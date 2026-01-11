@@ -1,0 +1,174 @@
+<!-- Sidebar Container -->
+<div class="h-screen fixed left-0 top-0 z-50 flex">
+  <!-- Main Sidebar -->
+  <div class="h-full flex flex-col bg-white border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out"
+       [class.w-72]="!isCollapsed"
+       [class.w-20]="isCollapsed">
+    
+    <!-- Sidebar Header (Logo & Toggle) -->
+    <div class="flex items-center justify-between h-20 px-6 border-b border-gray-200">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3 overflow-hidden transition-all duration-300"
+           [class.w-0]="isCollapsed"
+           [class.opacity-0]="isCollapsed">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-gradient-to-r from-primary-600 to-primary-400 rounded-lg flex items-center justify-center">
+            <i class="fas fa-chart-bar text-white text-lg"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-xl font-bold text-gray-800 truncate">Metric Dashboard</h1>
+          <p class="text-xs text-gray-500 truncate">Analytics Platform</p>
+        </div>
+      </div>
+      
+      <!-- Collapsed Logo -->
+      <div class="flex items-center justify-center w-full" *ngIf="isCollapsed">
+        <div class="w-10 h-10 bg-gradient-to-r from-primary-600 to-primary-400 rounded-lg flex items-center justify-center">
+          <i class="fas fa-chart-bar text-white text-lg"></i>
+        </div>
+      </div>
+      
+      <!-- Toggle Button -->
+      <button (click)="toggleSidebar()" 
+              class="absolute right-0 top-8 transform translate-x-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors z-10">
+        <i class="fas text-gray-600 transition-transform duration-300"
+           [class.fa-chevron-left]="!isCollapsed"
+           [class.fa-chevron-right]="isCollapsed"></i>
+      </button>
+    </div>
+    
+    <!-- Sidebar Content -->
+    <div class="flex-1 overflow-y-auto py-6 px-4">
+      <nav class="space-y-2">
+        <!-- Static Parent Items -->
+        <div *ngFor="let item of sidebarItems" class="mb-1">
+          <!-- Parent Item -->
+          <div class="relative">
+            <a (click)="toggleItemExpansion(item.id)"
+               [routerLink]="item.route"
+               [routerLinkActive]="'active-link'"
+               class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-gray-50 group"
+               [class]="getActiveItemClass(item)">
+              
+              <!-- Icon with possible badge -->
+              <div class="relative flex-shrink-0">
+                <i class="fas {{item.icon}} text-lg transition-colors duration-200"
+                   [class.text-primary-600]="item.isActive"
+                   [class.text-gray-500]="!item.isActive"
+                   [class.group-hover:text-primary-600]="!item.isActive"></i>
+                
+                <!-- Badge -->
+                <span *ngIf="item.badge && !isCollapsed" 
+                      class="absolute -top-2 -right-2 {{item.badge.color}} text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {{item.badge.text}}
+                </span>
+              </div>
+              
+              <!-- Label (shown only when expanded) -->
+              <span *ngIf="!isCollapsed" 
+                    class="ml-4 font-medium transition-all duration-200"
+                    [class.text-primary-600]="item.isActive"
+                    [class.text-gray-700]="!item.isActive">
+                {{item.label}}
+              </span>
+              
+              <!-- Chevron (shown only when expanded and has children) -->
+              <div *ngIf="!isCollapsed && item.children" 
+                   class="ml-auto">
+                <i class="fas fa-chevron-down text-xs transition-transform duration-300 text-gray-400"
+                   [class.rotate-180]="item.isExpanded"></i>
+              </div>
+            </a>
+          </div>
+          
+          <!-- Child Items -->
+          <div *ngIf="item.children && item.isExpanded && !isCollapsed"
+               @childAnimation
+               class="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-4">
+            <a *ngFor="let child of item.children"
+               (click)="setActiveItem(child.id)"
+               [routerLink]="child.route"
+               [routerLinkActive]="'active-link'"
+               class="flex items-center px-4 py-2.5 rounded-lg transition-all duration-200 cursor-pointer hover:bg-gray-50 group"
+               [class.bg-primary-50]="child.isActive">
+              
+              <i class="fas {{child.icon}} text-sm transition-colors duration-200"
+                 [class.text-primary-600]="child.isActive"
+                 [class.text-gray-400]="!child.isActive"
+                 [class.group-hover:text-primary-600]="!child.isActive"></i>
+              
+              <span class="ml-3 text-sm font-medium transition-colors duration-200"
+                    [class.text-primary-600]="child.isActive"
+                    [class.text-gray-600]="!child.isActive">
+                {{child.label}}
+              </span>
+              
+              <!-- Child Badge -->
+              <span *ngIf="child.badge" 
+                    class="ml-auto {{child.badge.color}} text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {{child.badge.text}}
+              </span>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Divider -->
+        <div class="pt-6" *ngIf="!isCollapsed">
+          <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">
+            Quick Actions
+          </div>
+        </div>
+        
+        <!-- Additional Static Items (no children) -->
+        <div class="space-y-1">
+          <a class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-gray-50 group"
+             [class.justify-center]="isCollapsed">
+            <i class="fas fa-plus-circle text-lg text-gray-500 group-hover:text-primary-600 transition-colors"></i>
+            <span *ngIf="!isCollapsed" class="ml-4 font-medium text-gray-700 group-hover:text-primary-600">
+              Create New
+            </span>
+          </a>
+          
+          <a class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-gray-50 group"
+             [class.justify-center]="isCollapsed">
+            <i class="fas fa-download text-lg text-gray-500 group-hover:text-primary-600 transition-colors"></i>
+            <span *ngIf="!isCollapsed" class="ml-4 font-medium text-gray-700 group-hover:text-primary-600">
+              Export Data
+            </span>
+          </a>
+        </div>
+      </nav>
+    </div>
+    
+    <!-- Sidebar Footer (User Profile) -->
+    <div class="border-t border-gray-200 p-4">
+      <div class="flex items-center" [class.justify-center]="isCollapsed">
+        <!-- Avatar -->
+        <div class="relative flex-shrink-0">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" 
+               alt="User"
+               class="w-10 h-10 rounded-full border-2 border-white shadow">
+          <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+        </div>
+        
+        <!-- User Info (shown only when expanded) -->
+        <div *ngIf="!isCollapsed" class="ml-3 flex-1 min-w-0">
+          <p class="text-sm font-semibold text-gray-800 truncate">John Doe</p>
+          <p class="text-xs text-gray-500 truncate">Administrator</p>
+        </div>
+        
+        <!-- Settings Icon -->
+        <button *ngIf="!isCollapsed" 
+                class="ml-2 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay for mobile (hidden on desktop) -->
+  <div *ngIf="!isCollapsed" 
+       class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+       (click)="toggleSidebar()"></div>
+</div>
