@@ -1,0 +1,20 @@
+<div class="h-screen flex flex-col bg-gray-50 overflow-hidden">
+  <!-- Sidebar (Fixed) -->
+  <app-sidebar></app-sidebar>
+  
+  <!-- Header -->
+  <app-header></app-header>
+  
+  <!-- Main Content -->
+  <main class="flex-1 overflow-y-auto transition-all duration-300 ease-in-out"
+    >
+    <!-- Content Wrapper -->
+    <div class="p-6">
+      <!-- Dashboard Header -->
+
+      
+      <!-- Content will be inserted by router outlet -->
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
