@@ -1,20 +1,18 @@
-<div class="h-screen flex flex-col bg-gray-50 overflow-hidden">
-  <!-- Sidebar (Fixed) -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Fixed Sidebar -->
   <app-sidebar></app-sidebar>
-  
-  <!-- Header -->
-  <app-header></app-header>
-  
-  <!-- Main Content -->
-  <main class="flex-1 overflow-y-auto transition-all duration-300 ease-in-out"
-    >
-    <!-- Content Wrapper -->
-    <div class="p-6">
-      <!-- Dashboard Header -->
 
-      
-      <!-- Content will be inserted by router outlet -->
-      <router-outlet></router-outlet>
-    </div>
+  <!-- Fixed Header -->
+  <app-header></app-header>
+
+  <!-- Main Content Area -->
+  <main
+    class="transition-all duration-300 ease-in-out p-5 min-h-screen"
+    [class.ml-72]="!isCollapsed && !isMobile"
+    [class.ml-20]="isCollapsed && !isMobile"
+    [class.ml-0]="isMobile"
+  >
+    <!-- Router Outlet - Direct child of main -->
+    <router-outlet></router-outlet>
   </main>
 </div>
