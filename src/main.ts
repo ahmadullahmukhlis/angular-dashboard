@@ -7,7 +7,6 @@ bootstrapApplication(App, {
   ...appConfig,
   providers: [
     ...(appConfig.providers || []),
-    provideAnimations() // required for Angular animations
-  ]
-})
-.catch(err => console.error(err));
+    provideAnimations(), // required for Angular animations
+  ],
+}).catch((err) => console.error(err));
