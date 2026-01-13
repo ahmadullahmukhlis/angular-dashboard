@@ -35,6 +35,8 @@
     "@angular/ssr": "^21.0.4",
     "@fortawesome/angular-fontawesome": "^4.0.0",
     "@fortawesome/fontawesome-free": "^7.1.0",
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "express": "^5.1.0",
     "font-awesome": "^4.7.0",
     "rxjs": "~7.8.0",
