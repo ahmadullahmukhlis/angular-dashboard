@@ -1,3 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* If your classes still aren't detected, explicitly tell Tailwind where to look: */
+@source "../src/**/*.{html,ts}";
