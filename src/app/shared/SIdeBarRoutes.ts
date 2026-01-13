@@ -7,31 +7,7 @@ export const SIDEBAR_ROUTES: SidebarItem[] = [
     icon: 'fa-home',
     route: '/dashboard',
     isActive: true,
-    isExpanded: true,
-    children: [
-      {
-        id: 11,
-        label: 'Overview',
-        icon: 'fa-chart-pie',
-        route: '/dashboard/overview',
-        isActive: true,
-        badge: { text: '5', color: 'bg-primary-500' },
-      },
-      {
-        id: 12,
-        label: 'Analytics',
-        icon: 'fa-chart-line',
-        route: '/dashboard/analytics',
-        isActive: false,
-      },
-      {
-        id: 13,
-        label: 'Campaigns',
-        icon: 'fa-bullhorn',
-        route: '/dashboard/campaigns',
-        isActive: false,
-      },
-    ],
+    isExpanded: false,
   },
   {
     id: 2,
