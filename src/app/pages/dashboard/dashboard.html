@@ -1,1 +1,255 @@
-<p>dashboard works!</p>
+<!-- Page Header -->
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div
+    *ngFor="let stat of stats"
+    class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+  >
+    <div class="flex justify-between items-start">
+      <div>
+        <p class="text-sm text-gray-500 font-medium">{{ stat.title }}</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ stat.value }}</p>
+        <div class="flex items-center mt-3">
+          <span
+            [ngClass]="{
+              'text-green-600 bg-green-50': stat.changeType === 'increase',
+              'text-red-600 bg-red-50': stat.changeType === 'decrease'
+            }"
+            class="text-sm font-medium px-2 py-1 rounded"
+          >
+            <i
+              [class]="
+                stat.changeType === 'increase' ? 'fas fa-arrow-up mr-1' : 'fas fa-arrow-down mr-1'
+              "
+            ></i>
+            {{ stat.change }}
+          </span>
+          <span class="text-gray-500 text-sm ml-2">{{ stat.period }}</span>
+        </div>
+      </div>
+      <div [ngClass]="stat.bgColor" class="p-3 rounded-xl">
+        <i [class]="stat.icon + ' ' + stat.iconColor + ' text-2xl'"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-lg font-bold text-gray-800">Revenue Overview</h2>
+      <select
+        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+      >
+        <option>Last 7 days</option>
+        <option>Last 30 days</option>
+        <option>Last 90 days</option>
+      </select>
+    </div>
+    <div
+      class="h-64 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center"
+    >
+      <div class="text-center">
+        <i class="fas fa-chart-area text-4xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500 font-medium">Revenue chart visualization</p>
+        <p class="text-gray-400 text-sm mt-1">Click to interact with the chart</p>
+      </div>
+    </div>
+    <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+      <div>
+        <p class="text-sm text-gray-500">Average Daily Revenue</p>
+        <p class="text-lg font-bold text-gray-800">$1,452</p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Revenue Target</p>
+        <p class="text-lg font-bold text-gray-800">85%</p>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Growth</p>
+        <p class="text-lg font-bold text-green-600">+12.5%</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-lg font-bold text-gray-800">User Acquisition</h2>
+      <select
+        class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white"
+      >
+        <option>This Month</option>
+        <option>Last Month</option>
+        <option>This Year</option>
+      </select>
+    </div>
+    <div
+      class="h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg flex items-center justify-center"
+    >
+      <div class="text-center">
+        <i class="fas fa-chart-pie text-4xl text-blue-300 mb-4"></i>
+        <p class="text-gray-700 font-medium">User acquisition chart</p>
+        <p class="text-gray-500 text-sm mt-1">Pie chart showing user sources</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-200">
+      <div>
+        <p class="text-sm text-gray-500">Organic Search</p>
+        <div class="flex items-center">
+          <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+            <div class="h-full bg-green-500" style="width: 45%"></div>
+          </div>
+          <span class="ml-2 text-sm font-medium text-gray-800">45%</span>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Direct Traffic</p>
+        <div class="flex items-center">
+          <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+            <div class="h-full bg-blue-500" style="width: 25%"></div>
+          </div>
+          <span class="ml-2 text-sm font-medium text-gray-800">25%</span>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Social Media</p>
+        <div class="flex items-center">
+          <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+            <div class="h-full bg-purple-500" style="width: 18%"></div>
+          </div>
+          <span class="ml-2 text-sm font-medium text-gray-800">18%</span>
+        </div>
+      </div>
+      <div>
+        <p class="text-sm text-gray-500">Email Campaign</p>
+        <div class="flex items-center">
+          <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+            <div class="h-full bg-orange-500" style="width: 12%"></div>
+          </div>
+          <span class="ml-2 text-sm font-medium text-gray-800">12%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <!-- Recent Activity -->
+  <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-lg font-bold text-gray-800">Recent Activity</h2>
+      <button class="text-sm text-primary-600 hover:text-primary-800 font-medium">View All</button>
+    </div>
+    <div class="space-y-4">
+      <div
+        *ngFor="let activity of recentActivities"
+        class="flex items-start p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+      >
+        <div class="flex-shrink-0">
+          <div
+            class="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm"
+            [ngClass]="activity.bgColor"
+          >
+            <i class="fas {{ activity.icon }} text-white"></i>
+          </div>
+        </div>
+        <div class="ml-4 flex-1">
+          <p class="font-medium text-gray-800">{{ activity.title }}</p>
+          <p class="text-sm text-gray-600 mt-1">{{ activity.description }}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-gray-500">{{ activity.time }}</p>
+          <span
+            class="inline-block mt-1 text-xs px-2 py-1 rounded-full font-medium"
+            [ngClass]="activity.statusColor"
+          >
+            {{ activity.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Products -->
+  <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-lg font-bold text-gray-800">Top Products</h2>
+      <button class="text-sm text-primary-600 hover:text-primary-800 font-medium">See All</button>
+    </div>
+    <div class="space-y-4">
+      <div
+        *ngFor="let product of topProducts"
+        class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
+      >
+        <div>
+          <p class="font-medium text-gray-800">{{ product.name }}</p>
+          <p class="text-sm text-gray-500">{{ product.sales }} sales</p>
+        </div>
+        <div class="text-right">
+          <p class="font-medium text-gray-800">{{ product.revenue }}</p>
+          <p
+            class="text-sm"
+            [ngClass]="{
+              'text-green-600': product.growth.startsWith('+'),
+              'text-red-600': product.growth.startsWith('-')
+            }"
+          >
+            {{ product.growth }}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 pt-6 border-t border-gray-200">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Total Revenue</p>
+          <p class="text-xl font-bold text-gray-800">$54,240</p>
+        </div>
+        <div class="text-right">
+          <p class="text-sm text-gray-500">Avg. Sale</p>
+          <p class="text-xl font-bold text-gray-800">$43.20</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-xl shadow-lg p-6 text-white">
+  <div class="flex flex-col md:flex-row md:items-center justify-between">
+    <div>
+      <h2 class="text-xl font-bold">Performance Summary</h2>
+      <p class="text-primary-100 mt-2">
+        Your dashboard is performing exceptionally well this month.
+      </p>
+    </div>
+    <div class="flex items-center space-x-6 mt-4 md:mt-0">
+      <div class="text-center">
+        <p class="text-2xl font-bold">98%</p>
+        <p class="text-primary-200 text-sm">Uptime</p>
+      </div>
+      <div class="text-center">
+        <p class="text-2xl font-bold">4.8</p>
+        <p class="text-primary-200 text-sm">Rating</p>
+      </div>
+      <div class="text-center">
+        <p class="text-2xl font-bold">2.1s</p>
+        <p class="text-primary-200 text-sm">Load Time</p>
+      </div>
+    </div>
+  </div>
+  <div class="mt-6 flex flex-wrap gap-3">
+    <button
+      class="px-4 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 font-medium transition-colors"
+    >
+      Download Report
+    </button>
+    <button
+      class="px-4 py-2 bg-primary-800 text-white rounded-lg hover:bg-primary-700 font-medium transition-colors border border-primary-700"
+    >
+      Share Dashboard
+    </button>
+  </div>
+</div>
