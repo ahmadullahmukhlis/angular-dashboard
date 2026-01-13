@@ -5,7 +5,7 @@ export const SIDEBAR_ROUTES: SidebarItem[] = [
     id: 1,
     label: 'Dashboard',
     icon: 'fa-home',
-    route: '/dashboard',
+    route: '/',
     isActive: true,
     isExpanded: false,
   },
