@@ -1,9 +1,9 @@
-import { NgClass } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass],
+  imports: [NgStyle, NgClass],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
