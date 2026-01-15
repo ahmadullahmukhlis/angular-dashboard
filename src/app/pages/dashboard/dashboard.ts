@@ -1,56 +1,119 @@
-import { Component } from '@angular/core';
 import { NgClass, NgStyle } from '@angular/common';
-import { Datatable } from '../../components/ui/datatable/datatable';
-import { DataTableConfig } from '../../models/datatable.model';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
+  imports: [ NgClass],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css'],
-  standalone: true,
-  imports: [NgClass, NgStyle, Datatable]
+  styleUrl: './dashboard.css',
 })
 export class Dashboard {
-  loading = false;
-  error: string | null = null;
-
-  users = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', status: 'active', amount: 1200, date: new Date() },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'inactive', amount: 800, date: new Date() },
+  recentActivities = [
+    {
+      title: 'New order received',
+      description: 'Order #12345 from John Doe',
+      time: '10 min ago',
+      icon: 'fa-shopping-cart',
+      bgColor: 'bg-blue-500',
+      status: 'Completed',
+      statusColor: 'bg-green-100 text-green-800',
+    },
+    {
+      title: 'Database backup',
+      description: 'Weekly backup completed successfully',
+      time: '1 hour ago',
+      icon: 'fa-database',
+      bgColor: 'bg-green-500',
+      status: 'Success',
+      statusColor: 'bg-green-100 text-green-800',
+    },
+    {
+      title: 'System alert',
+      description: 'High CPU usage detected',
+      time: '2 hours ago',
+      icon: 'fa-exclamation-triangle',
+      bgColor: 'bg-red-500',
+      status: 'Warning',
+      statusColor: 'bg-yellow-100 text-yellow-800',
+    },
+    {
+      title: 'New user registration',
+      description: 'Sarah Johnson joined the platform',
+      time: '3 hours ago',
+      icon: 'fa-user-plus',
+      bgColor: 'bg-purple-500',
+      status: 'Completed',
+      statusColor: 'bg-green-100 text-green-800',
+    },
+    {
+      title: 'Payment processed',
+      description: 'Payment of $1,200 processed successfully',
+      time: '5 hours ago',
+      icon: 'fa-credit-card',
+      bgColor: 'bg-indigo-500',
+      status: 'Success',
+      statusColor: 'bg-green-100 text-green-800',
+    },
   ];
 
-  config: DataTableConfig = {
-    columns: [
-      { key: 'id', label: 'ID', type: 'text', sortable: true, filterable: true },
-      { key: 'name', label: 'Name', type: 'text', sortable: true, filterable: true, filterType: 'text' },
-      { key: 'email', label: 'Email', type: 'text', sortable: true, filterable: true },
-      { key: 'status', label: 'Status', type: 'select', sortable: true, filterable: true,
-        filterType: 'select',
-        filterOptions: [
-          { value: 'active', label: 'Active' },
-          { value: 'inactive', label: 'Inactive' },
-          { value: 'pending', label: 'Pending' }
-        ]
-      },
-      { key: 'amount', label: 'Amount', type: 'currency', sortable: true, filterable: true, filterType: 'range', align: 'right' },
-      { key: 'date', label: 'Date', type: 'date', sortable: true, filterable: true, filterType: 'date' },
-      { key: 'actions', label: 'Actions', type: 'action', width: '120px' }
-    ],
-    data: this.users,
-    pagination: { pageSize: 10, currentPage: 1, totalItems: this.users.length, pageSizeOptions: [5,10,25] },
-    selectable: true,
-    showCheckboxes: true,
-    rowActions: [
-      { label: 'Edit', icon: 'edit', action: (row:any) => this.editRow(row), color: 'primary' },
-      { label: 'Delete', icon: 'delete', action: (row:any) => this.deleteRow(row), color: 'danger' }
-    ]
-  };
+  stats = [
+    {
+      title: 'Total Revenue',
+      value: '$42,580',
+      change: '+12.5%',
+      changeType: 'increase',
+      icon: 'fa-dollar-sign',
+      iconColor: 'text-green-600',
+      bgColor: 'bg-green-100',
+      period: 'From last month',
+    },
+    {
+      title: 'Total Orders',
+      value: '5,842',
+      change: '+8.3%',
+      changeType: 'increase',
+      icon: 'fa-shopping-cart',
+      iconColor: 'text-blue-600',
+      bgColor: 'bg-blue-100',
+      period: 'From last month',
+    },
+    {
+      title: 'Active Users',
+      value: '12,847',
+      change: '-2.1%',
+      changeType: 'decrease',
+      icon: 'fa-users',
+      iconColor: 'text-purple-600',
+      bgColor: 'bg-purple-100',
+      period: 'From last month',
+    },
+    {
+      title: 'Conversion Rate',
+      value: '3.24%',
+      change: '+15.7%',
+      changeType: 'increase',
+      icon: 'fa-chart-line',
+      iconColor: 'text-orange-600',
+      bgColor: 'bg-orange-100',
+      period: 'From last month',
+    },
+  ];
 
-  // Handlers
-  handleRowClick(event:any){ console.log(event); }
-  handleSelection(event:any){ console.log(event); }
-  handleTableEvent(event:any){ console.log(event); }
+  topProducts = [
+    { name: 'Premium Widget', sales: 1242, revenue: '$24,840', growth: '+12%' },
+    { name: 'Basic Widget', sales: 856, revenue: '$8,560', growth: '+5%' },
+    { name: 'Enterprise Widget', sales: 423, revenue: '$12,690', growth: '+23%' },
+    { name: 'Starter Widget', sales: 321, revenue: '$3,210', growth: '-2%' },
+    { name: 'Pro Widget', sales: 198, revenue: '$5,940', growth: '+18%' },
+  ];
 
-  editRow(row:any){ console.log('Edit', row); }
-  deleteRow(row:any){ console.log('Delete', row); }
+  getCurrentDate(): string {
+    const date = new Date();
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  }
 }
