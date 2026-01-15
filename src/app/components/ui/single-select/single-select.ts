@@ -17,7 +17,7 @@ export class SingleSelect implements OnInit {
   @Input() optionValue!: string;
   @Input() placeholder: string = 'Select';
   @Input() showClear:boolean = true
-
+  @Input() isSearable : boolean = true
   @Output() valueChange = new EventEmitter<any>();
 
   options: any[] = [];
