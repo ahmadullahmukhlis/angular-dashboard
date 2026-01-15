@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ NgClass],
+  imports: [NgStyle, NgClass],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
