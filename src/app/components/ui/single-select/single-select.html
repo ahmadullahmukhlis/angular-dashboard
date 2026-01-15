@@ -1,3 +1,14 @@
-<div class="">
-    <p-select [options]="options"  [checkmark]="showClear" optionLabel="name" [showClear]="true" placeholder="placeholder" class="w-full" />
+<div>
+  <p-select
+    [options]="options"
+    [optionLabel]="optionLabel"
+    [optionValue]="optionValue"
+    [showClear]="showClear"
+    [checkmark]="showClear"
+    [placeholder]="placeholder"
+    class="w-full"
+    appendTo="body"
+    [(ngModel)]="selected"
+    (onChange)="onChange($event)"
+  ></p-select>
 </div>
