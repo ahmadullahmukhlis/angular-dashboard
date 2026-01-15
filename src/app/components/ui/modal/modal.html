@@ -1,37 +1,31 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { NgIf, NgClass } from '@angular/common';
+<p-dialog
+  [visible]="visible"
+  [modal]="true"
+  [closable]="false"
+  [draggable]="false"
+  [resizable]="false"
+  [styleClass]="widthClass + ' ' + heightClass"
+>
 
-@Component({
-  selector: 'app-modal',
-  standalone: true,
-  imports: [DialogModule, ButtonModule, NgIf, NgClass],
-  templateUrl: './modal.component.html',
-})
-export class ModalComponent {
+  <!-- HEADER -->
+  <ng-template pTemplate="header">
+    <div class="flex justify-between items-center w-full">
+      <h3 class="text-lg font-semibold">{{ title }}</h3>
 
-  @Input() title: string = 'Modal Title';
+      <!-- X BUTTON -->
+      <button
+        type="button"
+        (click)="closeClicked()"
+        class="text-gray-500 hover:text-red-600 text-xl font-bold"
+      >
+        ×
+      </button>
+    </div>
+  </ng-template>
 
-  // Tailwind or css classes
-  @Input() widthClass: string = 'w-[500px]';
-  @Input() heightClass: string = 'auto';
+  <!-- BODY -->
+  <div class="p-4">
+    <ng-content></ng-content>
+  </div>
 
-  // button text
-  @Input() openLabel: string = 'Open';
-
-  @Output() onClose = new EventEmitter<void>();
-  @Output() onOpen = new EventEmitter<void>();
-
-  visible = false;
-
-  open() {
-    this.visible = true;
-    this.onOpen.emit();
-  }
-
-  close() {
-    this.visible = false;
-    this.onClose.emit();
-  }
-}
+</p-dialog>
