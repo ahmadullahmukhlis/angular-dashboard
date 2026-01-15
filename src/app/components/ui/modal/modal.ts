@@ -1,0 +1,36 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+
+@Component({
+  selector: 'app-modal',
+  standalone: true,
+  imports: [DialogModule, ButtonModule],
+  templateUrl: './modal.html',
+})
+export class Modal {
+
+  @Input() title: string = 'Modal Title';
+
+  // Tailwind or css classes
+  @Input() widthClass: string = 'w-[500px]';
+  @Input() heightClass: string = 'auto';
+
+  // button text
+  @Input() openLabel: string = 'Open';
+
+  @Output() onClose = new EventEmitter<void>();
+  @Output() onOpen = new EventEmitter<void>();
+
+  visible = false;
+
+  open() {
+    this.visible = true;
+    this.onOpen.emit();
+  }
+
+  close() {
+    this.visible = false;
+    this.onClose.emit();
+  }
+}
