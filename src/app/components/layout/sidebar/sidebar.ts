@@ -50,6 +50,7 @@ export class Sidebar implements OnInit {
   sidebarItems: SidebarItem[] = [];
   isCollapsed = false;
 
+
   constructor(private sidebarService: SidebarService) {}
 
   ngOnInit(): void {

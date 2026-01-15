@@ -84,4 +84,47 @@ export class SidebarService {
     }
     return null;
   }
+  private findActivePath(items: SidebarItem[], path: SidebarItem[]): boolean {
+    for (const item of items) {
+      path.push(item);
+
+      if (item.isActive) {
+        return true;
+      }
+
+      if (item.children && this.findActivePath(item.children, path)) {
+        return true;
+      }
+
+      path.pop(); // remove if not in active path
+    }
+    return false;
+  }
+
+  getBreadcrumb(): SidebarItem[] {
+    const path: SidebarItem[] = [];
+    this.findActivePath(this.sidebarItems, path);
+    return path;
+  }
+  setActiveByRoute(url: string): void {
+    this.deactivateAllItems(this.sidebarItems);
+    this.activateByRoute(this.sidebarItems, url);
+  }
+
+  private activateByRoute(items: SidebarItem[], url: string): boolean {
+    for (const item of items) {
+      if (item.route && url.startsWith(item.route)) {
+        item.isActive = true;
+        return true;
+      }
+
+      if (item.children && this.activateByRoute(item.children, url)) {
+        item.isExpanded = true; // open parent
+        return true;
+      }
+    }
+    return false;
+  }
+
+
 }
