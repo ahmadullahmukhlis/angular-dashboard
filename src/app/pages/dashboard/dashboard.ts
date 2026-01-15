@@ -1,10 +1,11 @@
 import {NgClass, NgFor} from '@angular/common';
 import { Component } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
+import { SingleSelect } from '../../components/ui/single-select/single-select';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ NgClass, NgFor,Modal],
+  imports: [ NgClass, NgFor,Modal,SingleSelect],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -15,6 +16,9 @@ export class Dashboard {
   }
   closeModal(){
     this.isOpent=false;
+  }
+  onSelectChange(enent:any){
+    console.log(enent)
   }
   recentActivities = [
     {
