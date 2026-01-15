@@ -215,6 +215,15 @@
     </div>
   </div>
 </div>
+<button (click)="openModal()" class="bg-purple-500">
+  open modal
+</button>
 
-
+<app-modal
+  [visible]="isOpent"
+  title="show test modal"
+  (onClose)="closeModal()"
+>
+test
+</app-modal>
 
