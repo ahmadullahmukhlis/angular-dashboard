@@ -1,13 +1,21 @@
 import {NgClass, NgFor} from '@angular/common';
 import { Component } from '@angular/core';
+import { Modal } from '../../components/ui/modal/modal';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ NgClass, NgFor],
+  imports: [ NgClass, NgFor,Modal],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
+  isOpent : boolean = false
+  openModal(){
+    this.isOpent=true;
+  }
+  closeModal(){
+    this.isOpent=false;
+  }
   recentActivities = [
     {
       title: 'New order received',

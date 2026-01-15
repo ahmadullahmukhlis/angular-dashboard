@@ -5,12 +5,13 @@ import { NgIf, NgClass } from '@angular/common';
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [DialogModule, NgIf, NgClass],
+  imports: [DialogModule],
   templateUrl: './modal.html',
 })
-export class ModalComponent {
+export class Modal{
 
   @Input() visible: boolean = false;
+  @Input() draggable :boolean = false
   @Input() title: string = 'Modal Title';
 
   // Tailwind or custom classes
