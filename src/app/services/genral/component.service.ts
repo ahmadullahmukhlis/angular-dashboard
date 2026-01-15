@@ -1,23 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../api/api.service';
 import { map, Observable } from 'rxjs';
+import { ShareHelper } from '../../helpers/SHare-helper';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ComponentService {
 
   private api = inject(ApiService);
+  private sharehelper = inject(ShareHelper);
 
   getList<T>(url: string): Observable<T[]> {
     return this.api.get(url).pipe(
-      map((res: any) =>
-        res?.data ??
-        res?.content ??
-        res?.items ??
-        res??
-        []
-      )
+      map((res: any) => this.sharehelper.extractItems(res))
     );
   }
 }
