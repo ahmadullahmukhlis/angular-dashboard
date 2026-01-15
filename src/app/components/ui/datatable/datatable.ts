@@ -24,13 +24,14 @@ import {
   TableEvent
 } from '../../../models/datatable.model';
 import { DatatableHelpers } from '../../../helpers/datatable-helpers';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule],
+  imports: [TableModule, FormsModule ,NgIf,NgFor],
 })
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   @Input() config: DataTableConfig = { columns: [], data: [], pagination: { pageSize: 10, currentPage: 1, totalItems: 0, pageSizeOptions: [5,10,25,50,100] } };
@@ -59,6 +60,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     selection: { selectedRows: [], allSelected: false }
   };
   Math = Math;
+  Object = Object;
   filterInputs: { [key: string]: any } = {};
   private filterSubject = new Subject<FilterState>();
   currentSort: SortConfig | null = null;
