@@ -1,0 +1,19 @@
+<div class="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+    <ng-container *ngFor="let item of breadcrumb$(); let last = last">
+
+        <a
+                *ngIf="!last"
+                [routerLink]="item.route"
+                class="hover:text-primary-600 transition-colors"
+        >
+            {{ item.label }}
+        </a>
+
+        <span *ngIf="last" class="text-gray-900 font-medium">
+      {{ item.label }}
+    </span>
+
+        <i *ngIf="!last" class="fas fa-chevron-right text-xs"></i>
+
+    </ng-container>
+</div>

@@ -1,13 +1,14 @@
 import { Component, HostListener, Inject, PLATFORM_ID, AfterViewInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarService } from '../../../services/sidebar.service';
+import {Breadcrumb} from "../breadcrumb/breadcrumb";
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
   standalone: true, // <-- make it standalone
-  imports: [CommonModule],
+    imports: [CommonModule, Breadcrumb],
 })
 export class Header implements AfterViewInit {
   isNotificationsOpen = false;
