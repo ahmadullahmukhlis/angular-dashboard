@@ -1,11 +1,12 @@
-import { Component, inject, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Input, OnInit, Output, EventEmitter, input } from '@angular/core';
 import { ComponentService } from '../../../services/genral/component.service';
 import { FormsModule } from '@angular/forms';
+import { Select } from 'primeng/select';
 
 @Component({
   selector: 'app-single-select',
   standalone: true,
-  imports: [ FormsModule],
+  imports: [ FormsModule,Select],
   templateUrl: './single-select.html',
   styleUrl: './single-select.css',
 })
@@ -15,6 +16,7 @@ export class SingleSelect implements OnInit {
   @Input() optionLabel!: string;
   @Input() optionValue!: string;
   @Input() placeholder: string = 'Select';
+  @Input() showClear:boolean = true
 
   @Output() valueChange = new EventEmitter<any>();
 
