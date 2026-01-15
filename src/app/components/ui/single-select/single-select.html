@@ -10,5 +10,6 @@
     appendTo="body"
     [(ngModel)]="selected"
     (onChange)="onChange($event)"
+    [filter]="isSearable"
   ></p-select>
 </div>
