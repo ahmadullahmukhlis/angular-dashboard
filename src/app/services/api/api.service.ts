@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class ApiService {
   private http = inject(HttpClient);
 
-  private BASE_URL = 'https://api.yourdomain.com/api'; // 🔥 change to your backend
+  private BASE_URL = 'https://jsonplaceholder.typicode.com/'; // 🔥 change to your backend
 
   private getHeaders() {
     const token = localStorage.getItem('token'); // or from auth service
