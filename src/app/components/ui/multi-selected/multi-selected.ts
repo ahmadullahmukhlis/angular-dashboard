@@ -17,6 +17,7 @@ export class MultiSelected {
   @Input() showClear:boolean = true
   @Input() isSearable : boolean = true
   @Input () multiple : Boolean = false
+  @Input () disabled :boolean = false
   @Output() valueChange = new EventEmitter<any>();
 
   options: any[] = [];

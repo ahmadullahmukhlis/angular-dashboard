@@ -3,6 +3,7 @@ export type FieldType =
   | 'number'
   | 'password'
   | 'select'
+  | 'multi-select'
   | 'server-select'
   | 'radio'
   | 'file'
@@ -20,7 +21,7 @@ export interface DynamicField {
   label: string;
 
   defaultValue?: any;
-  disabled?: boolean;
+  disabled: boolean;
   required?: boolean;
 
   className?: string;
