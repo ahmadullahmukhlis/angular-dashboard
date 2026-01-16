@@ -59,7 +59,7 @@
 
         <!-- SERVER SELECT (custom component) -->
         <app-single-select *ngIf="field.type === 'server-select'"
-                           [url]="field?.url"
+                           [url]="field.url"
                            [disabled]="field.disabled"
                            (selected)="handleSelectChange(field, $event)"></app-single-select>
 
