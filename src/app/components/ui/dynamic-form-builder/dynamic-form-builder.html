@@ -1,0 +1,63 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+
+  <ng-container *ngFor="let field of visibleFields()">
+
+    <div [class]="field.className">
+
+      <label class="block mb-1">{{ field.label }}</label>
+
+      <!-- TEXT -->
+      <input *ngIf="field.type === 'text'"
+        pInputText
+        [formControlName]="field.name" />
+
+      <!-- NUMBER -->
+      <p-inputNumber *ngIf="field.type === 'number'"
+        [formControlName]="field.name"></p-inputNumber>
+
+      <!-- PASSWORD -->
+      <p-password *ngIf="field.type === 'password'"
+        toggleMask
+        [formControlName]="field.name"></p-password>
+
+      <!-- DATE -->
+      <p-datePicker *ngIf="field.type === 'date'"
+        [formControlName]="field.name"></p-datePicker>
+
+      <!-- TEXTAREA -->
+      <textarea *ngIf="field.type === 'textarea'"
+        pTextarea rows="4"
+        [formControlName]="field.name"></textarea>
+
+      <!-- CHECKBOX -->
+      <p-checkbox *ngIf="field.type === 'checkbox'"
+        binary="true"
+        [formControlName]="field.name"></p-checkbox>
+
+      <!-- SWITCH -->
+      <p-toggleSwitch *ngIf="field.type === 'switch'"
+        [formControlName]="field.name"></p-toggleSwitch>
+
+     
+
+      <!-- FILE -->
+      <input *ngIf="field.type === 'file'" type="file"
+        (change)="form.get(field.name)?.setValue($any($event.target).files[0])">
+
+      <!-- DIV -->
+      <p *ngIf="field.type === 'div'">{{ field.label }}</p>
+
+      <!-- ERROR -->
+      <small class="text-red-600" *ngIf="isInvalid(field.name)">
+        {{ field.label }} is invalid
+      </small>
+
+    </div>
+
+  </ng-container>
+
+  <button pButton type="submit" [loading]="loading">Submit</button>
+
+  <p-progressBar *ngIf="progress" [value]="percent"></p-progressBar>
+
+</form>
