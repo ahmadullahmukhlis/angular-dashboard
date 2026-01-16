@@ -157,7 +157,7 @@ fields: DynamicField[] = [
     type: 'text',
     name: 'title',
     label: 'User Information',
-    className: 'col-7',
+    
     defaultValue:'kahn',
     disabled: true,
   },
@@ -165,7 +165,7 @@ fields: DynamicField[] = [
     type: 'text',
     name: 'firstName',
     label: 'First Name',
-    className: 'col-12 md:col-4', // ✅ 3 per row
+  
     required: true,
     disabled: false,
   },
@@ -173,7 +173,7 @@ fields: DynamicField[] = [
     type: 'text',
     name: 'lastName',
     label: 'Last Name',
-    className: 'col-12 md:col-4',
+   
     required: true,
     disabled: false,
   },
@@ -181,7 +181,6 @@ fields: DynamicField[] = [
     type: 'number',
     name: 'age',
     label: 'Age',
-    className: 'col-12 md:col-4',
     disabled: false,
     max:87
   },
@@ -191,14 +190,12 @@ fields: DynamicField[] = [
     label: 'City',
     url: '/api/cities',
     changeValue: 'id',
-    className: 'col-12 md:col-6',
     disabled: false,
   },
   {
     type: 'file',
     name: 'avatar',
     label: 'Photo',
-    className: 'col-12 md:col-6',
     disabled: false,
   },
 ];
