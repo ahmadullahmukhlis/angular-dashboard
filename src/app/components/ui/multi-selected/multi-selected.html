@@ -1,0 +1,14 @@
+
+<div>
+<p-multiselect [options]="options"
+
+  [optionLabel]="optionLabel"
+    [optionValue]="optionValue"
+       [placeholder]="placeholder"
+    [showClear]="showClear"
+    [filter]="isSearable"
+ [maxSelectedLabels]="3" 
+   (onChange)="onChange($event)"
+    class="w-full"
+    appendTo="body" />
+</div>

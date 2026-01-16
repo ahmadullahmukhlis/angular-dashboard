@@ -223,12 +223,9 @@
   [visible]="isOpent"
   title="show test modal"
   (onClose)="closeModal()"
-><app-single-select
-  url="posts"
-  optionLabel="title"
-  optionValue="id"
-(valueChange)="onSelectChange($event)"
-/>
+>
+
+<app-multi-selected url="posts" optionLabel="title" optionValue="id" (valueChange)="onSelectChange($event)" />
 
 </app-modal>
 

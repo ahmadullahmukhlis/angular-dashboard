@@ -1,12 +1,11 @@
 import {NgClass, NgFor} from '@angular/common';
 import { Component } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
-import { SingleSelect } from '../../components/ui/single-select/single-select';
- import {MultiSelect} from 'primeng/multiselect'
+import { MultiSelected } from '../../components/ui/multi-selected/multi-selected';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ NgClass, NgFor,Modal,SingleSelect , MultiSelect],
+  imports: [ NgClass, NgFor,Modal  ,MultiSelected],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
