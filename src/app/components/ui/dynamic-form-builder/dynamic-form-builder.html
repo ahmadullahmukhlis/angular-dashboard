@@ -1,7 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
 
   <!-- GRID CONTAINER -->
-  <div class="grid gap-4">
+  <div [class]="className">
 
     <ng-container *ngFor="let field of visibleFields()">
 
