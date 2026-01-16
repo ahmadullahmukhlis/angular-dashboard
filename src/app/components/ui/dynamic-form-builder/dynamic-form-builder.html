@@ -15,12 +15,16 @@
                pInputText
                [formControlName]="field.name"
                [placeholder]="field.label"
-               [disabled]="field.disabled" />
+               [disabled]="field.disabled" 
+               class="w-full"
+               />
 
         <!-- NUMBER -->
         <p-inputNumber *ngIf="field.type === 'number'"
                        [formControlName]="field.name"
-                       [disabled]="field.disabled"></p-inputNumber>
+                       [disabled]="field.disabled"
+                       class="w-full"
+                       ></p-inputNumber>
 
         <!-- PASSWORD -->
         <p-password *ngIf="field.type === 'password'"
@@ -38,7 +42,9 @@
                   pTextarea
                   rows="4"
                   [formControlName]="field.name"
-                  [disabled]="field.disabled"></textarea>
+                  [disabled]="field.disabled"
+                  class="w-full"
+                  ></textarea>
 
         <!-- CHECKBOX -->
         <p-checkbox *ngIf="field.type === 'checkbox'"
@@ -55,7 +61,10 @@
         <p-select *ngIf="field.type === 'select'"
                   [options]="field.options"
                   [formControlName]="field.name"
-                  [disabled]="field.disabled"></p-select>
+                  [disabled]="field.disabled"
+                  class="w-full"
+                    appendTo="body"
+                  ></p-select>
             
         <!-- SERVER SELECT (custom component) -->
         <app-single-select *ngIf="field.type === 'server-select'"
