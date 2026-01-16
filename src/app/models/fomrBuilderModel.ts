@@ -39,7 +39,7 @@ export interface DynamicField {
   pattern?: string;
 
   /* server select */
-  url?: string | ((values: any) => string);
+  url?: string;
   optionLabel?: string;
   optionValue?: string;
 
