@@ -2,10 +2,12 @@ import {NgClass, NgFor} from '@angular/common';
 import { Component } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
 import { MultiSelected } from '../../components/ui/multi-selected/multi-selected';
+import { DynamicField } from '../../models/fomrBuilderModel';
+import { DynamicFormBuilderComponent } from "../../components/ui/dynamic-form-builder/dynamic-form-builder";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ NgClass, NgFor,Modal  ,MultiSelected],
+  imports: [NgClass, NgFor, Modal, MultiSelected, DynamicFormBuilderComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -128,4 +130,77 @@ export class Dashboard {
       day: 'numeric',
     });
   }
+
+actionUrl = 'https://api.example.com/save';
+
+hiddenFields = [
+  { name: 'companyId', value: 5 },
+];
+
+beforeSubmit = (values: any) => {
+  console.log('before submit', values);
+  return true; // return false to stop submit
+};
+
+onSubmitCompleted(res: any) {
+  console.log('submit completed:', res);
+}
+
+onValuesChanged(values: any) {
+  console.log('form values changed:', values);
+}
+
+/* ===== YOUR FIELD ARRAY ===== */
+
+fields: DynamicField[] = [
+  {
+    type: 'text',
+    name: 'title',
+    label: 'User Information',
+    className: 'col-7',
+    defaultValue:'kahn',
+    disabled: true,
+  },
+  {
+    type: 'text',
+    name: 'firstName',
+    label: 'First Name',
+    className: 'col-12 md:col-4', // ✅ 3 per row
+    required: true,
+    disabled: false,
+  },
+  {
+    type: 'text',
+    name: 'lastName',
+    label: 'Last Name',
+    className: 'col-12 md:col-4',
+    required: true,
+    disabled: false,
+  },
+  {
+    type: 'number',
+    name: 'age',
+    label: 'Age',
+    className: 'col-12 md:col-4',
+    disabled: false,
+    max:87
+  },
+  {
+    type: 'server-select',
+    name: 'cityId',
+    label: 'City',
+    url: '/api/cities',
+    changeValue: 'id',
+    className: 'col-12 md:col-6',
+    disabled: false,
+  },
+  {
+    type: 'file',
+    name: 'avatar',
+    label: 'Photo',
+    className: 'col-12 md:col-6',
+    disabled: false,
+  },
+];
+
 }

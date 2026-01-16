@@ -242,5 +242,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
         ? 'bg-blue-600 text-white border border-gray-300'
         : 'bg-white text-gray-700 border border-gray-300';
   }
+  
 
 }

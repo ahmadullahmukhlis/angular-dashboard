@@ -4,6 +4,7 @@ import {
   Output,
   EventEmitter,
   OnChanges,
+  inject,
 } from '@angular/core';
 import {
   FormBuilder,
@@ -32,6 +33,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { SingleSelect } from "../single-select/single-select";
 import { SelectModule } from 'primeng/select';
+import { ToastService } from '../../../services/genral/tost.service';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -67,14 +69,15 @@ export class DynamicFormBuilderComponent implements OnChanges {
   @Input() needConfirmation = false;
 
   @Input() hiddenFields?: { name: string; value: any }[];
-
+  @Input () className:string = ""
   /* ================= OUTPUTS ================= */
 
   @Output() submitCompleted = new EventEmitter<any>();
   @Output() valuesChanged = new EventEmitter<any>();
 
   /* ================= FORM ================= */
-
+  
+  toastService = inject(ToastService);
   form!: FormGroup;
 
   loading = false;
@@ -135,7 +138,11 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (r === false) return;
     }
 
-    if (this.needConfirmation && !confirm('Are you sure?')) return;
+    if (this.needConfirmation ){
+      this.toastService.confirmAction({name:"DO you want to Sumite the form"},()=>{
+        alert()
+      })
+    }
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();

@@ -5,17 +5,20 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 
 import { routes } from './app.routes';
+import { MessageService, ConfirmationService } from 'primeng/api'; // 1. Add ConfirmationService here
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideAnimationsAsync(), // Required for PrimeNG animations
+    provideAnimationsAsync(),
+    MessageService,
+    ConfirmationService, // 2. Register the service provider
     providePrimeNG({
       theme: {
         preset: Aura,
         options: {
-          darkModeSelector: '.my-app-dark' // Optional: controls dark mode toggling
+          darkModeSelector: '.my-app-dark'
         }
       }
     })

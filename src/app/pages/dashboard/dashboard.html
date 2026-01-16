@@ -225,7 +225,16 @@
   (onClose)="closeModal()"
 >
 
-<app-multi-selected url="posts" optionLabel="title" optionValue="id" (valueChange)="onSelectChange($event)" />
+<app-dynamic-form-builder
+  [fields]="fields"
+  [action]="actionUrl"
+  method="POST"
+  [needConfirmation]="true"
+  [hiddenFields]="hiddenFields"
+  [beforeSubmit]="beforeSubmit"
+  (submitCompleted)="onSubmitCompleted($event)"
+  (valuesChanged)="onValuesChanged($event)"
+></app-dynamic-form-builder>
 
 </app-modal>
 
