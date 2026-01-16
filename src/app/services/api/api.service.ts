@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -10,13 +10,18 @@ export class ApiService {
 
   private BASE_URL = 'https://jsonplaceholder.typicode.com/'; // 🔥 change to your backend
 
-  private getHeaders() {
-    const token = localStorage.getItem('token'); // or from auth service
-
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
+ private getHeaders(isFormData: boolean = false) {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders({
       Authorization: token ? `Bearer ${token}` : '',
     });
+
+    // Only add JSON content type if it's NOT FormData
+    if (!isFormData) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
+
+    return headers;
   }
 
   get<T>(url: string): Observable<T> {
@@ -40,6 +45,16 @@ export class ApiService {
   delete<T>(url: string): Observable<T> {
     return this.http.delete<T>(`${this.BASE_URL}${url}`, {
       headers: this.getHeaders(),
+    });
+  }
+    request<T>(method: string, url: string, body: any): Observable<HttpEvent<T>> {
+    const isFormData = body instanceof FormData;
+    
+    return this.http.request<T>(method, `${this.BASE_URL}${url}`, {
+      body: body,
+      headers: this.getHeaders(isFormData),
+      observe: 'events',      // Required for progress bars
+      reportProgress: true,   // Required for progress bars
     });
   }
 }

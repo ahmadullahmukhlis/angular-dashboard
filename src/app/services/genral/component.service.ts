@@ -14,4 +14,7 @@ export class ComponentService {
       map((res: any) => this.sharehelper.extractItems(res))
     );
   }
+  request(method: string, url: string, data: any) {
+    return this.api.request(method, url, data);
+  }
 }
