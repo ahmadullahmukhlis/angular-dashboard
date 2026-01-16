@@ -30,6 +30,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DynamicField } from '../../../models/fomrBuilderModel';
+import { SingleSelect } from "../single-select/single-select";
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -38,7 +39,6 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
     CommonModule,
     ReactiveFormsModule,
     HttpClientModule,
-
     InputTextModule,
     InputNumberModule,
     DatePickerModule,
@@ -48,7 +48,8 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
     PasswordModule,
     ButtonModule,
     ProgressBarModule,
-  ],
+    SingleSelect
+],
   templateUrl: './dynamic-form-builder.html',
 })
 export class DynamicFormBuilderComponent implements OnChanges {
