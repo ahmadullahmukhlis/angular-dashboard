@@ -31,6 +31,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { SingleSelect } from "../single-select/single-select";
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -48,7 +49,8 @@ import { SingleSelect } from "../single-select/single-select";
     PasswordModule,
     ButtonModule,
     ProgressBarModule,
-    SingleSelect
+    SingleSelect,
+    SelectModule,
 ],
   templateUrl: './dynamic-form-builder.html',
 })
@@ -118,11 +120,6 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
   /* ================= SERVER SELECT ================= */
 
-  resolveUrl(field: DynamicField) {
-    return typeof field.url === 'function'
-      ? field.url(this.form.value)
-      : field.url;
-  }
 
   handleSelectChange(field: DynamicField, row: any) {
     const val = field.changeValue ? row?.[field.changeValue] : row;
