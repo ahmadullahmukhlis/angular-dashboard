@@ -34,6 +34,7 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
 import { SingleSelect } from "../single-select/single-select";
 import { SelectModule } from 'primeng/select';
 import { ToastService } from '../../../services/genral/tost.service';
+import { ComponentService } from '../../../services/genral/component.service';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -78,6 +79,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
   /* ================= FORM ================= */
   
   toastService = inject(ToastService);
+  componentService = inject(ComponentService)
   form!: FormGroup;
 
   loading = false;
@@ -140,16 +142,20 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     if (this.needConfirmation ){
       this.toastService.confirmAction({name:"DO you want to Sumite the form"},()=>{
-        alert()
+         this.dataSUbmit()
       })
+      return
     }
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-
-    let payload: any = this.form.value;
+ this.dataSUbmit()
+    
+  }
+  dataSUbmit(){
+      let payload: any = this.form.value;
     const hasFile = this.fields.some(f => f.type === 'file');
 
     if (hasFile) {
@@ -161,7 +167,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     this.loading = true;
 
-    this.http
+    this.componentService
       .request(this.method, this.action, {
         body: payload,
         observe: 'events',
