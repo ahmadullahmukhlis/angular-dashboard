@@ -5,7 +5,7 @@
 
     <ng-container *ngFor="let field of visibleFields()">
 
-      <!-- EACH FIELD -->
+      <!-- EACH FIELD - Keep your original structure -->
       <div [class]="field.className">
 
         <label class="block mb-1 font-medium">{{ field.label }}</label>
@@ -53,9 +53,9 @@
 
         <!-- SELECT -->
         <p-select *ngIf="field.type === 'select'"
-                    [options]="field.options"
-                    [formControlName]="field.name"
-                    [disabled]="field.disabled"></p-select>
+                  [options]="field.options"
+                  [formControlName]="field.name"
+                  [disabled]="field.disabled"></p-select>
             
         <!-- SERVER SELECT (custom component) -->
         <app-single-select *ngIf="field.type === 'server-select'"
@@ -63,11 +63,11 @@
                            [disabled]="field.disabled"
                            (selected)="handleSelectChange(field, $event)"></app-single-select>
 
-                        
         <app-single-select *ngIf="field.type === 'multi-select'"
                            [url]="field?.url"
                            [disabled]="field.disabled"
                            (selected)="handleSelectChange(field, $event)"></app-single-select>
+        
         <!-- FILE -->
         <input *ngIf="field.type === 'file'" type="file"
                (change)="form.get(field.name)?.setValue($any($event.target).files[0])"
@@ -75,11 +75,6 @@
 
         <!-- DIV (Label Only) -->
         <p *ngIf="field.type === 'div'">{{ field.label }}</p>
-
-        <!-- ERROR MESSAGE -->
-        <small class="text-red-600" *ngIf="isInvalid(field.name)">
-          {{ field.label }} is invalid
-        </small>
 
       </div>
 
