@@ -12,7 +12,7 @@ import { Select } from 'primeng/select';
 })
 export class SingleSelect implements OnInit {
 
-  @Input() url!: string;
+  @Input() url?: string;
   @Input() optionLabel!: string;
   @Input() optionValue!: string;
   @Input() placeholder: string = 'Select';
@@ -35,7 +35,7 @@ export class SingleSelect implements OnInit {
   loadOptions() {
     this.loading = true;
 
-    this.componentService.getList(this.url).subscribe({
+    this.componentService.getList(this.url??"").subscribe({
       next: (res) => {
         this.options = res;
         this.loading = false;
