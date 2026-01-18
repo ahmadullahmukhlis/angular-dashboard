@@ -190,6 +190,15 @@ fields: DynamicField[] = [
     url: '/api/cities',
     changeValue: 'id',
     disabled: false,
+    options : [
+      {
+        id:1,
+        name:"ali"
+      },  {
+        id:2,
+        name:"khan"
+      }
+    ]
   },
   {
     type: 'file',
@@ -197,6 +206,15 @@ fields: DynamicField[] = [
     label: 'Photo',
     disabled: false,
   },
+  {
+    type:'server-select',
+    name:"post",
+    label:"posts",
+    disabled:false,
+    url:"posts",
+    optionLabel:"title",
+    optionValue:'id'
+  }
 ];
 
 }
