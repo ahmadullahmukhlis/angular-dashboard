@@ -184,7 +184,7 @@ fields: DynamicField[] = [
     max:87
   },
   {
-    type: 'server-select',
+    type: 'select',
     name: 'cityId',
     label: 'City',
     url: '/api/cities',
@@ -210,6 +210,14 @@ fields: DynamicField[] = [
     type:'server-select',
     name:"post",
     label:"posts",
+    disabled:false,
+    url:"posts",
+    optionLabel:"title",
+    optionValue:'id'
+  },  {
+    type:'multi-select',
+    name:"pt",
+    label:"show test",
     disabled:false,
     url:"posts",
     optionLabel:"title",

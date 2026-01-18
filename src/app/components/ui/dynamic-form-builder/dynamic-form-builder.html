@@ -74,14 +74,15 @@
                            [disabled]="field.disabled"
                            [optionLabel]="field.optionLabel??'id'"
                            [optionValue]="field.optionValue ?? 'name'"
-                           (selected)="handleSelectChange(field, $event)"></app-single-select>
-
-        <app-single-select *ngIf="field.type === 'multi-select'"
-                           [url]="field?.url"
-                           [disabled]="field.disabled"
-                            [disabled]="field.disabled"
-                           [optionLabel]="field.optionLabel??'id'"
-                           (selected)="handleSelectChange(field, $event)"></app-single-select>
+                           (valueChange)="handleSelectChange(field, $event)"></app-single-select>
+   <app-multi-selected
+  *ngIf="field.type === 'multi-select'"
+  [url]="field?.url??''"
+  [disabled]="field.disabled"
+  [optionLabel]="field.optionLabel??'id'"
+  (valueChange)="handleSelectChange(field, $event)"
+></app-multi-selected>
+       
         
         <!-- FILE -->
         <input *ngIf="field.type === 'file'" type="file"
