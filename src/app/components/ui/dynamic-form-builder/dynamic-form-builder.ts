@@ -35,6 +35,7 @@ import { SingleSelect } from "../single-select/single-select";
 import { SelectModule } from 'primeng/select';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
+import { MultiSelected } from "../multi-selected/multi-selected";
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -54,6 +55,7 @@ import { ComponentService } from '../../../services/genral/component.service';
     ProgressBarModule,
     SingleSelect,
     SelectModule,
+    MultiSelected,MultiSelected
 ],
   templateUrl: './dynamic-form-builder.html',
 })
