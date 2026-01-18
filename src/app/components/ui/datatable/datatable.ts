@@ -23,8 +23,7 @@ import {
   TableState,
   TableEvent
 } from '../../../models/datatable.model';
-import { DatatableHelpers } from '../../../helpers/datatable-helpers';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import {  NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-datatable',
