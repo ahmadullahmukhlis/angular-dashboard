@@ -1,13 +1,12 @@
 import {NgClass, NgFor} from '@angular/common';
 import { Component } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
-import { MultiSelected } from '../../components/ui/multi-selected/multi-selected';
 import { DynamicField } from '../../models/fomrBuilderModel';
 import { DynamicFormBuilderComponent } from "../../components/ui/dynamic-form-builder/dynamic-form-builder";
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, NgFor, Modal, MultiSelected, DynamicFormBuilderComponent],
+  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
