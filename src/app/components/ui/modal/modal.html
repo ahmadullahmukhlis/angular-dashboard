@@ -1,4 +1,3 @@
-
 @if(visible){
 <p-dialog
   [visible]="visible"
@@ -7,6 +6,7 @@
   [draggable]="draggable"
   [resizable]="false"
   [styleClass]="widthClass + ' ' + heightClass"
+  [contentStyle]="{ 'overflow-y': 'auto', 'max-height': 'calc(100vh - 150px)' }"
 >
 
   <!-- HEADER -->
@@ -26,10 +26,11 @@
   </ng-template>
 
   <!-- BODY -->
-  <div class="">
-    <ng-content></ng-content>
-  </div>
+  <ng-template pTemplate="body">
+    <div class="modal-content">
+      <ng-content></ng-content>
+    </div>
+  </ng-template>
 
 </p-dialog>
 }
-
