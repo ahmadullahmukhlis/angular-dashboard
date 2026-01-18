@@ -13,12 +13,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import {
-  HttpClient,
-  HttpEventType,
-  HttpClientModule,
-} from '@angular/common/http';
-
+import { HttpClient, HttpEventType, HttpClientModule } from '@angular/common/http';
 
 /* PrimeNG */
 import { InputTextModule } from 'primeng/inputtext';
@@ -55,61 +50,53 @@ import { MultiSelected } from "../multi-selected/multi-selected";
     ProgressBarModule,
     SingleSelect,
     SelectModule,
-    MultiSelected,MultiSelected
-],
+    MultiSelected
+  ],
   templateUrl: './dynamic-form-builder.html',
 })
 export class DynamicFormBuilderComponent implements OnChanges {
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
-  /* ================= INPUTS ================= */
-
   @Input({ required: true }) fields: DynamicField[] = [];
   @Input() action!: string;
   @Input() method: 'POST' | 'PUT' = 'POST';
-
   @Input() beforeSubmit?: (v: any) => boolean | void;
   @Input() needConfirmation = false;
-
   @Input() hiddenFields?: { name: string; value: any }[];
-  @Input () className:string = ""
-  /* ================= OUTPUTS ================= */
+  @Input() className: string = "";
 
   @Output() submitCompleted = new EventEmitter<any>();
   @Output() valuesChanged = new EventEmitter<any>();
 
-  /* ================= FORM ================= */
-  
-  toastService = inject(ToastService);
-  componentService = inject(ComponentService)
   form!: FormGroup;
-
   loading = false;
   progress = false;
   percent = 0;
+  submitted = false; // Track submit click
+
+  toastService = inject(ToastService);
+  componentService = inject(ComponentService);
 
   ngOnChanges() {
     this.buildForm();
   }
 
-  /* ================= BUILD ================= */
-
   private buildForm() {
     const group: any = {};
 
     this.fields.forEach(f => {
-      const v = [];
+      const validators = [];
 
-      if (f.required) v.push(Validators.required);
-      if (f.min !== undefined) v.push(Validators.min(f.min));
-      if (f.max !== undefined) v.push(Validators.max(f.max));
-      if (f.minLength) v.push(Validators.minLength(f.minLength));
-      if (f.maxLength) v.push(Validators.maxLength(f.maxLength));
-      if (f.pattern) v.push(Validators.pattern(f.pattern));
+      if (f.required) validators.push(Validators.required);
+      if (f.min !== undefined) validators.push(Validators.min(f.min));
+      if (f.max !== undefined) validators.push(Validators.max(f.max));
+      if (f.minLength) validators.push(Validators.minLength(f.minLength));
+      if (f.maxLength) validators.push(Validators.maxLength(f.maxLength));
+      if (f.pattern) validators.push(Validators.pattern(f.pattern));
 
       group[f.name] = [
         { value: f.defaultValue ?? null, disabled: f.disabled },
-        v,
+        validators,
       ];
     });
 
@@ -118,85 +105,102 @@ export class DynamicFormBuilderComponent implements OnChanges {
     this.form.valueChanges.subscribe(v => this.valuesChanged.emit(v));
   }
 
-  /* ================= VISIBILITY ================= */
-
   visibleFields() {
     const values = this.form?.value;
     return this.fields.filter(f => (f.show ? f.show(values) : true));
   }
-
-  /* ================= SERVER SELECT ================= */
-
 
   handleSelectChange(field: DynamicField, row: any) {
     const val = field.changeValue ? row?.[field.changeValue] : row;
     this.form.get(field.name)?.setValue(val);
     field.onSelect?.(row);
   }
- 
 
-  /* ================= SUBMIT ================= */
+submit() {
+  this.submitted = true;
 
-  submit() {
-    if (this.beforeSubmit) {
-      const r = this.beforeSubmit(this.form.value);
-      if (r === false) return;
-    }
+  // 1️⃣ Validate form first
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    this.loading = false; // ensure button is not stuck loading
+    return;
+  }
 
-    if (this.needConfirmation ){
-      this.toastService.confirmAction({name:"DO you want to Sumite the form"},()=>{
-         this.dataSUbmit()
-      })
-      return
-    }
-
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  // 2️⃣ beforeSubmit hook
+  if (this.beforeSubmit) {
+    const r = this.beforeSubmit(this.form.value);
+    if (r != true) {
+      this.loading = false; // stop loading if beforeSubmit cancels
       return;
     }
- this.dataSUbmit()
-    
   }
-  dataSUbmit(){
-      let payload: any = this.form.value;
-    const hasFile = this.fields.some(f => f.type === 'file');
 
-    if (hasFile) {
-      const fd = new FormData();
-      Object.keys(payload).forEach(k => fd.append(k, payload[k] ?? ''));
-      this.hiddenFields?.forEach(h => fd.append(h.name, h.value));
-      payload = fd;
-    }
-
-    this.loading = true;
-
-    this.componentService
-      .request(this.method, this.action, {
-        body: payload,
-        observe: 'events',
-        reportProgress: true,
-      })
-      .subscribe({
-        next: e => {
-          if (e.type === HttpEventType.UploadProgress && e.total) {
-            this.progress = true;
-            this.percent = Math.round((e.loaded * 100) / e.total);
-          }
-          if (e.type === HttpEventType.Response) {
-            this.submitCompleted.emit(e.body);
-          }
-        },
-        error: err => console.error(err),
-        complete: () => {
-          this.loading = false;
-          this.progress = false;
-          this.percent = 0;
-        },
-      });
+  // 3️⃣ Confirmation dialog
+  if (this.needConfirmation) {
+    this.toastService.confirmAction(
+      { name: "Do you want to submit the form" },
+      () => { this.dataSubmit(); }
+    );
+    return; // do not set loading yet — wait for user confirmation
   }
+
+  // 4️⃣ Everything passed, submit form
+  this.dataSubmit();
+}
+
+
+dataSubmit() {
+  this.loading = true; // start loading here only when we are sure we submit
+
+  let payload: any = { ...this.form.value };
+
+  // Replace nulls with empty strings
+  Object.keys(payload).forEach(k => {
+    if (payload[k] === null) payload[k] = '';
+  });
+
+  const hasFile = this.fields.some(f => f.type === 'file');
+
+  if (hasFile) {
+    const fd = new FormData();
+    Object.keys(payload).forEach(k => fd.append(k, payload[k]));
+    this.hiddenFields?.forEach(h => fd.append(h.name, h.value));
+    payload = fd;
+  }
+
+  this.componentService
+    .request(this.method, this.action, {
+      body: payload,
+      observe: 'events',
+      reportProgress: true,
+    })
+    .subscribe({
+      next: e => {
+        if (e.type === HttpEventType.UploadProgress && e.total) {
+          this.progress = true;
+          this.percent = Math.round((e.loaded * 100) / e.total);
+        }
+        if (e.type === HttpEventType.Response) {
+          this.submitCompleted.emit(e.body);
+        }
+      },
+      error: err => {
+        console.error('Error submitting form:', err);
+        this.toastService.error('Error submitting form');
+        this.loading = false; // stop loading on error
+        this.progress = false;
+        this.percent = 0;
+      },
+      complete: () => {
+        this.loading = false; // ensure loading stops after completion
+        this.progress = false;
+        this.percent = 0;
+      },
+    });
+}
 
   isInvalid(name: string) {
     const c = this.form.get(name);
-    return !!(c && c.invalid && (c.touched || c.dirty));
+    return !!(c && c.invalid && (c.touched || c.dirty || this.submitted));
   }
 }
