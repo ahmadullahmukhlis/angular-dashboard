@@ -133,6 +133,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
     this.form.get(field.name)?.setValue(val);
     field.onSelect?.(row);
   }
+ 
 
   /* ================= SUBMIT ================= */
 
