@@ -1,7 +1,7 @@
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import jwt_decode from 'jwt-decode';
+import jwt_decode from 'jwt-decode'; // <- underscore, not camelCase
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +12,11 @@ export class AuthService {
 
   // Save token in localStorage
   setToken(token: string) {
-    localStorage.setItem('jwtToken', token);
+    localStorage.setItem('token', token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('jwtToken');
+    return localStorage.getItem('token');
   }
 
   // Check if token exists and is valid
@@ -25,7 +25,7 @@ export class AuthService {
     if (!token) return false;
 
     try {
-      const decoded: any = jwt_decode(token);
+      const decoded: any = jwt_decode(token); // <- use jwt_decode
       const now = Date.now().valueOf();
       if (decoded.exp && decoded.exp * 1000 < now) {
         // token expired
@@ -38,7 +38,7 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('token');
     this.router.navigate(['/login']);
   }
 }
