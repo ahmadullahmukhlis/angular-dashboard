@@ -24,13 +24,16 @@ import {
   TableEvent,
 } from '../../../models/datatable.model';
 import { ComponentService } from '../../../services/genral/component.service';
+import { Paginator } from 'primeng/paginator';
+import { NgClass } from '@angular/common';
+
 
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule],
+  imports: [TableModule, FormsModule, Paginator, NgClass],
 })
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ✅ API URL
@@ -39,18 +42,15 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   @Input() config: DataTableConfig = {
     columns: [],
     serverSide: true,
-    pagination: {
-      pageSize: 10,
-      currentPage: 1,
-      totalItems: 0,
-      pageSizeOptions: [5, 10, 25, 50, 100],
-    },
   };
 
   @Input() loading: boolean = false;
   @Input() error: string | null = null;
 
   data: any[] = [];
+  totalRecords: number = 0; // total records for pagination
+  currentPage: number = 1;
+  pageSize: number = 10;
 
   @Output() onRowClick = new EventEmitter<any>();
   @Output() onRowSelect = new EventEmitter<any[]>();
@@ -65,12 +65,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   internalState: TableState = {
     sort: null,
     filters: {},
-    pagination: {
-      pageSize: 10,
-      currentPage: 1,
-      totalItems: 0,
-      pageSizeOptions: [5, 10, 25, 50, 100],
-    },
     selection: { selectedRows: [], allSelected: false },
   };
 
@@ -81,8 +75,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   selectedRows: any[] = [];
   selectAll: boolean = false;
   visibleColumns: ColumnDefinition[] = [];
-  firstRecord: number = 0;
-  totalRecords: number = 0;
   showFilters: boolean = false;
 
   constructor(
@@ -97,12 +89,12 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
     this.filterSubject.pipe(debounceTime(400), distinctUntilChanged()).subscribe((filters) => {
       this.internalState.filters = filters;
-      this.internalState.pagination.currentPage = 1;
-      this.firstRecord = 0;
+      this.currentPage = 1; // reset to first page on filter change
       this.loadData();
     });
 
     if (this.url && this.config.serverSide) {
+      this.pageSize = 10;
       this.loadData();
     }
   }
@@ -123,13 +115,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
       .filter((c) => !c.hidden)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-    if (this.config.pagination) {
-      this.internalState.pagination = { ...this.config.pagination };
-      this.firstRecord =
-        (this.internalState.pagination.currentPage - 1) * this.internalState.pagination.pageSize;
-      this.totalRecords = this.config.pagination.totalItems || 0;
-    }
-
     if (this.config.sort) {
       this.internalState.sort = { ...this.config.sort };
       this.currentSort = this.config.sort;
@@ -140,6 +125,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
       this.filterInputs = { ...this.config.filters };
     }
 
+    this.pageSize = 10;
     this.clearSelection();
   }
 
@@ -150,21 +136,18 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.error = null;
 
     const state = {
-      page: this.internalState.pagination.currentPage,
-      pageSize: this.internalState.pagination.pageSize,
       sortBy: this.internalState.sort?.column,
       sortDir: this.internalState.sort?.direction,
       filters: this.internalState.filters,
+      page: this.currentPage,
+      pageSize: this.pageSize,
     };
 
     this.componentService.load(this.url, state).subscribe({
       next: (res: any) => {
-        this.data = res.items || res.data || [];
-        this.totalRecords = res.total || res.totalItems || 0;
-
-        this.internalState.pagination.totalItems = this.totalRecords;
-        if (this.config.pagination) this.config.pagination.totalItems = this.totalRecords;
-
+        console.log('Data loaded:', res);
+        this.data = res.items || res.data || res.results || res.content || res || [];
+        this.totalRecords = res.totalRecords || res.total || this.data.length;
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -181,6 +164,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   refresh() {
     this.loadData();
     this.tableEvent.emit({ type: 'refresh', data: null });
+    console.log('Data table refreshed', this.totalRecords);
   }
 
   handleSort(event: any) {
@@ -198,23 +182,13 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   handlePageChange(event: any) {
-    if (!this.config.serverSide) return;
+    // PrimeNG paginator emits first item index (0-based)
+    this.currentPage = Math.floor(event.first / event.rows) + 1;
+    this.pageSize = event.rows;
 
-    const newPage = Math.floor(event.first / event.rows) + 1;
-    this.internalState.pagination.currentPage = newPage;
-    this.firstRecord = event.first;
+    console.log('Page Change Event:', event, ' -> currentPage:', this.currentPage);
+
     this.loadData();
-    this.tableEvent.emit({ type: 'page', data: newPage });
-  }
-
-  handlePageSizeChange(event: any) {
-    const pageSize = event.target?.value || event;
-
-    this.internalState.pagination.pageSize = pageSize;
-    this.internalState.pagination.currentPage = 1;
-    this.firstRecord = 0;
-    this.loadData();
-    this.tableEvent.emit({ type: 'pageSize', data: pageSize });
   }
 
   handleFilter(key: string, value: any) {
@@ -318,33 +292,32 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   getCellClasses(column: ColumnDefinition): string {
-    return column.cellClass || '';
-  }
-
-  getPageNumbers(): number[] {
-    const totalItems = this.config.pagination?.totalItems || 0;
-    const pageSize = this.internalState.pagination.pageSize || 10;
-    const totalPages = Math.ceil(totalItems / pageSize) || 1;
-    const currentPage = this.internalState.pagination.currentPage || 1;
-
-    const pages: number[] = [];
-    const maxVisible = 5;
-
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-    startPage = Math.max(1, endPage - maxVisible + 1);
-
-    for (let i = startPage; i <= endPage; i++) pages.push(i);
-    return pages;
+    return column.cellClass || column.className || '';
   }
 
   getHeaderClasses(column: ColumnDefinition): string {
     let classes = 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
     if (column.sortable) classes += ' cursor-pointer';
+    classes += ` ${column.headerClass || 'text-center'}`;
     return classes;
   }
 
   isRowSelected(row: any): boolean {
     return this.selectedRows.includes(row);
+  }
+  rowActionMenuOpen: { [key: string]: boolean } = {};
+
+  toggleRowActions(row: any) {
+    const key = row.id || row.key || JSON.stringify(row); // unique key per row
+    this.rowActionMenuOpen[key] = !this.rowActionMenuOpen[key];
+  }
+
+  isRowActionsOpen(row: any) {
+    const key = row.id || row.key || JSON.stringify(row);
+    return !!this.rowActionMenuOpen[key];
+  }
+
+  closeAllRowActions() {
+    this.rowActionMenuOpen = {};
   }
 }

@@ -14,7 +14,7 @@
           <span
             [ngClass]="{
               'text-green-600 bg-green-50': stat.changeType === 'increase',
-              'text-red-600 bg-red-50': stat.changeType === 'decrease'
+              'text-red-600 bg-red-50': stat.changeType === 'decrease',
             }"
             class="text-sm font-medium px-2 py-1 rounded"
           >
@@ -193,7 +193,7 @@
             class="text-sm"
             [ngClass]="{
               'text-green-600': product.growth.startsWith('+'),
-              'text-red-600': product.growth.startsWith('-')
+              'text-red-600': product.growth.startsWith('-'),
             }"
           >
             {{ product.growth }}
@@ -215,28 +215,32 @@
     </div>
   </div>
 </div>
-<button (click)="openModal()" class="bg-purple-500">
-  open modal
-</button>
+<button (click)="openModal()" class="bg-purple-500">open modal</button>
 
-<app-modal
-  [visible]="isOpent"
-  title="show test modal"
-  (onClose)="closeModal()"
-  widthClass="w-50%"
->
-
-<app-dynamic-form-builder
-[className]="'grid grid-cols-2 gap-4'"
-  [fields]="fields"
-  [action]="actionUrl"
-  method="POST"
-  [needConfirmation]="false"
-  [hiddenFields]="hiddenFields"
-  [beforeSubmit]="beforeSubmit"
-  (submitCompleted)="onSubmitCompleted($event)"
-  (valuesChanged)="onValuesChanged($event)"
-></app-dynamic-form-builder>
-
+<app-modal [visible]="isOpent" title="show test modal" (onClose)="closeModal()" widthClass="w-50%">
+  <app-dynamic-form-builder
+    [className]="'grid grid-cols-2 gap-4'"
+    [fields]="fields"
+    [action]="actionUrl"
+    method="POST"
+    [needConfirmation]="false"
+    [hiddenFields]="hiddenFields"
+    [beforeSubmit]="beforeSubmit"
+    (submitCompleted)="onSubmitCompleted($event)"
+    (valuesChanged)="onValuesChanged($event)"
+  ></app-dynamic-form-builder>
 </app-modal>
-
+<app-datatable
+  [url]="'https://dummyjson.com/users'"
+  [config]="tableConfig"
+  [loading]="isLoading"
+  [error]="errorMessage"
+  (onRowClick)="handleRowClick($event)"
+  (onRowSelect)="handleRowSelect($event)"
+  (onAdd)="handleAdd()"
+  (onEdit)="handleEdit($event)"
+  (onDelete)="handleDelete($event)"
+  (onExport)="handleExport($event)"
+  (tableEvent)="handleTableEvent($event)"
+>
+</app-datatable>

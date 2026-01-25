@@ -3,10 +3,12 @@ import { Component } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
 import { DynamicField } from '../../models/fomrBuilderModel';
 import { DynamicFormBuilderComponent } from '../../components/ui/dynamic-form-builder/dynamic-form-builder';
+import { DataTableConfig, RowAction } from '../../models/datatable.model';
+import { Datatable } from '../../components/ui/datatable/datatable';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent],
+  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent, Datatable],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -224,4 +226,75 @@ export class Dashboard {
       optionValue: 'id',
     },
   ];
+
+  isLoading = false;
+  errorMessage: string | null = null;
+  actions: RowAction[] = [
+    {
+      label: 'View',
+      icon: 'fa-eye',
+      action: (row: any) => {
+        console.log('View action on row:', row);
+      },
+      color: 'primary',
+    },
+    {
+      label: 'Delete',
+      icon: 'fa-trash',
+      action: (row: any) => {
+        console.log('Delete action on row:', row);
+      },
+      color: 'danger',
+      confirm: {
+        title: 'Confirm Deletion',
+        message: 'Are you sure you want to delete this item?',
+        confirmText: 'Yes, Delete',
+        cancelText: 'Cancel',
+      },
+    },
+  ];
+  tableConfig: DataTableConfig = {
+    columns: [
+      { key: 'id', label: 'ID', sortable: true, width: '50px', className: 'font-bold text-center' },
+      { key: 'name', label: 'full Name', sortable: true, filterType: 'text' },
+      { key: 'username', label: 'User Name', sortable: true, filterType: 'text' },
+      { key: 'email', label: 'Email', sortable: true, filterType: 'text' },
+      { key: 'phone', label: 'Phone', sortable: true, type: 'text' },
+      { key: 'website', label: 'Website', type: 'boolean', filterType: 'boolean' },
+    ],
+    serverSide: true,
+    showCheckboxes: true,
+    selectable: true,
+    rowActions: this.actions,
+  };
+
+  // ================= EVENT HANDLERS =================
+
+  handleRowClick(row: any) {
+    console.log('Row clicked:', row);
+  }
+
+  handleRowSelect(rows: any[]) {
+    console.log('Rows selected:', rows);
+  }
+
+  handleAdd() {
+    console.log('Add new row');
+  }
+
+  handleEdit(row: any) {
+    console.log('Edit row:', row);
+  }
+
+  handleDelete(row: any) {
+    console.log('Delete row:', row);
+  }
+
+  handleExport(format: 'csv' | 'excel' | 'pdf') {
+    console.log('Export table as:', format);
+  }
+
+  handleTableEvent(event: any) {
+    console.log('Table event:', event);
+  }
 }
