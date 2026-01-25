@@ -27,7 +27,6 @@ import { ComponentService } from '../../../services/genral/component.service';
 import { Paginator } from 'primeng/paginator';
 import { NgClass } from '@angular/common';
 
-
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
@@ -44,8 +43,8 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     serverSide: true,
   };
 
-  @Input() loading: boolean = false;
-  @Input() error: string | null = null;
+  loading: boolean = false;
+  error: string | null = null;
 
   data: any[] = [];
   totalRecords: number = 0; // total records for pagination
@@ -153,7 +152,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
       },
       error: (err) => {
         console.error(err);
-        this.error = 'Failed to load data';
+        this.error = err.message || 'Error loading data';
         this.loading = false;
       },
     });

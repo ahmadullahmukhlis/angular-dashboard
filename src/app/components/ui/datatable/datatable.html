@@ -210,7 +210,7 @@
           @for (row of data; track row; let i = $index) {
             <tr [class]="getRowClass(row)" (click)="config.onRowClick && handleRowClick(row)">
               @if (config.selectable && config.showCheckboxes) {
-                <td class="px-4 py-3">
+                <td class="px-2 py-1 text-center">
                   <input
                     type="checkbox"
                     [checked]="isRowSelected(row)"

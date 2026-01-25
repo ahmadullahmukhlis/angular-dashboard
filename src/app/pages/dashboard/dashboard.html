@@ -233,8 +233,6 @@
 <app-datatable
   [url]="'https://dummyjson.com/users'"
   [config]="tableConfig"
-  [loading]="isLoading"
-  [error]="errorMessage"
   (onRowClick)="handleRowClick($event)"
   (onRowSelect)="handleRowSelect($event)"
   (onAdd)="handleAdd()"
