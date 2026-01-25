@@ -51,7 +51,7 @@ export class Login implements OnInit {
         this.isLoading = false;
         this.loginForm.enable(); // ✅ re-enable form
 
-        if (!res?.success) {
+        if (!res?.status) {
           this.errorMessage = res?.message || 'Login failed';
           return;
         }
