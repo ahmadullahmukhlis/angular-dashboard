@@ -48,6 +48,7 @@ export interface DataTableConfig {
   sort?: SortConfig;
   filters?: { [key: string]: any };
   rowActions?: RowAction[];
+  headerActions?: RowAction[];
   selectable?: boolean;
   multiSelect?: boolean;
   showCheckboxes?: boolean;
@@ -79,6 +80,7 @@ export interface RowAction {
   color?: 'primary' | 'danger' | 'warning' | 'success' | 'info' | 'secondary';
   disabled?: (row: any) => boolean;
   hidden?: (row: any) => boolean;
+  rowType?: 'single' | 'multiple';
   class?: string;
   tooltip?: string;
   confirm?: {

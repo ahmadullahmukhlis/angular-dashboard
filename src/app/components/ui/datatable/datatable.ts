@@ -37,7 +37,7 @@ import { NgClass } from '@angular/common';
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ✅ API URL
   @Input() url!: string;
-
+  @Input() name!: string;
   @Input() config: DataTableConfig = {
     columns: [],
     serverSide: true,
