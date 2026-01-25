@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { SidebarService } from './services/sidebar.service';
-import { MainContent } from './components/layout/main-content/main-content';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { RouterModule } from "@angular/router";
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
-  imports: [MainContent,ToastModule,ConfirmDialogModule],
+  imports: [ToastModule, ConfirmDialogModule, RouterModule], // remove MainContent import!
 })
 export class App {
   title = 'Metric Dashboard';
