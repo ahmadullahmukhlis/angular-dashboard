@@ -1,25 +1,81 @@
 <!-- Main Container -->
-<div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden" #tableContainer>
+<div
+  class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-200"
+  [ngClass]="{
+    'text-sm': tableSize === 'sm' || tableSize === 'xs',
+    'text-xs': tableSize === 'xs',
+    'text-base': tableSize === 'default',
+  }"
+  #tableContainer
+>
   <!-- Header Section -->
-  <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <!-- Title and Stats -->
-      <div>
-        <h2 class="text-xl font-semibold text-gray-800">{{ name }}</h2>
+  <div
+    class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white sticky top-0 z-20"
+    [ngClass]="{
+      'px-6 py-4': tableSize === 'default',
+      'px-4 py-3': tableSize === 'sm',
+      'px-3 py-2': tableSize === 'xs',
+    }"
+  >
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <!-- Title -->
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-blue-50 rounded-lg">
+          <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div>
+          <h2
+            class="font-bold text-gray-900"
+            [ngClass]="{
+              'text-xl': tableSize === 'default',
+              'text-lg': tableSize === 'sm',
+              'text-base': tableSize === 'xs',
+            }"
+          >
+            {{ name }}
+          </h2>
+          <p
+            class="text-gray-500"
+            [ngClass]="{
+              'text-sm': tableSize === 'default',
+              'text-xs': tableSize === 'sm' || tableSize === 'xs',
+            }"
+          >
+            Total: {{ totalRecords }} records
+          </p>
+        </div>
       </div>
 
       <!-- Actions Toolbar -->
       <div class="flex flex-wrap items-center gap-2">
         <!-- Search -->
-        <div class="relative">
+        <!-- Search -->
+        <div class="relative flex items-center">
           <input
             type="text"
-            placeholder="Search..."
-            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Search records..."
             (input)="handleFilter('global', $any($event.target).value)"
+            class="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400 hover:border-gray-400"
+            [ngClass]="{
+              'pl-10 pr-4 py-2 w-48 text-base': tableSize === 'default',
+              'pl-9 pr-3 py-1.5 w-40 text-sm': tableSize === 'sm',
+              'pl-8 pr-2.5 py-1 w-36 text-xs': tableSize === 'xs',
+            }"
           />
+
           <svg
-            class="w-5 h-5 absolute left-3 top-2.5 text-gray-400"
+            class="absolute text-gray-400 pointer-events-none transition-colors"
+            [ngClass]="{
+              'w-4 h-4 left-3 top-2.5': tableSize === 'default',
+              'w-3.5 h-3.5 left-2.5 top-1.5': tableSize === 'sm',
+              'w-3 h-3 left-2 top-1.5': tableSize === 'xs',
+            }"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -36,9 +92,27 @@
         <!-- Filter Toggle -->
         <button
           (click)="showFilters = !showFilters"
-          class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          [class.bg-blue-600]="showFilters"
+          [class.text-white]="showFilters"
+          [class.border-blue-600]="showFilters"
+          class="border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center gap-2 group"
+          [ngClass]="{
+            'px-3 py-2': tableSize === 'default',
+            'px-2.5 py-1.5': tableSize === 'sm',
+            'px-2 py-1': tableSize === 'xs',
+          }"
         >
-          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            class="group-hover:scale-110 transition-transform"
+            [ngClass]="{
+              'w-4 h-4': tableSize === 'default',
+              'w-3.5 h-3.5': tableSize === 'sm',
+              'w-3 h-3': tableSize === 'xs',
+            }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -46,16 +120,26 @@
               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
             />
           </svg>
-          <span class="hidden md:inline">Filters</span>
+          <span class="font-medium"> Filter </span>
         </button>
 
-        <!-- Export -->
-        <div class="relative group">
+        <!-- Export Dropdown -->
+        <div class="relative">
           <button
-            class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            class="border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center gap-2 group"
+            [ngClass]="{
+              'px-3 py-2': tableSize === 'default',
+              'px-2.5 py-1.5': tableSize === 'sm',
+              'px-2 py-1': tableSize === 'xs',
+            }"
           >
             <svg
-              class="w-5 h-5 text-gray-600"
+              class="group-hover:scale-110 transition-transform"
+              [ngClass]="{
+                'w-4 h-4': tableSize === 'default',
+                'w-3.5 h-3.5': tableSize === 'sm',
+                'w-3 h-3': tableSize === 'xs',
+              }"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -67,30 +151,51 @@
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <span class="hidden md:inline">Export</span>
+            <span class="font-medium"> Export </span>
           </button>
 
           <div
-            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block"
+            class="absolute right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-30 hidden group-hover:block hover:block min-w-[160px]"
           >
             <div class="py-1">
               <button
                 (click)="export('csv')"
-                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                class="block w-full text-left hover:bg-gray-50 px-4 py-2.5 transition-colors flex items-center gap-2 text-gray-700"
               >
-                Export as CSV
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>CSV</span>
               </button>
               <button
                 (click)="export('excel')"
-                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                class="block w-full text-left hover:bg-gray-50 px-4 py-2.5 transition-colors flex items-center gap-2 text-gray-700"
               >
-                Export as Excel
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Excel</span>
               </button>
               <button
                 (click)="export('pdf')"
-                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                class="block w-full text-left hover:bg-gray-50 px-4 py-2.5 transition-colors flex items-center gap-2 text-gray-700"
               >
-                Export as PDF
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>PDF</span>
               </button>
             </div>
           </div>
@@ -100,9 +205,24 @@
         @if (config.onAdd) {
           <button
             (click)="addNew()"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-2 group"
+            [ngClass]="{
+              'px-4 py-2.5': tableSize === 'default',
+              'px-3.5 py-2': tableSize === 'sm',
+              'px-3 py-1.5': tableSize === 'xs',
+            }"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              class="group-hover:scale-110 transition-transform"
+              [ngClass]="{
+                'w-4 h-4': tableSize === 'default',
+                'w-3.5 h-3.5': tableSize === 'sm',
+                'w-3 h-3': tableSize === 'xs',
+              }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -110,7 +230,7 @@
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span class="hidden md:inline">Add New</span>
+            <span class="font-medium"> Add New </span>
           </button>
         }
 
@@ -118,10 +238,21 @@
         <button
           (click)="refresh()"
           [disabled]="loading"
-          class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          class="border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+          [ngClass]="{
+            'px-3 py-2': tableSize === 'default',
+            'px-2.5 py-1.5': tableSize === 'sm',
+            'px-2 py-1': tableSize === 'xs',
+          }"
+          [title]="loading ? 'Refreshing...' : 'Refresh data'"
         >
           <svg
-            class="w-5 h-5 text-gray-600"
+            class="text-gray-600 group-hover:text-blue-600 group-hover:rotate-180 transition-all duration-500"
+            [ngClass]="{
+              'w-4 h-4': tableSize === 'default',
+              'w-3.5 h-3.5': tableSize === 'sm',
+              'w-3 h-3': tableSize === 'xs',
+            }"
             [class.animate-spin]="loading"
             fill="none"
             stroke="currentColor"
@@ -139,50 +270,153 @@
     </div>
   </div>
 
-  <!-- Loading -->
+  <!-- Loading State -->
   @if (loading) {
-    <div class="p-8 text-center">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-600">Loading data...</p>
+    <div
+      class="flex flex-col items-center justify-center"
+      [ngClass]="{
+        'py-16': tableSize === 'default',
+        'py-12': tableSize === 'sm',
+        'py-10': tableSize === 'xs',
+      }"
+    >
+      <div class="relative">
+        <div
+          class="animate-spin rounded-full border-4 border-gray-200"
+          [ngClass]="{
+            'h-12 w-12': tableSize === 'default',
+            'h-10 w-10': tableSize === 'sm',
+            'h-8 w-8': tableSize === 'xs',
+          }"
+        ></div>
+        <div
+          class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
+          [ngClass]="{
+            'h-8 w-8': tableSize === 'default',
+            'h-6 w-6': tableSize === 'sm',
+            'h-5 w-5': tableSize === 'xs',
+          }"
+        ></div>
+      </div>
+      <p
+        class="mt-4 text-gray-600 font-medium"
+        [ngClass]="{
+          'text-base': tableSize === 'default',
+          'text-sm': tableSize === 'sm',
+          'text-xs': tableSize === 'xs',
+        }"
+      >
+        Loading data...
+      </p>
     </div>
   }
 
-  <!-- Error -->
+  <!-- Error State -->
   @if (error && !loading) {
-    <div class="p-8 text-center">
-      <p class="text-red-600">{{ error }}</p>
+    <div
+      class="flex flex-col items-center justify-center"
+      [ngClass]="{
+        'py-16': tableSize === 'default',
+        'py-12': tableSize === 'sm',
+        'py-10': tableSize === 'xs',
+      }"
+    >
+      <div class="p-4 bg-red-50 rounded-full mb-4">
+        <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+      <p class="text-red-700 font-medium mb-2">{{ error }}</p>
       <button
         (click)="refresh()"
-        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        class="mt-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium px-4 py-2 flex items-center gap-2"
       >
-        Retry
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Try Again
       </button>
     </div>
   }
 
-  <!-- Empty -->
+  <!-- Empty State -->
   @if (!loading && !error && data.length === 0) {
-    <div class="p-8 text-center">
-      <h3 class="text-lg font-medium text-gray-900">
+    <div
+      class="flex flex-col items-center justify-center"
+      [ngClass]="{
+        'py-16': tableSize === 'default',
+        'py-12': tableSize === 'sm',
+        'py-10': tableSize === 'xs',
+      }"
+    >
+      <div class="p-4 bg-gray-100 rounded-full mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L10 12.414 5.293 7.707A1 1 0 015 7V4a1 1 0 011-1zm12 13H5a1 1 0 01-1-1v-2a1 1 0 01.293-.707L10 7.586l5.707 5.707A1 1 0 0116 13v2a1 1 0 01-1 1z"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+      <h3 class="font-semibold text-gray-900 mb-1">
         {{ config.emptyMessage || 'No data available' }}
       </h3>
+      <p class="text-gray-500 text-center mb-4 max-w-md">
+        No records found. Try adjusting your search or filters.
+      </p>
+      <button
+        (click)="refresh()"
+        class="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Refresh
+      </button>
     </div>
   }
 
-  <!-- Table -->
+  <!-- Table Content -->
   @if (!loading && !error && data.length > 0) {
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+        <thead class="bg-gray-50 sticky">
           <tr>
             @if (config.selectable && config.showCheckboxes) {
-              <th class="px-4 py-3">
-                <input
-                  type="checkbox"
-                  [checked]="selectAll"
-                  (change)="handleSelectAll()"
-                  class="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
+              <th
+                [ngClass]="{
+                  'px-4 py-3': tableSize === 'default',
+                  'px-3 py-2': tableSize === 'sm',
+                  'px-2 py-1.5': tableSize === 'xs',
+                }"
+              >
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    [checked]="selectAll"
+                    (change)="handleSelectAll()"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+                    [ngClass]="{
+                      'h-4 w-4': tableSize === 'default',
+                      'h-3.5 w-3.5': tableSize === 'sm',
+                      'h-3 w-3': tableSize === 'xs',
+                    }"
+                  />
+                </div>
               </th>
             }
 
@@ -196,74 +430,158 @@
                       order: currentSort?.direction === 'asc' ? -1 : 1,
                     })
                 "
+                class="text-left font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors"
+                [ngClass]="{
+                  'px-4 py-3': tableSize === 'default',
+                  'px-3 py-2': tableSize === 'sm',
+                  'px-2 py-1.5': tableSize === 'xs',
+                  'cursor-pointer': column.sortable,
+                }"
               >
-                {{ column.label }}
+                <div class="flex items-center gap-1.5">
+                  {{ column.label }}
+                  @if (column.sortable) {
+                    <svg
+                      class="w-3 h-3 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                      />
+                    </svg>
+                  }
+                </div>
               </th>
             }
             @if (config.rowActions) {
-              <th class="px-4 py-3 text-right">Actions</th>
+              <th
+                class="text-right font-semibold text-gray-700 bg-gray-50"
+                [ngClass]="{
+                  'px-4 py-3': tableSize === 'default',
+                  'px-3 py-2': tableSize === 'sm',
+                  'px-2 py-1.5': tableSize === 'xs',
+                }"
+              >
+                Actions
+              </th>
             }
           </tr>
         </thead>
 
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-100">
           @for (row of data; track row; let i = $index) {
-            <tr [class]="getRowClass(row)" (click)="config.onRowClick && handleRowClick(row)">
+            <tr
+              [class]="getRowClass(row)"
+              (click)="config.onRowClick && handleRowClick(row)"
+              class="hover:bg-gray-50 transition-colors cursor-pointer group"
+            >
               @if (config.selectable && config.showCheckboxes) {
-                <td class="px-2 py-1 text-center">
+                <td
+                  class="text-center"
+                  [ngClass]="{
+                    'px-4 py-3': tableSize === 'default',
+                    'px-3 py-2': tableSize === 'sm',
+                    'px-2 py-1.5': tableSize === 'xs',
+                  }"
+                >
                   <input
                     type="checkbox"
                     [checked]="isRowSelected(row)"
                     (change)="toggleRowSelection(row)"
                     (click)="$event.stopPropagation()"
-                    class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
+                    [ngClass]="{
+                      'h-4 w-4': tableSize === 'default',
+                      'h-3.5 w-3.5': tableSize === 'sm',
+                      'h-3 w-3': tableSize === 'xs',
+                    }"
                   />
                 </td>
               }
 
               @for (column of visibleColumns; track column.key) {
-                <td [class]="getCellClasses(column)">
-                  {{ getCellValue(row, column) }}
+                <td
+                  [class]="getCellClasses(column)"
+                  [ngClass]="{
+                    'px-4 py-3': tableSize === 'default',
+                    'px-3 py-2': tableSize === 'sm',
+                    'px-2 py-1.5': tableSize === 'xs',
+                  }"
+                >
+                  <div class="truncate" [title]="getCellValue(row, column)">
+                    {{ getCellValue(row, column) }}
+                  </div>
                 </td>
               }
               @if (config?.rowActions) {
-                <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium relative">
-                  <!-- Three-dot button -->
-                  <button
-                    (click)="toggleRowActions(row); $event.stopPropagation()"
-                    class="p-1 text-gray-500 hover:text-gray-700 rounded-full focus:outline-none"
-                  >
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        d="M6 10a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
-                  </button>
-                  @if (isRowActionsOpen(row)) {
-                    <div
-                      class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20 flex flex-col"
+                <td
+                  class="whitespace-nowrap text-right relative"
+                  [ngClass]="{
+                    'px-4 py-3': tableSize === 'default',
+                    'px-3 py-2': tableSize === 'sm',
+                    'px-2 py-1.5': tableSize === 'xs',
+                  }"
+                >
+                  <div class="flex justify-end">
+                    <button
+                      (click)="toggleRowActions(row); $event.stopPropagation()"
+                      class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      [ngClass]="{
+                        'p-1.5': tableSize === 'default',
+                        'p-1': tableSize === 'sm',
+                        'p-0.5': tableSize === 'xs',
+                      }"
                     >
-                      @for (action of config.rowActions; track action.label) {
-                        <button
-                          (click)="
-                            action.action(row); $event.stopPropagation(); toggleRowActions(row)
-                          "
-                          class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          [ngClass]="{
-                            'text-red-600': action.color === 'danger',
-                            'text-blue-600': action.color === 'primary',
-                          }"
-                        >
-                          @if (action.icon) {
-                            <i class="fa {{ action.icon }}"></i>
-                          }
-
-                          {{ action.label }}
-                        </button>
-                      }
-                    </div>
-                  }
-                  <!-- Actions dropdown -->
+                      <svg
+                        class="fill-current"
+                        [ngClass]="{
+                          'w-5 h-5': tableSize === 'default',
+                          'w-4 h-4': tableSize === 'sm',
+                          'w-3.5 h-3.5': tableSize === 'xs',
+                        }"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M6 10a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+                    </button>
+                    @if (isRowActionsOpen(row)) {
+                      <div
+                        class="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 min-w-[160px]"
+                        (click)="$event.stopPropagation()"
+                      >
+                        @for (action of config.rowActions; track action.label) {
+                          <button
+                            (click)="
+                              action.action(row); $event.stopPropagation(); toggleRowActions(row)
+                            "
+                            class="block w-full text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
+                            [ngClass]="{
+                              'px-4 py-3': tableSize === 'default',
+                              'px-3 py-2': tableSize === 'sm',
+                              'px-2 py-1.5': tableSize === 'xs',
+                              'text-red-600 hover:text-red-700 hover:bg-red-50':
+                                action.color === 'danger',
+                              'text-blue-600 hover:text-blue-700 hover:bg-blue-50':
+                                action.color === 'primary',
+                              'text-gray-700 hover:text-gray-900': !action.color,
+                            }"
+                          >
+                            @if (action.icon) {
+                              <i class="fa {{ action.icon }} text-sm"></i>
+                            }
+                            <span class="font-medium">{{ action.label }}</span>
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
                 </td>
               }
             </tr>
@@ -271,15 +589,27 @@
         </tbody>
       </table>
     </div>
-    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
-      <p-paginator
-        [first]="(currentPage - 1) * pageSize"
-        [rows]="pageSize"
-        [totalRecords]="totalRecords"
-        [rowsPerPageOptions]="[5, 10, 20, 50]"
-        (onPageChange)="handlePageChange($event)"
-      >
-      </p-paginator>
+
+    <!-- Pagination -->
+    <div
+      class="border-t border-gray-200 bg-white sticky bottom-0 z-10"
+      [ngClass]="{
+        'px-6 py-4': tableSize === 'default',
+        'px-4 py-3': tableSize === 'sm',
+        'px-3 py-2': tableSize === 'xs',
+      }"
+    >
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p-paginator
+          [first]="(currentPage - 1) * pageSize"
+          [rows]="pageSize"
+          [totalRecords]="totalRecords"
+          [rowsPerPageOptions]="[5, 10, 20, 50]"
+          (onPageChange)="handlePageChange($event)"
+          class="[&_.p-paginator]:border-0 [&_.p-paginator]:bg-transparent [&_.p-paginator]:p-0"
+        >
+        </p-paginator>
+      </div>
     </div>
   }
 </div>
