@@ -1,18 +1,17 @@
 <div class="min-h-screen bg-gray-50">
-  <!-- Fixed Sidebar -->
+  <!-- Sidebar -->
   <app-sidebar></app-sidebar>
 
-  <!-- Fixed Header -->
+  <!-- Header -->
   <app-header></app-header>
 
-  <!-- Main Content Area -->
+  <!-- Main Content -->
   <main
     class="transition-all duration-300 ease-in-out p-5 min-h-screen"
     [class.ml-72]="!isCollapsed && !isMobile"
     [class.ml-20]="isCollapsed && !isMobile"
     [class.ml-0]="isMobile"
   >
-    <!-- Router Outlet - Direct child of main -->
     <router-outlet></router-outlet>
   </main>
 </div>
