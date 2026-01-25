@@ -1,531 +1,242 @@
 <!-- Main Container -->
 <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden" #tableContainer>
+  <!-- Header Section -->
+  <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <!-- Title and Stats -->
+      <div>
+        <h2 class="text-xl font-semibold text-gray-800">Data Table</h2>
 
-    <!-- Header Section -->
-    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        @if (config.pagination) {
+          <div class="flex items-center gap-3 mt-1">
+            <span class="text-sm text-gray-600"> Total: {{ config?.pagination?.totalItems }} </span>
 
-            <!-- Title and Stats -->
-            <div>
-                <h2 class="text-xl font-semibold text-gray-800">Data Table</h2>
-                <div *ngIf="config.pagination" class="flex items-center gap-3 mt-1">
-          <span class="text-sm text-gray-600">
-            Total: {{ config?.pagination?.totalItems }}
-          </span>
-                    <span *ngIf="selectedRows.length > 0" class="text-sm text-blue-600">
-            Selected: {{ selectedRows.length }}
-          </span>
-                </div>
-            </div>
+            @if (selectedRows.length > 0) {
+              <span class="text-sm text-blue-600"> Selected: {{ selectedRows.length }} </span>
+            }
+          </div>
+        }
+      </div>
 
-            <!-- Actions Toolbar -->
-            <div class="flex flex-wrap items-center gap-2">
-
-                <!-- Search -->
-                <div class="relative">
-                    <input
-                            type="text"
-                            placeholder="Search..."
-                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            (input)="handleFilter('global', $any($event.target).value)"
-                    />
-                    <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-
-                <!-- Filter Toggle -->
-                <button
-                        (click)="showFilters = !showFilters"
-                        class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                >
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    <span class="hidden md:inline">Filters</span>
-                </button>
-
-                <!-- Export -->
-                <div class="relative group">
-                    <button
-                            class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-                    >
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span class="hidden md:inline">Export</span>
-                    </button>
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block">
-                        <div class="py-1">
-                            <button
-                                    (click)="export('csv')"
-                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                                Export as CSV
-                            </button>
-                            <button
-                                    (click)="export('excel')"
-                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                                Export as Excel
-                            </button>
-                            <button
-                                    (click)="export('pdf')"
-                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                                Export as PDF
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add New -->
-                <button
-                        *ngIf="config.onAdd"
-                        (click)="addNew()"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span class="hidden md:inline">Add New</span>
-                </button>
-
-                <!-- Refresh -->
-                <button
-                        (click)="refresh()"
-                        [disabled]="loading"
-                        class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                >
-                    <svg class="w-5 h-5 text-gray-600" [class.animate-spin]="loading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                </button>
-
-            </div>
+      <!-- Actions Toolbar -->
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Search -->
+        <div class="relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            (input)="handleFilter('global', $any($event.target).value)"
+          />
+          <svg
+            class="w-5 h-5 absolute left-3 top-2.5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
         </div>
 
-        <!-- Active Filters -->
-        <div *ngIf="Object.keys(internalState.filters).length > 0" class="mt-3 flex flex-wrap gap-2">
-            <div *ngFor="let key of Object.keys(internalState.filters)" class="flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                <span>{{ getColumnLabel(key) }}: {{ internalState.filters[key] }}</span>
-                <button
-                        (click)="handleFilter(key, null)"
-                        class="ml-1 text-blue-600 hover:text-blue-800"
-                >
-                    ×
-                </button>
-            </div>
-            <button
-                    (click)="clearFilters()"
-                    class="text-sm text-gray-600 hover:text-gray-800"
-            >
-                Clear all
-            </button>
-        </div>
-    </div>
-
-    <!-- Filter Row -->
-    <div *ngIf="showFilters" class="px-6 py-3 border-b border-gray-200 bg-gray-50">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div *ngFor="let column of visibleColumns">
-                <div *ngIf="isColumnFilterable(column)" class="space-y-1">
-                    <label class="block text-xs font-medium text-gray-700">{{ column.label }}</label>
-
-                    <!-- Text Filter -->
-                    <input
-                            *ngIf="column.filterType === 'text'"
-                            type="text"
-                            [placeholder]="getFilterPlaceholder(column)"
-                            [(ngModel)]="filterInputs[column.key]"
-                            (input)="handleFilter(column.key, $any($event.target).value)"
-                            class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    />
-
-                    <!-- Select Filter -->
-                    <select
-                            *ngIf="column.filterType === 'select' && column.filterOptions"
-                            [(ngModel)]="filterInputs[column.key]"
-                            (change)="handleFilter(column.key, $any($event.target).value)"
-                            class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option [value]="null">All {{ column.label }}</option>
-                        <option *ngFor="let option of column.filterOptions" [value]="option.value">
-                            {{ option.label }}
-                        </option>
-                    </select>
-
-                    <!-- Multi-Select Filter -->
-                    <div *ngIf="column.filterType === 'multi-select' && column.filterOptions" class="relative">
-                        <select
-                                multiple
-                                [(ngModel)]="filterInputs[column.key]"
-                                (change)="handleFilter(column.key, $any($event.target).value)"
-                                class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option *ngFor="let option of column.filterOptions" [value]="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <!-- Number Filter -->
-                    <input
-                            *ngIf="column.filterType === 'number'"
-                            type="number"
-                            [placeholder]="getFilterPlaceholder(column)"
-                            [(ngModel)]="filterInputs[column.key]"
-                            (input)="handleFilter(column.key, $any($event.target).value)"
-                            class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    />
-
-                    <!-- Range Filter -->
-                    <div *ngIf="column.filterType === 'range'" class="flex items-center gap-2">
-                        <input
-                                type="number"
-                                placeholder="Min"
-                                [(ngModel)]="filterInputs[column.key + '_min']"
-                                (input)="handleFilter(column.key, { min: $any($event.target).value, max: filterInputs[column.key + '_max'] })"
-                                class="w-1/2 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
-                        <span class="text-gray-400">-</span>
-                        <input
-                                type="number"
-                                placeholder="Max"
-                                [(ngModel)]="filterInputs[column.key + '_max']"
-                                (input)="handleFilter(column.key, { min: filterInputs[column.key + '_min'], max: $any($event.target).value })"
-                                class="w-1/2 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
-                    </div>
-
-                    <!-- Date Filter -->
-                    <input
-                            *ngIf="column.filterType === 'date'"
-                            type="date"
-                            [(ngModel)]="filterInputs[column.key]"
-                            (change)="handleFilter(column.key, $any($event.target).value)"
-                            class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    />
-
-                    <!-- Boolean Filter -->
-                    <select
-                            *ngIf="column.filterType === 'boolean'"
-                            [(ngModel)]="filterInputs[column.key]"
-                            (change)="handleFilter(column.key, $any($event.target).value)"
-                            class="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option [value]="null">All</option>
-                        <option [value]="true">Yes</option>
-                        <option [value]="false">No</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading State -->
-    <div *ngIf="loading" class="p-8 text-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-2 text-gray-600">Loading data...</p>
-    </div>
-
-    <!-- Error State -->
-    <div *ngIf="error && !loading" class="p-8 text-center">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 text-red-600 mb-4">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        </div>
-        <p class="text-red-600">{{ error }}</p>
+        <!-- Filter Toggle -->
         <button
-                (click)="refresh()"
-                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          (click)="showFilters = !showFilters"
+          class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
         >
-            Retry
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+            />
+          </svg>
+          <span class="hidden md:inline">Filters</span>
         </button>
-    </div>
 
-    <!-- Empty State -->
-    <div *ngIf="!loading && !error && config.data.length === 0" class="p-8 text-center">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400 mb-4">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900">{{ config.emptyMessage || 'No data available' }}</h3>
-        <p *ngIf="config.emptySubMessage" class="mt-1 text-gray-500">{{ config.emptySubMessage }}</p>
-        <button
-                *ngIf="config.onAdd"
-                (click)="addNew()"
-                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-            Add New Item
-        </button>
-    </div>
-
-    <!-- Data Table -->
-    <div *ngIf="!loading && !error && config.data.length > 0" class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <!-- Table Header -->
-            <thead class="bg-gray-50">
-            <tr>
-                <!-- Checkbox Column -->
-                <th *ngIf="config.selectable && config.showCheckboxes" class="px-4 py-3">
-                    <input
-                            type="checkbox"
-                            [checked]="selectAll"
-                            (change)="handleSelectAll()"
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                </th>
-
-                <!-- Dynamic Columns -->
-                <ng-container *ngFor="let column of visibleColumns">
-                    <th
-                            [class]="getHeaderClasses(column)"
-                            [style.width]="getColumnWidth(column)"
-                            [style.min-width]="column.minWidth"
-                            [style.max-width]="column.maxWidth"
-                            [style.cursor]="column.sortable ? 'pointer' : 'default'"
-                            (click)="column.sortable && handleSort({ field: column.key, order: currentSort?.direction === 'asc' ? -1 : 1 })"
-                    >
-                        <div class="flex items-center gap-2">
-                            <span>{{ column.label }}</span>
-
-                            <!-- Sort Indicator -->
-                            <span *ngIf="column.sortable && currentSort?.column === column.key">
-                  <svg *ngIf="currentSort?.direction === 'asc'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                  </svg>
-                  <svg *ngIf="currentSort?.direction === 'desc'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </span>
-
-                            <!-- Tooltip -->
-                            <span *ngIf="column.tooltip" class="relative group">
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                    {{ column.tooltip }}
-                  </div>
-                </span>
-                        </div>
-                    </th>
-                </ng-container>
-
-                <!-- Actions Column -->
-                <th *ngIf="config.rowActions && config.rowActions.length > 0" class="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                </th>
-            </tr>
-            </thead>
-
-            <!-- Table Body -->
-            <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-                    *ngFor="let row of config.data; let i = index"
-                    [class]="getRowClass(row)"
-                    [style]="getRowStyle(row)"
-                    (click)="config.onRowClick && handleRowClick(row)"
+        <!-- Export -->
+        <div class="relative group">
+          <button
+            class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          >
+            <svg
+              class="w-5 h-5 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-                <!-- Checkbox Cell -->
-                <td *ngIf="config.selectable && config.showCheckboxes" class="px-4 py-3 whitespace-nowrap">
-                    <input
-                            type="checkbox"
-                            [checked]="isRowSelected(row)"
-                            (change)="toggleRowSelection(row)"
-                            (click)="$event.stopPropagation()"
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                </td>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <span class="hidden md:inline">Export</span>
+          </button>
 
-                <!-- Dynamic Data Cells -->
-                <ng-container *ngFor="let column of visibleColumns">
-                    <td
-                            [class]="getCellClasses(column)"
-                            [style.width]="getColumnWidth(column)"
-                            [style.min-width]="column.minWidth"
-                            [style.max-width]="column.maxWidth"
-                    >
-                        <!-- Custom Renderer -->
-                        <ng-container *ngIf="column.type === 'custom' && column.renderer">
-                            {{ column.renderer(row[column.key], row) }}
-                        </ng-container>
-
-                        <!-- Action Column -->
-                        <ng-container *ngIf="column.type === 'action'">
-                            <div class="flex items-center gap-2">
-                                <button
-                                        *ngFor="let action of config.rowActions"
-                                        (click)="$event.stopPropagation(); action.action(row)"
-                                        [disabled]="action.disabled && action.disabled(row)"
-                                        [hidden]="action.hidden && action.hidden(row)"
-                                        [class]="getActionButtonClass(action) + ' ' + (action.class || '')"
-                                        [title]="action.tooltip || action.label"
-                                        class="px-3 py-1.5 text-sm rounded-md transition-colors"
-                                >
-                                    <span>{{ action.label }}</span>
-                                </button>
-                            </div>
-                        </ng-container>
-
-                        <!-- Default Display -->
-                        <ng-container *ngIf="column.type !== 'custom' && column.type !== 'action'">
-                            {{ getCellValue(row, column) }}
-                        </ng-container>
-                    </td>
-                </ng-container>
-
-                <!-- Row Actions -->
-                <td *ngIf="config.rowActions && config.rowActions.length > 0" class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex items-center justify-end gap-2">
-                        <!-- Edit Action -->
-                        <button
-                                *ngIf="config.onEdit"
-                                (click)="$event.stopPropagation(); handleEdit(row)"
-                                class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                                title="Edit"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-
-                        <!-- Delete Action -->
-                        <button
-                                *ngIf="config.onDelete"
-                                (click)="$event.stopPropagation(); handleDelete(row)"
-                                class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                                title="Delete"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-
-                        <!-- Custom Actions -->
-                        <ng-container *ngFor="let action of config.rowActions">
-                            <button
-                                    *ngIf="!action.hidden || !action.hidden(row)"
-                                    (click)="$event.stopPropagation(); action.action(row)"
-                                    [disabled]="action.disabled && action.disabled(row)"
-                                    [class]="getActionButtonClass(action) + ' ' + (action.class || '')"
-                                    [title]="action.tooltip || action.label"
-                                    class="px-3 py-1.5 text-sm rounded-md transition-colors"
-                            >
-                                {{ action.label }}
-                            </button>
-                        </ng-container>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Footer Section -->
-    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-            <!-- Selection Info -->
-            <div *ngIf="config.selectable && selectedRows.length > 0" class="text-sm text-gray-600">
-                {{ selectedRows.length }} item(s) selected
-                <button
-                        (click)="clearSelection()"
-                        class="ml-3 text-blue-600 hover:text-blue-800 text-sm"
-                >
-                    Clear selection
-                </button>
+          <div
+            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden group-hover:block"
+          >
+            <div class="py-1">
+              <button
+                (click)="export('csv')"
+                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Export as CSV
+              </button>
+              <button
+                (click)="export('excel')"
+                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Export as Excel
+              </button>
+              <button
+                (click)="export('pdf')"
+                class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Export as PDF
+              </button>
             </div>
-
-            <!-- Pagination Controls -->
-            <div *ngIf="config.pagination && config.data.length > 0" class="flex flex-col sm:flex-row items-center gap-4">
-
-                <!-- Page Size Selector -->
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-700">Show</span>
-                    <select
-                            [value]="internalState.pagination.pageSize"
-                            (change)="handlePageSizeChange($event)"
-                            class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option *ngFor="let size of internalState.pagination.pageSizeOptions" [value]="size">
-                            {{ size }}
-                        </option>
-                    </select>
-                    <span class="text-sm text-gray-700">entries</span>
-                </div>
-
-                <!-- Page Info -->
-                <div class="text-sm text-gray-700">
-                    Showing
-                    <span class="font-medium">{{ firstRecord + 1 }}</span>
-                    to
-                    <span class="font-medium">{{ Math.min(firstRecord + internalState.pagination.pageSize, internalState.pagination.totalItems) }}</span>
-                    of
-                    <span class="font-medium">{{ internalState.pagination.totalItems }}</span>
-                    entries
-                </div>
-
-                <!-- Pagination Buttons -->
-                <div class="flex items-center gap-1">
-                    <!-- First Page -->
-                    <button
-                            *ngIf="config.pagination.showFirstLast"
-                            (click)="handlePageChange({ first: 0, rows: internalState.pagination.pageSize })"
-                            [disabled]="firstRecord === 0"
-                            class="px-3 py-1.5 border border-gray-300 rounded-l-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                    >
-                        First
-                    </button>
-
-                    <!-- Previous Page -->
-                    <button
-                            (click)="handlePageChange({ first: Math.max(0, firstRecord - internalState.pagination.pageSize), rows: internalState.pagination.pageSize })"
-                            [disabled]="firstRecord === 0"
-                            class="px-3 py-1.5 border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    <!-- Page Numbers -->
-                    <ng-container *ngIf="config.pagination.showPageNumbers">
-                        <button
-                                *ngFor="let page of getPageNumbers()"
-                                (click)="handlePageChange({ first: (page - 1) * internalState.pagination.pageSize, rows: internalState.pagination.pageSize })"
-                                [class]="getPageButtonClass(page)"
-                                class="px-3 py-1.5 border border-gray-300 text-sm hover:bg-gray-50"
-                        >
-                            {{ page }}
-                        </button>
-                    </ng-container>
-
-                    <!-- Next Page -->
-                    <button
-                            (click)="handlePageChange({ first: firstRecord + internalState.pagination.pageSize, rows: internalState.pagination.pageSize })"
-                            [disabled]="firstRecord + internalState.pagination.pageSize >= internalState.pagination.totalItems"
-                            class="px-3 py-1.5 border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-
-                    <!-- Last Page -->
-                    <button
-                            *ngIf="config.pagination.showFirstLast"
-                            (click)="handlePageChange({ first: Math.floor((internalState.pagination.totalItems - 1) / internalState.pagination.pageSize) * internalState.pagination.pageSize, rows: internalState.pagination.pageSize })"
-                            [disabled]="firstRecord + internalState.pagination.pageSize >= internalState.pagination.totalItems"
-                            class="px-3 py-1.5 border border-gray-300 rounded-r-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                    >
-                        Last
-                    </button>
-                </div>
-            </div>
+          </div>
         </div>
+
+        <!-- Add New -->
+        @if (config.onAdd) {
+          <button
+            (click)="addNew()"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            <span class="hidden md:inline">Add New</span>
+          </button>
+        }
+
+        <!-- Refresh -->
+        <button
+          (click)="refresh()"
+          [disabled]="loading"
+          class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+        >
+          <svg
+            class="w-5 h-5 text-gray-600"
+            [class.animate-spin]="loading"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="p-8 text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-600">Loading data...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error && !loading) {
+    <div class="p-8 text-center">
+      <p class="text-red-600">{{ error }}</p>
+      <button
+        (click)="refresh()"
+        class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- Empty -->
+  @if (!loading && !error && data.length === 0) {
+    <div class="p-8 text-center">
+      <h3 class="text-lg font-medium text-gray-900">
+        {{ config.emptyMessage || 'No data available' }}
+      </h3>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!loading && !error && data.length > 0) {
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            @if (config.selectable && config.showCheckboxes) {
+              <th class="px-4 py-3">
+                <input
+                  type="checkbox"
+                  [checked]="selectAll"
+                  (change)="handleSelectAll()"
+                  class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                />
+              </th>
+            }
+
+            @for (column of visibleColumns; track column.key) {
+              <th
+                [class]="getHeaderClasses(column)"
+                (click)="
+                  column.sortable &&
+                    handleSort({
+                      field: column.key,
+                      order: currentSort?.direction === 'asc' ? -1 : 1,
+                    })
+                "
+              >
+                {{ column.label }}
+              </th>
+            }
+          </tr>
+        </thead>
+
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (row of data; track row; let i = $index) {
+            <tr [class]="getRowClass(row)" (click)="config.onRowClick && handleRowClick(row)">
+              @if (config.selectable && config.showCheckboxes) {
+                <td class="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    [checked]="isRowSelected(row)"
+                    (change)="toggleRowSelection(row)"
+                    (click)="$event.stopPropagation()"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                  />
+                </td>
+              }
+
+              @for (column of visibleColumns; track column.key) {
+                <td [class]="getCellClasses(column)">
+                  {{ getCellValue(row, column) }}
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>

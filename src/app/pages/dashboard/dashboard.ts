@@ -1,8 +1,8 @@
-import {NgClass, NgFor} from '@angular/common';
+import { NgClass, NgFor } from '@angular/common';
 import { Component } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
 import { DynamicField } from '../../models/fomrBuilderModel';
-import { DynamicFormBuilderComponent } from "../../components/ui/dynamic-form-builder/dynamic-form-builder";
+import { DynamicFormBuilderComponent } from '../../components/ui/dynamic-form-builder/dynamic-form-builder';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,15 +11,15 @@ import { DynamicFormBuilderComponent } from "../../components/ui/dynamic-form-bu
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-  isOpent : boolean = false
-  openModal(){
-    this.isOpent=true;
+  isOpent: boolean = false;
+  openModal() {
+    this.isOpent = true;
   }
-  closeModal(){
-    this.isOpent=false;
+  closeModal() {
+    this.isOpent = false;
   }
-  onSelectChange(enent:any){
-    console.log(enent)
+  onSelectChange(enent: any) {
+    console.log(enent);
   }
   recentActivities = [
     {
@@ -130,99 +130,98 @@ export class Dashboard {
     });
   }
 
-actionUrl = 'https://api.example.com/save';
+  actionUrl = 'https://api.example.com/save';
 
-hiddenFields = [
-  { name: 'companyId', value: 5 },
-];
+  hiddenFields = [{ name: 'companyId', value: 5 }];
 
-beforeSubmit = (values: any) => {
-  console.log('before submit', values);
-  return true; // return false to stop submit
-};
+  beforeSubmit = (values: any) => {
+    console.log('before submit', values);
+    return true; // return false to stop submit
+  };
 
-onSubmitCompleted(res: any) {
-  console.log('submit completed:', res);
-}
-
-onValuesChanged(values: any) {
-  console.log('form values changed:', values);
-}
-
-/* ===== YOUR FIELD ARRAY ===== */
-
-fields: DynamicField[] = [
-  {
-    type: 'text',
-    name: 'title',
-    label: 'User Information',
-    
-    defaultValue:'kahn',
-    disabled: true,
-  },
-  {
-    type: 'text',
-    name: 'firstName',
-    label: 'First Name',
-  
-    required: true,
-    disabled: false,
-  },
-  {
-    type: 'text',
-    name: 'lastName',
-    label: 'Last Name',
-   
-    required: true,
-    disabled: false,
-  },
-  {
-    type: 'number',
-    name: 'age',
-    label: 'Age',
-    disabled: false,
-    max:87
-  },
-  {
-    type: 'select',
-    name: 'cityId',
-    label: 'City',
-    url: '/api/cities',
-    changeValue: 'id',
-    disabled: false,
-    options : [
-      {
-        id:1,
-        name:"ali"
-      },  {
-        id:2,
-        name:"khan"
-      }
-    ]
-  },
-  {
-    type: 'file',
-    name: 'avatar',
-    label: 'Photo',
-    disabled: false,
-  },
-  {
-    type:'server-select',
-    name:"post",
-    label:"posts",
-    disabled:false,
-    url:"posts",
-    optionLabel:"title",
-    optionValue:'id'
-  },  {
-    type:'multi-select',
-    name:"pt",
-    label:"show test",
-    disabled:false,
-    url:"posts",
-    optionLabel:"title",
-    optionValue:'id'
+  onSubmitCompleted(res: any) {
+    console.log('submit completed:', res);
   }
-];
 
+  onValuesChanged(values: any) {
+    console.log('form values changed:', values);
+  }
+
+  /* ===== YOUR FIELD ARRAY ===== */
+
+  fields: DynamicField[] = [
+    {
+      type: 'text',
+      name: 'title',
+      label: 'User Information',
+
+      defaultValue: 'kahn',
+      disabled: true,
+    },
+    {
+      type: 'text',
+      name: 'firstName',
+      label: 'First Name',
+
+      required: true,
+      disabled: false,
+    },
+    {
+      type: 'text',
+      name: 'lastName',
+      label: 'Last Name',
+
+      required: true,
+      disabled: false,
+    },
+    {
+      type: 'number',
+      name: 'age',
+      label: 'Age',
+      disabled: false,
+      max: 87,
+    },
+    {
+      type: 'select',
+      name: 'cityId',
+      label: 'City',
+      url: '/api/cities',
+      changeValue: 'id',
+      disabled: false,
+      options: [
+        {
+          id: 1,
+          name: 'ali',
+        },
+        {
+          id: 2,
+          name: 'khan',
+        },
+      ],
+    },
+    {
+      type: 'file',
+      name: 'avatar',
+      label: 'Photo',
+      disabled: false,
+    },
+    {
+      type: 'server-select',
+      name: 'post',
+      label: 'posts',
+      disabled: false,
+      url: 'posts',
+      optionLabel: 'title',
+      optionValue: 'id',
+    },
+    {
+      type: 'multi-select',
+      name: 'pt',
+      label: 'show test',
+      disabled: false,
+      url: 'posts',
+      optionLabel: 'title',
+      optionValue: 'id',
+    },
+  ];
 }
