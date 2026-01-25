@@ -58,6 +58,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   @Output() onDelete = new EventEmitter<any>();
   @Output() onExport = new EventEmitter<'csv' | 'excel' | 'pdf'>();
   @Output() tableEvent = new EventEmitter<TableEvent>();
+  @Input() tableSize = 'sm';
 
   @ViewChild('dt') dt!: ElementRef;
 
