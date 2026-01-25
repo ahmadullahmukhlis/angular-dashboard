@@ -43,8 +43,6 @@ export interface PaginationConfig {
 
 export interface DataTableConfig {
   columns: ColumnDefinition[];
-  data?: any[];
-  pagination?: PaginationConfig;
   sort?: SortConfig;
   filters?: { [key: string]: any };
   rowActions?: RowAction[];
