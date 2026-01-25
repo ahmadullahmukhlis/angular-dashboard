@@ -5,7 +5,8 @@
     <div class="bg-white py-8 px-6 shadow-lg rounded-lg sm:px-10">
       
       <!-- Error Message -->
-      <div *ngIf="errorMessage" 
+       @if (errorMessage) {
+            <div 
            class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
         <div class="flex">
           <div class="flex-shrink-0">
@@ -18,6 +19,8 @@
           </div>
         </div>
       </div>
+       }
+  
 
       <!-- Login Form -->
       <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-6">
@@ -42,9 +45,12 @@
                 (usernameControl?.invalid && usernameControl?.touched ? 'border-red-300' : '')"
             />
           </div>
-          <div *ngIf="usernameControl?.invalid && usernameControl?.touched" class="mt-1 text-sm text-red-600">
+          @if (usernameControl?.invalid && usernameControl?.touched) {
+              <div  class="mt-1 text-sm text-red-600">
             Username is required
           </div>
+          }
+        
         </div>
 
         <!-- Password Field -->

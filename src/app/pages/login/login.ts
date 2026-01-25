@@ -7,7 +7,6 @@ import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
-  standalone: true,
   imports: [ReactiveFormsModule]
 })
 export class Login implements OnInit {
@@ -56,7 +55,7 @@ export class Login implements OnInit {
           this.errorMessage = res?.message || 'Login failed';
           return;
         }
-
+        console.log(res)
         const accessToken = res.data?.accessToken;
 
         if (!accessToken) {
