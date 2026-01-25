@@ -10,7 +10,7 @@ export class ApiService {
 
   private BASE_URL = 'https://jsonplaceholder.typicode.com/'; // 🔥 change to your backend
 
- private getHeaders(isFormData: boolean = false) {
+  private getHeaders(isFormData: boolean = false) {
     const token = localStorage.getItem('token');
     let headers = new HttpHeaders({
       Authorization: token ? `Bearer ${token}` : '',
@@ -24,9 +24,10 @@ export class ApiService {
     return headers;
   }
 
-  get<T>(url: string): Observable<T> {
+  get<T>(url: string, params: Record<string, any> = {}): Observable<T> {
     return this.http.get<T>(`${this.BASE_URL}${url}`, {
       headers: this.getHeaders(),
+      params: params,
     });
   }
 
@@ -47,14 +48,14 @@ export class ApiService {
       headers: this.getHeaders(),
     });
   }
-    request<T>(method: string, url: string, body: any): Observable<HttpEvent<T>> {
+  request<T>(method: string, url: string, body: any): Observable<HttpEvent<T>> {
     const isFormData = body instanceof FormData;
-    
+
     return this.http.request<T>(method, `${this.BASE_URL}${url}`, {
       body: body,
       headers: this.getHeaders(isFormData),
-      observe: 'events',      // Required for progress bars
-      reportProgress: true,   // Required for progress bars
+      observe: 'events', // Required for progress bars
+      reportProgress: true, // Required for progress bars
     });
   }
 }

@@ -42,7 +42,7 @@ export interface PaginationConfig {
 
 export interface DataTableConfig {
   columns: ColumnDefinition[];
-  data: any[];
+  data?: any[];
   pagination?: PaginationConfig;
   sort?: SortConfig;
   filters?: { [key: string]: any };
@@ -99,7 +99,8 @@ export interface TableEvent {
     | 'export'
     | 'edit'
     | 'delete'
-    | 'add';
+    | 'add'
+    | 'pageSize';
   data: any;
 }
 
