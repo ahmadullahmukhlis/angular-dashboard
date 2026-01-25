@@ -26,13 +26,16 @@ import {
 import { ComponentService } from '../../../services/genral/component.service';
 import { Paginator } from 'primeng/paginator';
 import { NgClass } from '@angular/common';
+import { Modal } from '../modal/modal';
+import { ALL } from 'dns';
+import { Filter } from '../filter/filter';
 
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule, Paginator, NgClass],
+  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter],
 })
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ✅ API URL
@@ -42,6 +45,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     columns: [],
     serverSide: true,
   };
+  filterModal: boolean = false;
 
   loading: boolean = false;
   error: string | null = null;
@@ -106,6 +110,12 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   ngAfterViewInit() {
     this.cdr.detectChanges();
+  }
+  showMoreFilters() {
+    this.showFilters = true;
+  }
+  closemodal() {
+    this.showFilters = false;
   }
 
   // ================= CORE =================
@@ -319,5 +329,12 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   closeAllRowActions() {
     this.rowActionMenuOpen = {};
+  }
+  applyFilters(filters: any) {
+    this.internalState.filters = filters;
+    console.log('Applying filters:', filters);
+    this.currentPage = 1;
+    this.showFilters = false;
+    this.loadData();
   }
 }

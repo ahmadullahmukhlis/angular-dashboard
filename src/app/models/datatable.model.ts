@@ -1,3 +1,5 @@
+import { DynamicField } from './fomrBuilderModel';
+
 export interface ColumnDefinition {
   key: string;
   label: string;
@@ -44,7 +46,7 @@ export interface PaginationConfig {
 export interface DataTableConfig {
   columns: ColumnDefinition[];
   sort?: SortConfig;
-  filters?: { [key: string]: any };
+  filters?: DynamicField[];
   rowActions?: RowAction[];
   headerActions?: RowAction[];
   selectable?: boolean;

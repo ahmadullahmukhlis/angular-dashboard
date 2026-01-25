@@ -267,6 +267,7 @@ export class Dashboard {
     selectable: true,
     rowActions: this.actions,
     rowClass: (row: any) => 'bg-gray-50',
+    filters: this.fields,
   };
 
   // ================= EVENT HANDLERS =================
