@@ -1,0 +1,95 @@
+<div [class]="className">
+  <div *ngFor="let field of fields" [class]="field.className">
+    <label class="block mb-1 font-medium">{{ field.label }}</label>
+
+    <!-- TEXT -->
+    <input
+      *ngIf="field.type === 'text'"
+      pInputText
+      [formControlName]="field.name"
+      [placeholder]="field.label"
+      [disabled]="field.disabled"
+      class="w-full"
+      (blur)="form.get(field.name)?.markAsTouched()"
+    />
+
+    <!-- NUMBER -->
+    <p-inputNumber
+      *ngIf="field.type === 'number'"
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+      class="w-full"
+      (onBlur)="form.get(field.name)?.markAsTouched()"
+    ></p-inputNumber>
+
+    <!-- PASSWORD -->
+    <p-password
+      *ngIf="field.type === 'password'"
+      toggleMask
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+      (onBlur)="form.get(field.name)?.markAsTouched()"
+    ></p-password>
+
+    <!-- DATE -->
+    <p-datePicker
+      *ngIf="field.type === 'date'"
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+      (onBlur)="form.get(field.name)?.markAsTouched()"
+    ></p-datePicker>
+
+    <!-- TEXTAREA -->
+    <textarea
+      *ngIf="field.type === 'textarea'"
+      pTextarea
+      rows="4"
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+      class="w-full"
+      (blur)="form.get(field.name)?.markAsTouched()"
+    ></textarea>
+
+    <!-- CHECKBOX -->
+    <p-checkbox
+      *ngIf="field.type === 'checkbox'"
+      binary="true"
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+    ></p-checkbox>
+
+    <!-- SWITCH -->
+    <p-toggleSwitch
+      *ngIf="field.type === 'switch'"
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+    ></p-toggleSwitch>
+
+    <!-- SELECT -->
+    <p-select
+      *ngIf="field.type === 'select'"
+      [options]="field.options"
+      [formControlName]="field.name"
+      [disabled]="field.disabled"
+      [optionLabel]="field.optionLabel ?? 'id'"
+      class="w-full"
+      appendTo="body"
+      (onBlur)="form.get(field.name)?.markAsTouched()"
+    ></p-select>
+
+    <!-- SERVER SELECT -->
+    <app-single-select
+      *ngIf="field.type === 'server-select'"
+      [url]="field.url"
+      [disabled]="field.disabled"
+      [optionLabel]="field.optionLabel ?? 'id'"
+      [optionValue]="field.optionValue ?? 'name'"
+      (valueChange)="handleSelectChange(field, $event)"
+    ></app-single-select>
+  </div>
+
+  <!-- APPLY BUTTON -->
+  <div class="mt-4">
+    <button pButton type="button" label="Apply Filter" (click)="applyFilter()"></button>
+  </div>
+</div>
