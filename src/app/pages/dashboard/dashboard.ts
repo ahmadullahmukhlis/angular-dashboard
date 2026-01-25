@@ -266,6 +266,7 @@ export class Dashboard {
     showCheckboxes: true,
     selectable: true,
     rowActions: this.actions,
+    rowClass: (row: any) => 'bg-gray-50',
   };
 
   // ================= EVENT HANDLERS =================
