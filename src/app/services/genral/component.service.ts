@@ -45,6 +45,8 @@ export class ComponentService {
       });
     }
 
-    return this.api.get(url, { params });
+    var data = this.api.get(url, { params });
+    console.log(data);
+    return data;
   }
 }

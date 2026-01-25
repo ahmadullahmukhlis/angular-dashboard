@@ -24,6 +24,7 @@ export interface ColumnDefinition {
   validation?: (value: any) => string | null;
   tooltip?: string;
   order?: number;
+  className?: string;
 }
 
 export interface SortConfig {
@@ -116,6 +117,5 @@ export interface SelectionState {
 export interface TableState {
   sort: SortConfig | null;
   filters: FilterState;
-  pagination: PaginationConfig;
   selection: SelectionState;
 }
