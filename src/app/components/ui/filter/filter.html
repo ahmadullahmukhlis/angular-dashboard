@@ -93,16 +93,6 @@
           (valueChange)="handleSelectChange(field, $event)"
         ></app-single-select>
       }
-
-      <!-- MULTI SELECT (if you need it) -->
-      @if (field.type === 'multi-select') {
-        <app-multi-selected
-          [url]="field.url ?? ''"
-          [disabled]="field.disabled"
-          [optionLabel]="field.optionLabel ?? 'id'"
-          (valueChange)="handleSelectChange(field, $event)"
-        ></app-multi-selected>
-      }
     </div>
   }
 
