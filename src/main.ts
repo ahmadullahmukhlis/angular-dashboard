@@ -10,6 +10,5 @@ bootstrapApplication(App, {
   providers: [
     ...(appConfig.providers || []),
     provideAnimations(),
-    provideRouter(routes),
   ],
 }).catch((err) => console.error(err));

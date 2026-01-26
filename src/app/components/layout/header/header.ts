@@ -4,12 +4,17 @@ import {
   Inject,
   PLATFORM_ID,
   AfterViewInit,
-  ElementRef
+  ElementRef,
+  inject,
+  signal,
+  computed
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarService } from '../../../services/sidebar.service';
 import { Breadcrumb } from '../breadcrumb/breadcrumb';
 import { Router, NavigationEnd } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -19,45 +24,41 @@ import { Router, NavigationEnd } from '@angular/router';
   styleUrls: ['./header.css'],
 })
 export class Header implements AfterViewInit {
+  private readonly sidebarService = inject(SidebarService);
+  private readonly elRef = inject(ElementRef);
+  private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
+
   isNotificationsOpen = false;
   isProfileMenuOpen = false;
   isMobile = false;
-  isBrowser = false;
+  isBrowser = isPlatformBrowser(this.platformId);
 
-  notifications = [
+  // Signal for Notifications
+  notifications = signal([
     { id: 1, text: 'New user registered', time: '5 min ago', read: false, icon: 'fa-user-plus' },
     { id: 2, text: 'Server load is high', time: '15 min ago', read: false, icon: 'fa-server' },
     { id: 3, text: 'Report generated successfully', time: '1 hour ago', read: true, icon: 'fa-file-alt' },
     { id: 4, text: 'Database backup completed', time: '2 hours ago', read: true, icon: 'fa-database' },
-  ];
+  ]);
 
-  constructor(
-      private sidebarService: SidebarService,
-      private elRef: ElementRef,
-      private router: Router,
-      @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
+  // Computed signal replaces getUnreadCount()
+  unreadCount = computed(() => this.notifications().filter(n => !n.read).length);
 
-    // Close dropdowns on route change
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.closeDropdowns();
-      }
-    });
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      takeUntilDestroyed()
+    ).subscribe(() => this.closeDropdowns());
   }
 
   ngAfterViewInit(): void {
-    if (this.isBrowser) {
-      this.checkMobile();
-    }
+    if (this.isBrowser) this.checkMobile();
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any): void {
-    if (this.isBrowser) {
-      this.checkMobile();
-    }
+  @HostListener('window:resize')
+  onResize(): void {
+    if (this.isBrowser) this.checkMobile();
   }
 
   private checkMobile(): void {
@@ -65,31 +66,29 @@ export class Header implements AfterViewInit {
   }
 
   toggleNotifications(event?: MouseEvent): void {
-    if (event) event.stopPropagation(); // prevent click-outside closing immediately
+    event?.stopPropagation();
     this.isNotificationsOpen = !this.isNotificationsOpen;
     this.isProfileMenuOpen = false;
   }
 
   toggleProfileMenu(event?: MouseEvent): void {
-    if (event) event.stopPropagation();
+    event?.stopPropagation();
     this.isProfileMenuOpen = !this.isProfileMenuOpen;
     this.isNotificationsOpen = false;
   }
 
   markAsRead(notificationId: number): void {
-    const notification = this.notifications.find((n) => n.id === notificationId);
-    if (notification) notification.read = true;
-  }
-
-  getUnreadCount(): number {
-    return this.notifications.filter((n) => !n.read).length;
+    this.notifications.update(list => 
+      list.map(n => n.id === notificationId ? { ...n, read: true } : n)
+    );
   }
 
   toggleSidebar(): void {
     this.sidebarService.toggleSidebar();
   }
 
-  isSidebarCollapsed(): boolean {
+  // Getter for the template to use [class.ml-72]="isSidebarCollapsed"
+  get isSidebarCollapsed(): boolean {
     return this.sidebarService.isCollapsed();
   }
 
@@ -98,18 +97,14 @@ export class Header implements AfterViewInit {
     this.isProfileMenuOpen = false;
   }
 
-  // Close dropdowns when clicking anywhere outside
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.isBrowser) return;
-
-    const clickedInside = this.elRef.nativeElement.contains(event.target);
-    if (!clickedInside) {
+    if (!this.elRef.nativeElement.contains(event.target)) {
       this.closeDropdowns();
     }
   }
 
-  // Optional: close dropdowns on ESC key
   @HostListener('document:keydown.escape')
   onEsc(): void {
     this.closeDropdowns();
