@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
@@ -8,7 +9,9 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { SidebarService } from '../../../services/sidebar.service';
 import { SidebarItem } from '../../../models/sidebar-item.model';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-sidebar',
@@ -30,38 +33,62 @@ import { RouterModule } from '@angular/router';
     ]),
   ],
 })
-export class Sidebar implements OnInit {
+export class Sidebar implements OnInit, OnDestroy {
   sidebarItems: SidebarItem[] = [];
   isCollapsed = false;
+  
+  // Used to clean up subscriptions and prevent memory leaks
+  private destroy$ = new Subject<void>();
 
   constructor(
-    private sidebarService: SidebarService,
+    public sidebarService: SidebarService, // Public so it can be used in template if needed
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.sidebarItems = this.sidebarService.getSidebarItems();
-    this.isCollapsed = this.sidebarService.isCollapsed();
-    this.cdr.markForCheck();
+    // 1. Subscribe to items from the service
+    this.sidebarService.sidebarItems$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((items) => {
+        this.sidebarItems = items;
+        this.isCollapsed = this.sidebarService.isCollapsed();
+        this.cdr.markForCheck(); // Essential for OnPush
+      });
+
+    // 2. Automatically update active state when the route changes
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: any) => {
+        this.sidebarService.setActiveByRoute(event.urlAfterRedirects || event.url);
+      });
+
+    // Initial check for the current route on load
+    this.sidebarService.setActiveByRoute(this.router.url);
   }
 
   toggleItemExpansion(itemId: number): void {
     this.sidebarService.toggleItemExpansion(itemId);
-    this.cdr.markForCheck();
+    // No need for manual markForCheck() here if the service refreshes the stream
   }
 
   setActiveItem(itemId: number): void {
     this.sidebarService.setActiveItem(itemId);
-    this.cdr.markForCheck();
   }
 
   toggleSidebar(): void {
     this.sidebarService.toggleSidebar();
-    this.isCollapsed = this.sidebarService.isCollapsed();
-    this.cdr.markForCheck();
   }
 
   trackById(index: number, item: SidebarItem): number {
     return item.id;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

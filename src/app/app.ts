@@ -5,7 +5,7 @@ import { RouterModule } from "@angular/router";
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrls: ['./app.css'],
-  imports: [  RouterModule], // remove MainContent import!
+  imports: [RouterModule],
 })
 export class App {
   title = ' Dashboard';
