@@ -1,6 +1,6 @@
 <div class="min-h-screen bg-gray-50">
   <!-- Sidebar -->
-  <app-sidebar></app-sidebar>
+  <app-sidebar *ngIf="!isMobile"></app-sidebar>
 
   <!-- Header -->
   <app-header></app-header>
@@ -14,7 +14,7 @@
   >
     <router-outlet></router-outlet>
   </main>
-    <app-delete-confirmation></app-delete-confirmation>
-  <app-toast></app-toast>
 
+  <app-delete-confirmation></app-delete-confirmation>
+  <app-toast></app-toast>
 </div>

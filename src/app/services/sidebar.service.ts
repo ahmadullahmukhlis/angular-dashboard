@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal, computed } from '@angular/core';
 import { SidebarItem } from '../models/sidebar-item.model';
 import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
 
@@ -7,85 +6,73 @@ import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
   providedIn: 'root',
 })
 export class SidebarService {
-  // 1. Initialize state with BehaviorSubject to make it reactive
-  private sidebarItemsSubject = new BehaviorSubject<SidebarItem[]>(structuredClone(SIDEBAR_ROUTES));
-  
-  // 2. Expose as Observable for components to subscribe to
-  sidebarItems$ = this.sidebarItemsSubject.asObservable();
+  private sidebarItems: SidebarItem[] = structuredClone(SIDEBAR_ROUTES);
+  private _isCollapsed = signal(false); // ✅ signal for collapsed state
 
-  private isSidebarCollapsed = false;
+  // expose collapsed state as signal
+  sidebarCollapsedSignal = this._isCollapsed;
 
   constructor() {}
 
-  // Getter to retrieve the current snapshot of items
-  private get currentItems(): SidebarItem[] {
-    return this.sidebarItemsSubject.value;
+  // Breadcrumb logic
+  getBreadcrumb(): SidebarItem[] {
+    const path: SidebarItem[] = [];
+
+    function findActive(items: SidebarItem[]) {
+      for (const item of items) {
+        if (item.isActive) {
+          path.push(item);
+          if (item.children) findActive(item.children);
+          break;
+        } else if (item.children) {
+          findActive(item.children);
+        }
+      }
+    }
+
+    findActive(this.sidebarItems);
+    return path;
   }
 
-  // Helper to notify all subscribers that the data has changed
-  private refreshState(): void {
-    this.sidebarItemsSubject.next([...this.currentItems]);
+  getSidebarItems(): SidebarItem[] {
+    return this.sidebarItems;
   }
 
   toggleItemExpansion(itemId: number): void {
-    if (this.isSidebarCollapsed) return;
-
-    const item = this.findItemById(this.currentItems, itemId);
+    if (this._isCollapsed()) return; // don't expand if sidebar is collapsed
+    const item = this.findItemById(this.sidebarItems, itemId);
     if (item && item.children) {
       item.isExpanded = !item.isExpanded;
-      this.refreshState();
     }
   }
 
   setActiveItem(itemId: number): void {
-    const items = this.currentItems;
-    this.deactivateAllItems(items);
-
-    const item = this.findItemById(items, itemId);
-    if (item) {
-      item.isActive = true;
-      this.refreshState();
-    }
-  }
-
-  setActiveByRoute(url: string): void {
-    const items = this.currentItems;
-    this.deactivateAllItems(items);
-    this.activateByRoute(items, url);
-    this.refreshState();
+    this.deactivateAllItems(this.sidebarItems);
+    const item = this.findItemById(this.sidebarItems, itemId);
+    if (item) item.isActive = true;
   }
 
   toggleSidebar(): void {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed;
-    if (this.isSidebarCollapsed) {
-      this.collapseAllItems(this.currentItems);
+    this._isCollapsed.set(!this._isCollapsed());
+
+    if (this._isCollapsed()) {
+      this.collapseAllItems(this.sidebarItems);
     }
-    this.refreshState();
   }
 
   isCollapsed(): boolean {
-    return this.isSidebarCollapsed;
+    return this._isCollapsed();
   }
-
-  getBreadcrumb(): SidebarItem[] {
-    const path: SidebarItem[] = [];
-    this.findActivePath(this.currentItems, path);
-    return path;
-  }
-
-  // --- Private Helper Methods ---
 
   private deactivateAllItems(items: SidebarItem[]): void {
-    items.forEach((item) => {
+    items.forEach(item => {
       item.isActive = false;
-      if (item.children) {
-        this.deactivateAllItems(item.children);
-      }
+      if (item.children) this.deactivateAllItems(item.children);
     });
   }
 
   private collapseAllItems(items: SidebarItem[]): void {
-    items.forEach((item) => {
+    items.forEach(item => {
       if (item.children) {
         item.isExpanded = false;
         this.collapseAllItems(item.children);
@@ -102,31 +89,5 @@ export class SidebarService {
       }
     }
     return null;
-  }
-
-  private findActivePath(items: SidebarItem[], path: SidebarItem[]): boolean {
-    for (const item of items) {
-      path.push(item);
-      if (item.isActive) return true;
-      if (item.children && this.findActivePath(item.children, path)) return true;
-      path.pop();
-    }
-    return false;
-  }
-
-  private activateByRoute(items: SidebarItem[], url: string): boolean {
-    for (const item of items) {
-      // Direct match or partial match for nested routes
-      if (item.route && (url === item.route || url.startsWith(item.route + '/'))) {
-        item.isActive = true;
-        return true;
-      }
-
-      if (item.children && this.activateByRoute(item.children, url)) {
-        item.isExpanded = true; 
-        return true;
-      }
-    }
-    return false;
   }
 }

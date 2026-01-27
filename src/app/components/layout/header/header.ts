@@ -34,7 +34,6 @@ export class Header implements AfterViewInit {
   isMobile = false;
   isBrowser = isPlatformBrowser(this.platformId);
 
-  // Signal for Notifications
   notifications = signal([
     { id: 1, text: 'New user registered', time: '5 min ago', read: false, icon: 'fa-user-plus' },
     { id: 2, text: 'Server load is high', time: '15 min ago', read: false, icon: 'fa-server' },
@@ -42,8 +41,10 @@ export class Header implements AfterViewInit {
     { id: 4, text: 'Database backup completed', time: '2 hours ago', read: true, icon: 'fa-database' },
   ]);
 
-  // Computed signal replaces getUnreadCount()
   unreadCount = computed(() => this.notifications().filter(n => !n.read).length);
+
+  // Use signal from SidebarService
+  isSidebarCollapsed = this.sidebarService.sidebarCollapsedSignal;
 
   constructor() {
     this.router.events.pipe(
@@ -85,11 +86,6 @@ export class Header implements AfterViewInit {
 
   toggleSidebar(): void {
     this.sidebarService.toggleSidebar();
-  }
-
-  // Getter for the template to use [class.ml-72]="isSidebarCollapsed"
-  get isSidebarCollapsed(): boolean {
-    return this.sidebarService.isCollapsed();
   }
 
   private closeDropdowns(): void {
