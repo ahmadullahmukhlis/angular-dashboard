@@ -16,25 +16,26 @@ import { CommonModule } from '@angular/common';
 import {
   HttpClient,
   HttpEventType,
-  HttpClientModule,
 } from '@angular/common/http';
 
-/* PrimeNG */
+/* PrimeNG 18+ Updated Imports */
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { DatePickerModule } from 'primeng/datepicker';
+import { DatePickerModule } from 'primeng/datepicker'; // Replaces CalendarModule
 import { TextareaModule } from 'primeng/textarea';
 import { CheckboxModule } from 'primeng/checkbox';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchModule } from 'primeng/toggleswitch'; // Replaces InputSwitchModule
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { SelectModule } from 'primeng/select'; // Replaces DropdownModule
+
+/* Custom Imports */
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { SingleSelect } from '../single-select/single-select';
-import { SelectModule } from 'primeng/select';
+import { MultiSelected } from '../multi-selected/multi-selected';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
-import { MultiSelected } from '../multi-selected/multi-selected';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -42,7 +43,6 @@ import { MultiSelected } from '../multi-selected/multi-selected';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    HttpClientModule,
     InputTextModule,
     InputNumberModule,
     DatePickerModule,
@@ -59,7 +59,11 @@ import { MultiSelected } from '../multi-selected/multi-selected';
   templateUrl: './dynamic-form-builder.html',
 })
 export class DynamicFormBuilderComponent implements OnChanges {
-  constructor(private fb: FormBuilder, private http: HttpClient) {}
+  // Use inject() for all services to follow Angular 18+ best practices
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
+  toastService = inject(ToastService);
+  componentService = inject(ComponentService);
 
   @Input({ required: true }) fields: DynamicField[] = [];
   @Input() action!: string;
@@ -77,9 +81,6 @@ export class DynamicFormBuilderComponent implements OnChanges {
   progress = false;
   percent = 0;
   submitted = false;
-
-  toastService = inject(ToastService);
-  componentService = inject(ComponentService);
 
   ngOnChanges() {
     this.buildForm();
@@ -105,7 +106,6 @@ export class DynamicFormBuilderComponent implements OnChanges {
     });
 
     this.form = this.fb.group(group);
-
     this.form.valueChanges.subscribe(v => this.valuesChanged.emit(v));
   }
 
@@ -131,7 +131,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     if (this.beforeSubmit) {
       const r = this.beforeSubmit(this.form.value);
-      if (r != true) {
+      if (r !== true) {
         this.loading = false;
         return;
       }
@@ -140,9 +140,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
     if (this.needConfirmation) {
       this.toastService.confirmAction(
         { name: 'Do you want to submit the form' },
-        () => {
-          this.dataSubmit();
-        }
+        () => this.dataSubmit()
       );
       return;
     }
@@ -157,6 +155,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     let payload: any = { ...this.form.value };
 
+    // Sanitize null values
     Object.keys(payload).forEach(k => {
       if (payload[k] === null) payload[k] = '';
     });
@@ -165,7 +164,6 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     if (hasFile) {
       const fd = new FormData();
-
       Object.keys(payload).forEach(k => {
         if (payload[k] instanceof File) {
           fd.append(k, payload[k]);
@@ -187,29 +185,29 @@ export class DynamicFormBuilderComponent implements OnChanges {
         reportProgress: hasFile,
       })
       .subscribe({
-        next: e => {
-          if (hasFile && (e as any).type === HttpEventType.UploadProgress && (e as any).total) {
+        next: (e: any) => {
+          if (hasFile && e.type === HttpEventType.UploadProgress && e.total) {
             this.progress = true;
-            this.percent = Math.round(((e as any).loaded * 100) / (e as any).total);
+            this.percent = Math.round((e.loaded * 100) / e.total);
           }
 
-          if (!hasFile || (e as any).type === HttpEventType.Response) {
-            this.submitCompleted.emit((e as any).body ?? e);
+          if (!hasFile || e.type === HttpEventType.Response) {
+            this.submitCompleted.emit(e.body ?? e);
           }
         },
-        error: err => {
+        error: (err: any) => {
           console.error('Error submitting form:', err);
           this.toastService.error('Error submitting form');
-          this.loading = false;
-          this.progress = false;
-          this.percent = 0;
+          this.resetLoadingState();
         },
-        complete: () => {
-          this.loading = false;
-          this.progress = false;
-          this.percent = 0;
-        },
+        complete: () => this.resetLoadingState(),
       });
+  }
+
+  private resetLoadingState() {
+    this.loading = false;
+    this.progress = false;
+    this.percent = 0;
   }
 
   isInvalid(name: string) {
