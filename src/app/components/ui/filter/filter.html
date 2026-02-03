@@ -1,7 +1,9 @@
 <div [class]="className">
   @for (field of fields; track field.name) {
     <div [class]="field.className">
-      <label class="block mb-1 font-medium">{{ field.label }}</label>
+      @if (labelTypes.includes(field.type) && field.label) {
+        <label class="block mb-1 font-medium">{{ field.label }}</label>
+      }
 
       <!-- TEXT -->
       @if (field.type === 'text') {
@@ -23,16 +25,6 @@
           class="w-full"
           (onBlur)="form.get(field.name)?.markAsTouched()"
         ></p-inputNumber>
-      }
-
-      <!-- PASSWORD -->
-      @if (field.type === 'password') {
-        <p-password
-          toggleMask
-          [formControlName]="field.name"
-          [disabled]="field.disabled"
-          (onBlur)="form.get(field.name)?.markAsTouched()"
-        ></p-password>
       }
 
       <!-- DATE -->
