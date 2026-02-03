@@ -46,6 +46,16 @@ export class Filter implements OnInit {
   @Input() className: string = '';
   @Output() onFilter = new EventEmitter<any>();
   @Output() valuesChanged = new EventEmitter<any>();
+  labelTypes = [
+    'text',
+    'number',
+    'date',
+    'textarea',
+    'checkbox',
+    'switch',
+    'select',
+    'server-select',
+  ];
 
   form!: FormGroup; // Declare form here
 
