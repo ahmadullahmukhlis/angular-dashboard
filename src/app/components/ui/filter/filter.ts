@@ -15,7 +15,6 @@ import { SelectModule } from 'primeng/select';
 
 /* Components */
 import { SingleSelect } from '../single-select/single-select';
-import { MultiSelected } from '../multi-selected/multi-selected';
 
 /* Models */
 import { DynamicField } from '../../../models/fomrBuilderModel';
@@ -36,7 +35,6 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
     ButtonModule,
     SelectModule,
     SingleSelect,
-    MultiSelected,
   ],
   templateUrl: './filter.html',
   styleUrls: ['./filter.css'],
