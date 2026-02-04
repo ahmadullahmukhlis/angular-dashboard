@@ -166,12 +166,25 @@ export class FileUpload implements OnDestroy {
     }
   }
 
-  removeFile(i: number) {
-    const p = this.previews[i];
-    if (p.url && p.url.startsWith('blob:')) URL.revokeObjectURL(p.url);
-    this.selectedFiles.splice(i, 1);
-    this.previews.splice(i, 1);
-    this.fileChange.emit(this.selectedFiles);
+  removeFile(index: number) {
+    const removedPreview = this.previews[index];
+    if (!removedPreview) return;
+
+    // Revoke blob URL if image
+    if (removedPreview.url && removedPreview.url.startsWith('blob:')) {
+      URL.revokeObjectURL(removedPreview.url);
+    }
+
+    // Remove from both arrays safely
+    const removedFile = removedPreview.file;
+
+    this.previews = this.previews.filter((_, i) => i !== index);
+    this.selectedFiles = this.selectedFiles.filter((f) => f !== removedFile);
+
+    // 🔥 Always emit updated list to parent
+    this.fileChange.emit([...this.selectedFiles]);
+
+    this.cdr.detectChanges();
   }
 
   clearAllFiles() {
