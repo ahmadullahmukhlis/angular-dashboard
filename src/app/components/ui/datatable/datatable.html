@@ -522,15 +522,8 @@
                 </td>
               }
               @if (config.rowActions) {
-                <td
-                  class="whitespace-nowrap text-right relative"
-                  [ngClass]="{
-                    'px-4 py-3': tableSize === 'default',
-                    'px-3 py-2': tableSize === 'sm',
-                    'px-2 py-1.5': tableSize === 'xs',
-                  }"
-                >
-                  <div class="flex justify-end">
+                <td class="whitespace-nowrap text-right relative">
+                  <div class="flex justify-end row-action-container">
                     <button
                       (click)="toggleRowActions(row); $event.stopPropagation()"
                       class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -554,6 +547,7 @@
                         />
                       </svg>
                     </button>
+
                     @if (isRowActionsOpen(row)) {
                       <div
                         class="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-30 min-w-[160px]"
@@ -562,7 +556,7 @@
                         @for (action of config.rowActions; track action.label) {
                           <button
                             (click)="
-                              action.action(row); $event.stopPropagation(); toggleRowActions(row)
+                              action.action(row); toggleRowActions(row); $event.stopPropagation()
                             "
                             class="block w-full text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
                             [ngClass]="{
