@@ -8,7 +8,7 @@ import { Datatable } from '../../components/ui/datatable/datatable';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent, Datatable],
+  imports: [NgClass, Modal, DynamicFormBuilderComponent, Datatable],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
