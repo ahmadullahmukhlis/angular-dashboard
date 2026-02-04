@@ -7,10 +7,9 @@ import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
-  imports: [ReactiveFormsModule]
+  imports: [ReactiveFormsModule],
 })
 export class Login implements OnInit {
-
   loginForm: FormGroup;
   isLoading = false;
   errorMessage = '';
@@ -20,11 +19,11 @@ export class Login implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(3)]],
     });
   }
 
@@ -42,38 +41,40 @@ export class Login implements OnInit {
     this.loginForm.disable(); // ✅ prevent double submit
 
     const { username, password } = this.loginForm.value;
+    const loginUrl = import.meta.env.NG_APP_LOGIN_URL;
+    this.http
+      .post<any>(loginUrl + '/keycloak-admin/login', {
+        username,
+        password,
+      })
+      .subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.loginForm.enable(); // ✅ re-enable form
 
-    this.http.post<any>('http://localhost:8080/api/auth/login', {
-      username,
-      password
-    }).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        this.loginForm.enable(); // ✅ re-enable form
+          if (!res?.status) {
+            this.errorMessage = res?.message || 'Login failed';
+            return;
+          }
+          console.log(res);
+          const accessToken = res.data?.accessToken;
 
-        if (!res?.status) {
-          this.errorMessage = res?.message || 'Login failed';
-          return;
-        }
-        console.log(res)
-        const accessToken = res.data?.accessToken;
+          if (!accessToken) {
+            this.errorMessage = 'Invalid server response';
+            return;
+          }
 
-        if (!accessToken) {
-          this.errorMessage = 'Invalid server response';
-          return;
-        }
+          this.authService.setToken(accessToken);
+          this.router.navigate(['/dashboard']);
+        },
 
-        this.authService.setToken(accessToken);
-        this.router.navigate(['/dashboard']);
-      },
-
-      error: (err) => {
-        this.isLoading = false;
-        this.loginForm.enable(); // ✅ re-enable form
-        this.errorMessage = err.error?.message || 'Server error. Try again.';
-        console.error('Login error:', err);
-      }
-    });
+        error: (err) => {
+          this.isLoading = false;
+          this.loginForm.enable(); // ✅ re-enable form
+          this.errorMessage = err.error?.message || 'Server error. Try again.';
+          console.error('Login error:', err);
+        },
+      });
   }
 
   togglePasswordVisibility(): void {
@@ -81,7 +82,7 @@ export class Login implements OnInit {
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach(control => {
+    Object.values(formGroup.controls).forEach((control) => {
       control.markAsTouched();
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
