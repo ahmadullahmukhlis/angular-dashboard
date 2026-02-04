@@ -225,6 +225,16 @@ export class Dashboard {
       optionLabel: 'title',
       optionValue: 'id',
     },
+    {
+      type: 'file-upload',
+      name: 'fileupload',
+      label: 'show test',
+      disabled: false,
+      multiple: true,
+      url: 'posts',
+      optionLabel: 'title',
+      optionValue: 'id',
+    },
   ];
 
   isLoading = false;
