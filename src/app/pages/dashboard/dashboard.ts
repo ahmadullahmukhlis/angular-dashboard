@@ -228,12 +228,13 @@ export class Dashboard {
     {
       type: 'file-upload',
       name: 'fileupload',
-      label: 'show test',
+      label: 'upload file',
       disabled: false,
       multiple: true,
       url: 'posts',
       optionLabel: 'title',
       optionValue: 'id',
+      className: 'col-span-2',
     },
   ];
 
