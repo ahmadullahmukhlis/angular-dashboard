@@ -1,22 +1,7 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnChanges,
-  inject,
-} from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { Component, Input, Output, EventEmitter, OnChanges, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import {
-  HttpClient,
-  HttpEventType,
-} from '@angular/common/http';
+import { HttpClient, HttpEventType } from '@angular/common/http';
 
 /* PrimeNG 18+ Updated Imports */
 import { InputTextModule } from 'primeng/inputtext';
@@ -36,6 +21,7 @@ import { SingleSelect } from '../single-select/single-select';
 import { MultiSelected } from '../multi-selected/multi-selected';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
+import { FileUpload } from '../file-upload./file-upload.';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -55,6 +41,7 @@ import { ComponentService } from '../../../services/genral/component.service';
     SingleSelect,
     SelectModule,
     MultiSelected,
+    FileUpload,
   ],
   templateUrl: './dynamic-form-builder.html',
 })
@@ -89,7 +76,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
   private buildForm() {
     const group: any = {};
 
-    this.fields.forEach(f => {
+    this.fields.forEach((f) => {
       const validators = [];
 
       if (f.required) validators.push(Validators.required);
@@ -99,19 +86,16 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (f.maxLength) validators.push(Validators.maxLength(f.maxLength));
       if (f.pattern) validators.push(Validators.pattern(f.pattern));
 
-      group[f.name] = [
-        { value: f.defaultValue ?? null, disabled: f.disabled },
-        validators,
-      ];
+      group[f.name] = [{ value: f.defaultValue ?? null, disabled: f.disabled }, validators];
     });
 
     this.form = this.fb.group(group);
-    this.form.valueChanges.subscribe(v => this.valuesChanged.emit(v));
+    this.form.valueChanges.subscribe((v) => this.valuesChanged.emit(v));
   }
 
   visibleFields() {
     const values = this.form?.value;
-    return this.fields.filter(f => (f.show ? f.show(values) : true));
+    return this.fields.filter((f) => (f.show ? f.show(values) : true));
   }
 
   handleSelectChange(field: DynamicField, row: any) {
@@ -138,9 +122,8 @@ export class DynamicFormBuilderComponent implements OnChanges {
     }
 
     if (this.needConfirmation) {
-      this.toastService.confirmAction(
-        { name: 'Do you want to submit the form' },
-        () => this.dataSubmit()
+      this.toastService.confirmAction({ name: 'Do you want to submit the form' }, () =>
+        this.dataSubmit(),
       );
       return;
     }
@@ -156,15 +139,15 @@ export class DynamicFormBuilderComponent implements OnChanges {
     let payload: any = { ...this.form.value };
 
     // Sanitize null values
-    Object.keys(payload).forEach(k => {
+    Object.keys(payload).forEach((k) => {
       if (payload[k] === null) payload[k] = '';
     });
 
-    const hasFile = this.fields.some(f => f.type === 'file');
+    const hasFile = this.fields.some((f) => f.type === 'file');
 
     if (hasFile) {
       const fd = new FormData();
-      Object.keys(payload).forEach(k => {
+      Object.keys(payload).forEach((k) => {
         if (payload[k] instanceof File) {
           fd.append(k, payload[k]);
         } else if (Array.isArray(payload[k]) && payload[k][0] instanceof File) {
@@ -174,7 +157,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
         }
       });
 
-      this.hiddenFields?.forEach(h => fd.append(h.name, h.value));
+      this.hiddenFields?.forEach((h) => fd.append(h.name, h.value));
       payload = fd;
     }
 

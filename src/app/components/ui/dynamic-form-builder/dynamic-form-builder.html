@@ -107,6 +107,12 @@
             (valueChange)="handleSelectChange(field, $event)"
           ></app-multi-selected>
         }
+        @if (field.type === 'file-upload') {
+          <app-file-upload
+            [multiple]="field.multiple ?? false"
+            (fileChange)="handleFileChange(field, $event)"
+          ></app-file-upload>
+        }
 
         <!-- FILE -->
         @if (field.type === 'file') {

@@ -12,7 +12,8 @@ export type FieldType =
   | 'editor'
   | 'checkbox'
   | 'switch'
-  | 'div';
+  | 'div'
+  | 'file-upload';
 
 export interface DynamicField {
   type: FieldType;
@@ -42,6 +43,7 @@ export interface DynamicField {
   url?: string;
   optionLabel?: string;
   optionValue?: string;
+  multiple?: boolean;
 
   /* mapping */
   changeValue?: string;
