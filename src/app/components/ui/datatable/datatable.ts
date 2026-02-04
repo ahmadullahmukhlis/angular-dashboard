@@ -11,6 +11,7 @@ import {
   AfterViewInit,
   ChangeDetectorRef,
   inject,
+  HostListener,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -345,8 +346,26 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   rowActionMenuOpen: { [key: string]: boolean } = {};
 
   toggleRowActions(row: any) {
-    const key = row.id || row.key || JSON.stringify(row); // unique key per row
+    const key = row.id || row.key || JSON.stringify(row);
+
+    // Close all other menus first
+    Object.keys(this.rowActionMenuOpen).forEach((k) => {
+      if (k !== key) this.rowActionMenuOpen[k] = false;
+    });
+
+    // Toggle current row menu
     this.rowActionMenuOpen[key] = !this.rowActionMenuOpen[key];
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+
+    // Check if click is inside a row action menu button or menu
+    const insideMenu = target.closest('.row-action-container');
+    if (!insideMenu) {
+      this.closeAllRowActions();
+      this.cdr.detectChanges(); // update UI
+    }
   }
 
   isRowActionsOpen(row: any) {
