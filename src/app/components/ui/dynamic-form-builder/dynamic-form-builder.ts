@@ -21,7 +21,7 @@ import { SingleSelect } from '../single-select/single-select';
 import { MultiSelected } from '../multi-selected/multi-selected';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
-import { FileUpload } from '../file-upload./file-upload.';
+import { FileUpload } from '../file-upload/file-upload';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -102,6 +102,20 @@ export class DynamicFormBuilderComponent implements OnChanges {
     const val = field.changeValue ? row?.[field.changeValue] : row;
     this.form.get(field.name)?.setValue(val);
     field.onSelect?.(row);
+  }
+  handleFileChange(field: DynamicField, files: File[]) {
+    if (!files || files.length === 0) return;
+
+    // If multiple = false → store single file
+    if (!field.multiple) {
+      this.form.get(field.name)?.setValue(files[0]);
+    } else {
+      this.form.get(field.name)?.setValue(files);
+    }
+
+    // Mark control as touched to trigger validation
+    this.form.get(field.name)?.markAsTouched();
+    this.form.get(field.name)?.updateValueAndValidity();
   }
 
   submit() {

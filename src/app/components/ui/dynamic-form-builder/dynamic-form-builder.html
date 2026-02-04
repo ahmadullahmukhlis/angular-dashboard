@@ -107,11 +107,13 @@
             (valueChange)="handleSelectChange(field, $event)"
           ></app-multi-selected>
         }
-        @if (field.type === 'file-upload') {
-          <app-file-upload
-            [multiple]="field.multiple ?? false"
-            (fileChange)="handleFileChange(field, $event)"
-          ></app-file-upload>
+
+        @if (field.type === 'editor') {
+          <p-editor
+            [formControlName]="field.name"
+            [disabled]="field.disabled"
+            (onBlur)="form.get(field.name)?.markAsTouched()"
+          ></p-editor>
         }
 
         <!-- FILE -->
@@ -121,6 +123,12 @@
             (change)="form.get(field.name)?.setValue($any($event.target).files[0])"
             [disabled]="field.disabled"
           />
+        }
+        @if (field.type === 'file-upload') {
+          <app-file-upload
+            [multiple]="field.multiple ?? false"
+            (fileChange)="handleFileChange(field, $event)"
+          ></app-file-upload>
         }
 
         <!-- DIV (Label only) -->
