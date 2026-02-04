@@ -50,6 +50,7 @@
     "@angular/build": "^21.0.4",
     "@angular/cli": "^21.0.4",
     "@angular/compiler-cli": "^21.0.0",
+    "@ngx-env/builder": "^21.0.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
