@@ -10,6 +10,7 @@ import {
   ElementRef,
   AfterViewInit,
   ChangeDetectorRef,
+  inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -80,11 +81,8 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   selectAll: boolean = false;
   visibleColumns: ColumnDefinition[] = [];
   showFilters: boolean = false;
-
-  constructor(
-    private cdr: ChangeDetectorRef,
-    private componentService: ComponentService,
-  ) {}
+  private cdr = inject(ChangeDetectorRef);
+  private componentService = inject(ComponentService);
 
   // ================= LIFECYCLE =================
 
