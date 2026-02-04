@@ -556,7 +556,7 @@
                         @for (action of config.rowActions; track action.label) {
                           <button
                             (click)="
-                              action.action(row); toggleRowActions(row); $event.stopPropagation()
+                              rowAction(row, action); toggleRowActions(row); $event.stopPropagation()
                             "
                             class="block w-full text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
                             [ngClass]="{
