@@ -8,7 +8,7 @@ import { Datatable } from '../../components/ui/datatable/datatable';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, Modal, DynamicFormBuilderComponent, Datatable],
+  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent, Datatable],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -227,14 +227,13 @@ export class Dashboard {
     },
     {
       type: 'file-upload',
-      name: 'fileupload',
-      label: 'upload file',
+      name: 'pt',
+      label: 'show test',
       disabled: false,
       multiple: true,
       url: 'posts',
       optionLabel: 'title',
       optionValue: 'id',
-      className: 'col-span-2',
     },
   ];
 
@@ -271,7 +270,15 @@ export class Dashboard {
       { key: 'username', label: 'User Name', sortable: true, filterType: 'text' },
       { key: 'email', label: 'Email', sortable: true, filterType: 'text' },
       { key: 'phone', label: 'Phone', sortable: true, type: 'text' },
-      { key: 'website', label: 'Website', type: 'boolean', filterType: 'boolean' },
+      {
+        key: 'website',
+        label: 'Website',
+        type: 'text',
+        filterType: 'text',
+        validation: (value: any) => {
+          return value == 'demarco.info' ? '<p class="text-red-500">' + value + '</p>' : value;
+        },
+      },
     ],
     serverSide: true,
     showCheckboxes: true,

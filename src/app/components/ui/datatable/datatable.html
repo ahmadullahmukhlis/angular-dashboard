@@ -514,9 +514,11 @@
                     'px-2 py-1.5': tableSize === 'xs',
                   }"
                 >
-                  <div class="truncate" [title]="getCellValue(row, column)">
-                    {{ getCellValue(row, column) }}
-                  </div>
+                  <div
+                    class="truncate"
+                    [title]="column.tooltip || getCellValue(row, column)"
+                    [innerHTML]="getCellValue(row, column)"
+                  ></div>
                 </td>
               }
               @if (config.rowActions) {

@@ -259,14 +259,43 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ================= DISPLAY =================
 
   getCellValue(row: any, column: ColumnDefinition): any {
-    if (column.renderer) return column.renderer(row[column.key], row);
-
     const val = row[column.key];
-    if (column.type === 'date' && val) return new Date(val).toLocaleDateString();
-    if (column.type === 'currency' && val !== undefined)
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
-    if (column.type === 'boolean') return val ? 'Yes' : 'No';
-    return val;
+
+    // 1️⃣ Use custom renderer if defined
+    if (column.renderer) return column.renderer(val, row);
+
+    // 2️⃣ Validation message if defined
+    if (column.validation) {
+      const validationResult = column.validation(val);
+      if (validationResult) return validationResult;
+    }
+
+    // 3️⃣ Type-based formatting
+    switch (column.type) {
+      case 'date':
+        return val ? new Date(val).toLocaleDateString() : '';
+      case 'currency':
+        return val !== undefined
+          ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
+          : '';
+      case 'boolean':
+        return val ? 'Yes' : 'No';
+      case 'number':
+        return val !== undefined ? val : '';
+      case 'select':
+        // Show label from filterOptions if exists
+        if (column.filterOptions && val !== undefined && val !== null) {
+          const option = column.filterOptions.find((o) => o.value === val);
+          return option ? option.label : val;
+        }
+        return val ?? '';
+      case 'custom':
+        return val ?? '';
+      case 'action':
+        return ''; // actions are handled in template
+      default:
+        return val ?? '';
+    }
   }
 
   isColumnFilterable(column: ColumnDefinition): boolean {
