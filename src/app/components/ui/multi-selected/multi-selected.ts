@@ -2,22 +2,22 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ComponentService } from '../../../services/genral/component.service';
 
-
 @Component({
   selector: 'app-multi-selected',
+  standalone: true,
   imports: [MultiSelectModule],
   templateUrl: './multi-selected.html',
   styleUrl: './multi-selected.css',
 })
 export class MultiSelected {
-@Input() url!: string;
+  @Input() url!: string;
   @Input() optionLabel!: string;
   @Input() optionValue!: string;
   @Input() placeholder: string = 'Select';
-  @Input() showClear:boolean = true
-  @Input() isSearable : boolean = true
-  @Input () multiple : Boolean = false
-  @Input () disabled :boolean = false
+  @Input() showClear: boolean = true;
+  @Input() isSearable: boolean = true;
+  @Input() multiple: Boolean = false;
+  @Input() disabled: boolean = false;
   @Output() valueChange = new EventEmitter<any>();
 
   options: any[] = [];
