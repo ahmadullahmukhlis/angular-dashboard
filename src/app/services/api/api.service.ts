@@ -7,8 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   private http = inject(HttpClient);
-
-  private BASE_URL = import.meta.env.NG_APP_API_URL 
+  private BASE_URL = import.meta.env.NG_APP_API_URL;
 
   private getHeaders(isFormData: boolean = false) {
     const token = localStorage.getItem('token');

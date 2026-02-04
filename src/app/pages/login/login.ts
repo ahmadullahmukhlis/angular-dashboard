@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -42,39 +42,35 @@ export class Login implements OnInit {
 
     const { username, password } = this.loginForm.value;
     const loginUrl = import.meta.env.NG_APP_LOGIN_URL;
-    this.http
-      .post<any>(loginUrl + '/keycloak-admin/login', {
-        username,
-        password,
-      })
-      .subscribe({
-        next: (res) => {
-          this.isLoading = false;
-          this.loginForm.enable(); // ✅ re-enable form
+    const params = new HttpParams().set('username', username).set('password', password);
+    this.http.post<any>(loginUrl + '/keycloak-admin/login', params).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.loginForm.enable(); // ✅ re-enable form
+        console.log(res);
+        // if (!res?.status) {
+        //   this.errorMessage = res?.message || 'Login failed';
+        //   return;
+        // }
+        console.log(res.data);
+        const accessToken = res.access_token;
 
-          if (!res?.status) {
-            this.errorMessage = res?.message || 'Login failed';
-            return;
-          }
-          console.log(res);
-          const accessToken = res.data?.accessToken;
+        if (!accessToken) {
+          this.errorMessage = 'Invalid server response';
+          return;
+        }
 
-          if (!accessToken) {
-            this.errorMessage = 'Invalid server response';
-            return;
-          }
+        this.authService.setToken(accessToken);
+        this.router.navigate(['/dashboard']);
+      },
 
-          this.authService.setToken(accessToken);
-          this.router.navigate(['/dashboard']);
-        },
-
-        error: (err) => {
-          this.isLoading = false;
-          this.loginForm.enable(); // ✅ re-enable form
-          this.errorMessage = err.error?.message || 'Server error. Try again.';
-          console.error('Login error:', err);
-        },
-      });
+      error: (err) => {
+        this.isLoading = false;
+        this.loginForm.enable(); // ✅ re-enable form
+        this.errorMessage = err.error?.message || 'Server error. Try again.';
+        console.error('Login error:', err);
+      },
+    });
   }
 
   togglePasswordVisibility(): void {
