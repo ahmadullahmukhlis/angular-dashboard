@@ -1,3 +1,6 @@
+import { Message } from './../../../../../node_modules/esbuild/lib/main.d';
+import { ToastService } from './../../../services/genral/tost.service';
+
 import {
   Component,
   Input,
@@ -29,7 +32,6 @@ import { ComponentService } from '../../../services/genral/component.service';
 import { Paginator } from 'primeng/paginator';
 import { NgClass } from '@angular/common';
 import { Modal } from '../modal/modal';
-import { ALL } from 'dns';
 import { Filter } from '../filter/filter';
 
 @Component({
@@ -76,6 +78,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   filterInputs: { [key: string]: any } = {};
   private filterSubject = new Subject<FilterState>();
+  private toastService = inject(ToastService);
 
   currentSort: SortConfig | null = null;
   selectedRows: any[] = [];
@@ -256,7 +259,13 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.onExport.emit(format);
     this.tableEvent.emit({ type: 'export', data: format });
   }
-
+  rowAction(row: any, action: any) {
+    if (action.confirm) {
+      this.toastService.confirmAction({ name: action.confirm.Message }, () => action.action(row));
+    } else {
+      action.action(row);
+    }
+  }
   // ================= DISPLAY =================
 
   getCellValue(row: any, column: ColumnDefinition): any {
