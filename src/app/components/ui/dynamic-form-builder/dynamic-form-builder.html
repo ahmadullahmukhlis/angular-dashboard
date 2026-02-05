@@ -15,7 +15,7 @@
           <input
             pInputText
             [formControlName]="field.name"
-            [placeholder]="field.placeholder"
+            [placeholder]="field.placeholder ?? field.label"
             [disabled]="field.disabled"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
@@ -27,7 +27,7 @@
           <p-inputNumber
             [formControlName]="field.name"
             [disabled]="field.disabled"
-            [placeholder]="field.placeholder"
+            [placeholder]="field.placeholder ?? field.label"
             class="w-full"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-inputNumber>
@@ -39,7 +39,7 @@
             toggleMask
             [formControlName]="field.name"
             [disabled]="field.disabled"
-            [placeholder]="field.placeholder"
+            [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-password>
         }
@@ -49,7 +49,7 @@
           <p-datePicker
             [formControlName]="field.name"
             [disabled]="field.disabled"
-            [placeholder]="field.placeholder"
+            [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-datePicker>
         }
@@ -61,7 +61,7 @@
             rows="4"
             [formControlName]="field.name"
             [disabled]="field.disabled"
-            [placeholder]="field.placeholder"
+            [placeholder]="field.placeholder ?? field.label"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
           ></textarea>
