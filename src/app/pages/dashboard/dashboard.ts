@@ -218,7 +218,7 @@ export class Dashboard {
     },
     {
       type: 'multi-select',
-      name: 'pt',
+      name: 'multiPost',
       label: 'show test',
       disabled: false,
       url: 'posts',

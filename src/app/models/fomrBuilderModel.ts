@@ -13,7 +13,8 @@ export type FieldType =
   | 'checkbox'
   | 'switch'
   | 'div'
-  | 'file-upload';
+  | 'file-upload'
+  | 'checkbox-group';
 
 export interface DynamicField {
   type: FieldType;
