@@ -81,7 +81,13 @@ export class DynamicFormBuilderComponent implements OnChanges {
     this.fields.forEach((f) => {
       const validators = [];
 
-      if (f.required) validators.push(Validators.required);
+      if (f.required) {
+        if (f.type === 'checkbox-group') {
+          validators.push(this.checkboxGroupRequiredValidator());
+        } else {
+          validators.push(Validators.required);
+        }
+      }
       if (f.min !== undefined) validators.push(Validators.min(f.min));
       if (f.max !== undefined) validators.push(Validators.max(f.max));
       if (f.minLength) validators.push(Validators.minLength(f.minLength));
@@ -154,6 +160,11 @@ export class DynamicFormBuilderComponent implements OnChanges {
     }
 
     this.dataSubmit();
+  }
+  private checkboxGroupRequiredValidator() {
+    return (control: any) => {
+      return Array.isArray(control.value) && control.value.length > 0 ? null : { required: true };
+    };
   }
 
   dataSubmit() {
