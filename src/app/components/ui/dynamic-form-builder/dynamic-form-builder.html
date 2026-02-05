@@ -9,7 +9,7 @@
           <input
             pInputText
             [formControlName]="field.name"
-            [placeholder]="field.label"
+            [placeholder]="field.placeholder"
             [disabled]="field.disabled"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
@@ -21,6 +21,7 @@
           <p-inputNumber
             [formControlName]="field.name"
             [disabled]="field.disabled"
+            [placeholder]="field.placeholder"
             class="w-full"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-inputNumber>
@@ -32,6 +33,7 @@
             toggleMask
             [formControlName]="field.name"
             [disabled]="field.disabled"
+            [placeholder]="field.placeholder"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-password>
         }
@@ -41,6 +43,7 @@
           <p-datePicker
             [formControlName]="field.name"
             [disabled]="field.disabled"
+            [placeholder]="field.placeholder"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-datePicker>
         }
@@ -52,6 +55,7 @@
             rows="4"
             [formControlName]="field.name"
             [disabled]="field.disabled"
+            [placeholder]="field.placeholder"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
           ></textarea>
@@ -117,6 +121,8 @@
             [formControlName]="field.name"
             [disabled]="field.disabled"
             [optionLabel]="field.optionLabel ?? 'id'"
+            [optionValue]="field.optionValue ?? 'id'"
+            [placeholder]="field.placeholder ?? 'Select'"
             class="w-full"
             appendTo="body"
             (onBlur)="form.get(field.name)?.markAsTouched()"
@@ -153,6 +159,7 @@
         @if (field.type === 'editor') {
           <p-editor
             [formControlName]="field.name"
+            placeholder="Enter text here..."
             [disabled]="field.disabled"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-editor>
@@ -162,6 +169,7 @@
         @if (field.type === 'file') {
           <input
             type="file"
+            [placeholder]="field.placeholder ?? 'select file'"
             (change)="form.get(field.name)?.setValue($any($event.target).files[0])"
             [disabled]="field.disabled"
           />
