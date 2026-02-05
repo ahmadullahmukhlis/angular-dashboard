@@ -23,7 +23,7 @@ import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { FileUpload } from '../file-upload/file-upload';
 import { RadioButton } from 'primeng/radiobutton';
-import { AddProfileImage } from "../add-profile-image/add-profile-image";
+import { AddProfileImage } from '../add-profile-image/add-profile-image';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -45,8 +45,8 @@ import { AddProfileImage } from "../add-profile-image/add-profile-image";
     MultiSelected,
     FileUpload,
     RadioButton,
-    AddProfileImage
-],
+    AddProfileImage,
+  ],
   templateUrl: './dynamic-form-builder.html',
 })
 export class DynamicFormBuilderComponent implements OnChanges {
@@ -181,7 +181,9 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (payload[k] === null) payload[k] = '';
     });
 
-    const hasFile = this.fields.some((f) => f.type === 'file' || f.type === 'file-upload');
+    const hasFile = this.fields.some(
+      (f) => f.type === 'file' || f.type === 'file-upload' || f.type === 'profile-image',
+    );
 
     if (hasFile) {
       const fd = new FormData();
