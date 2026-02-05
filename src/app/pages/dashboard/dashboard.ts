@@ -153,6 +153,13 @@ export class Dashboard {
 
   fields: DynamicField[] = [
     {
+      type: 'profile-image',
+      name: 'profileImage',
+      label: 'Profile Image',
+      disabled: false,
+      className: 'col-span-2 mx-auto',
+    },
+    {
       type: 'text',
       name: 'title',
       label: 'User Information',
