@@ -126,10 +126,14 @@
         <!-- SERVER SELECT -->
         @if (field.type === 'server-select') {
           <app-single-select
+            [formControlName]="field.name"
             [url]="field.url"
-            [disabled]="field.disabled"
             [optionLabel]="field.optionLabel ?? 'id'"
-            [optionValue]="field.optionValue ?? 'name'"
+            [optionValue]="field.optionValue ?? 'id'"
+            [placeholder]="field.placeholder ?? 'Select'"
+            [showClear]="true"
+            [isSearable]="true"
+            [multiple]="false"
             (valueChange)="handleSelectChange(field, $event)"
           ></app-single-select>
         }

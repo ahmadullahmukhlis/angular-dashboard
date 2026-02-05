@@ -29,6 +29,7 @@ export interface DynamicField {
   className?: string;
 
   options?: any[];
+  placeholder?: string;
 
   /* conditional show */
   show?: (values: any) => boolean;
