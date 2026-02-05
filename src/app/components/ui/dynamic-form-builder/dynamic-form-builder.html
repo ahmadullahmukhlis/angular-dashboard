@@ -141,9 +141,11 @@
         <!-- MULTI SELECT -->
         @if (field.type === 'multi-select') {
           <app-multi-selected
+            [formControlName]="field.name"
             [url]="field.url ?? ''"
-            [disabled]="field.disabled"
             [optionLabel]="field.optionLabel ?? 'id'"
+            [optionValue]="field.optionValue ?? 'id'"
+            [placeholder]="field.placeholder ?? 'Select'"
             (valueChange)="handleSelectChange(field, $event)"
           ></app-multi-selected>
         }
