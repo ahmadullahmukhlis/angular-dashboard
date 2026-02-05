@@ -23,6 +23,7 @@ import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { FileUpload } from '../file-upload/file-upload';
 import { RadioButton } from 'primeng/radiobutton';
+import { AddProfileImage } from "../add-profile-image/add-profile-image";
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -44,7 +45,8 @@ import { RadioButton } from 'primeng/radiobutton';
     MultiSelected,
     FileUpload,
     RadioButton,
-  ],
+    AddProfileImage
+],
   templateUrl: './dynamic-form-builder.html',
 })
 export class DynamicFormBuilderComponent implements OnChanges {

@@ -14,7 +14,8 @@ export type FieldType =
   | 'switch'
   | 'div'
   | 'file-upload'
-  | 'checkbox-group';
+  | 'checkbox-group'
+  | 'profile-image';
 
 export interface DynamicField {
   type: FieldType;
