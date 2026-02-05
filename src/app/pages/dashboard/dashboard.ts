@@ -155,9 +155,9 @@ export class Dashboard {
     {
       type: 'profile-image',
       name: 'profileImage',
-      label: 'Profile Image',
+      label: '',
       disabled: false,
-      className: 'col-span-2 mx-auto',
+      className: 'col-span-2 mx-auto mb-4',
     },
     {
       type: 'text',
