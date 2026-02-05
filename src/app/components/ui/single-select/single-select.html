@@ -9,7 +9,7 @@
     class="w-full"
     appendTo="body"
     [(ngModel)]="selected"
-    (onChange)="onChange($event)"
+    (onChange)="onSelectChange($event)"
     [filter]="isSearable"
     [disabled]="disabled"
   ></p-select>
