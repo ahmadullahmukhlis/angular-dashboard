@@ -7,7 +7,7 @@
           <app-add-profile-image
             [formControlName]="field.name"
             [disabled]="field.disabled"
-            (valueChange)="handleSelectChange(field, $event)"
+            (valueChange)="handleSingleFileChange(field, $event)"
           ></app-add-profile-image>
         }
         <!-- TEXT -->

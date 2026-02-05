@@ -137,6 +137,21 @@ export class DynamicFormBuilderComponent implements OnChanges {
     this.form.get(field.name)?.updateValueAndValidity();
   }
 
+  // Handles single file upload only
+  handleSingleFileChange(field: DynamicField, file: File | string) {
+    if (!file) return;
+
+    // Set the form control value to this single file
+    this.form.get(field.name)?.setValue(file);
+
+    // Mark control as touched to trigger validation
+    const control = this.form.get(field.name);
+    if (control) {
+      control.markAsTouched();
+      control.updateValueAndValidity();
+    }
+  }
+
   submit() {
     this.submitted = true;
 
