@@ -65,6 +65,42 @@
             [disabled]="field.disabled"
           ></p-checkbox>
         }
+        @if (field.type === 'radio') {
+          <div class="flex flex-wrap gap-3">
+            @for (opt of field.options; track opt.value) {
+              <div class="flex items-center gap-2">
+                <p-radioButton
+                  [name]="field.name"
+                  [value]="opt[field.optionValue ?? 'value']"
+                  [formControlName]="field.name"
+                  [disabled]="field.disabled"
+                ></p-radioButton>
+
+                <label>
+                  {{ opt[field.optionLabel ?? 'label'] }}
+                </label>
+              </div>
+            }
+          </div>
+        }
+        @if (field.type === 'checkbox-group') {
+          <div class="flex flex-wrap gap-3">
+            @for (opt of field.options; track opt.value) {
+              <div class="flex items-center gap-2">
+                <p-checkbox
+                  [binary]="false"
+                  [value]="opt[field.optionValue ?? 'value']"
+                  [formControlName]="field.name"
+                  [disabled]="field.disabled"
+                ></p-checkbox>
+
+                <label>
+                  {{ opt[field.optionLabel ?? 'label'] }}
+                </label>
+              </div>
+            }
+          </div>
+        }
 
         <!-- SWITCH -->
         @if (field.type === 'switch') {

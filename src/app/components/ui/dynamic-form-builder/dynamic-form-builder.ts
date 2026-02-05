@@ -22,6 +22,7 @@ import { MultiSelected } from '../multi-selected/multi-selected';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { FileUpload } from '../file-upload/file-upload';
+import { RadioButton } from 'primeng/radiobutton';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -42,6 +43,7 @@ import { FileUpload } from '../file-upload/file-upload';
     SelectModule,
     MultiSelected,
     FileUpload,
+    RadioButton,
   ],
   templateUrl: './dynamic-form-builder.html',
 })
@@ -86,10 +88,19 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (f.maxLength) validators.push(Validators.maxLength(f.maxLength));
       if (f.pattern) validators.push(Validators.pattern(f.pattern));
 
-      group[f.name] = [{ value: f.defaultValue ?? null, disabled: f.disabled }, validators];
+      let defaultValue: any = f.defaultValue ?? null;
+
+      // 🔹 Proper default values by type
+      if (f.type === 'checkbox') defaultValue = f.defaultValue ?? false;
+      if (f.type === 'switch') defaultValue = f.defaultValue ?? false;
+      if (f.type === 'checkbox-group') defaultValue = f.defaultValue ?? [];
+      if (f.type === 'radio') defaultValue = f.defaultValue ?? null;
+
+      group[f.name] = [{ value: defaultValue, disabled: f.disabled }, validators];
     });
 
     this.form = this.fb.group(group);
+
     this.form.valueChanges.subscribe((v) => this.valuesChanged.emit(v));
   }
 
@@ -157,7 +168,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (payload[k] === null) payload[k] = '';
     });
 
-    const hasFile = this.fields.some((f) => f.type === 'file');
+    const hasFile = this.fields.some((f) => f.type === 'file' || f.type === 'file-upload');
 
     if (hasFile) {
       const fd = new FormData();
