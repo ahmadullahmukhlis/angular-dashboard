@@ -243,3 +243,12 @@
   [name]="'Users Table'"
 >
 </app-datatable>
+
+<app-server-data url="/users" id="users-table">
+  <ng-template let-data>
+    <div *ngFor="let user of data">
+      {{ user.name }}
+    </div>
+    <button class="bg-primary text-2xl p-2.5" (click)="reloadData()">reload Data</button>
+  </ng-template>
+</app-server-data>

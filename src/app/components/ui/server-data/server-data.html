@@ -15,13 +15,15 @@
 }
 
 <!-- No Data -->
-@if (!loading && data?.length < 1 && !ignoreNull) {
+@if (!loading && !data) {
   <div class="text-red-500 text-center py-12">No data found</div>
 }
 
 <!-- Content -->
 @if (!loading && data && template) {
-  <ng-container>
-    <ng-container *ngTemplateOutlet="template; context: { $implicit: data }"> </ng-container>
+  <ng-container [ngSwitch]="renderKey">
+    <ng-container *ngSwitchCase="renderKey">
+      <ng-container *ngTemplateOutlet="template; context: { $implicit: data }"></ng-container>
+    </ng-container>
   </ng-container>
 }
