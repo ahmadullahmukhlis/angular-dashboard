@@ -18,7 +18,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 
 import {
   ColumnDefinition,
@@ -49,6 +49,8 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     columns: [],
     serverSide: true,
   };
+  @Input() tableName: string | null = null; // optional, used for parent-triggered revalidate
+
   filterModal: boolean = false;
 
   loading: boolean = false;
@@ -87,6 +89,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   showFilters: boolean = false;
   private cdr = inject(ChangeDetectorRef);
   private componentService = inject(ComponentService);
+  private sub!: Subscription;
 
   // ================= LIFECYCLE =================
 
@@ -103,6 +106,13 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
       this.pageSize = 10;
       this.loadData();
     }
+
+    // Listen for parent-triggered revalidation
+    this.sub = this.componentService.revalidate$.subscribe((value) => {
+      if (value && value === this.tableName) {
+        this.refresh(); // refresh already calls loadData and emits tableEvent
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -391,5 +401,8 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.currentPage = 1;
     this.showFilters = false;
     this.loadData();
+  }
+  ngOnDestroy() {
+    if (this.sub) this.sub.unsubscribe();
   }
 }
