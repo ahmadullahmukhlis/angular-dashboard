@@ -233,6 +233,7 @@
 <app-datatable
   [url]="'/users'"
   [config]="tableConfig"
+  tableName="users-table"
   (onRowClick)="handleRowClick($event)"
   (onRowSelect)="handleRowSelect($event)"
   (onAdd)="handleAdd()"
@@ -249,6 +250,12 @@
     <div *ngFor="let user of data">
       {{ user.name }}
     </div>
+    <ol>
+      @for (user of data; track $index) {
+        <li>{{ user.id }} {{ user.name }}</li>
+      }
+    </ol>
+
     <button class="bg-primary text-2xl p-2.5" (click)="reloadData()">reload Data</button>
   </ng-template>
 </app-server-data>
