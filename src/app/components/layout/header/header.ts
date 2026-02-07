@@ -7,7 +7,7 @@ import {
   ElementRef,
   inject,
   signal,
-  computed
+  computed,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarService } from '../../../services/sidebar.service';
@@ -15,6 +15,7 @@ import { Breadcrumb } from '../breadcrumb/breadcrumb';
 import { Router, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
+import { ComponentService } from '../../../services/genral/component.service';
 
 @Component({
   selector: 'app-header',
@@ -28,6 +29,7 @@ export class Header implements AfterViewInit {
   private readonly elRef = inject(ElementRef);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
+  private componentService = inject(ComponentService);
 
   isNotificationsOpen = false;
   isProfileMenuOpen = false;
@@ -37,20 +39,34 @@ export class Header implements AfterViewInit {
   notifications = signal([
     { id: 1, text: 'New user registered', time: '5 min ago', read: false, icon: 'fa-user-plus' },
     { id: 2, text: 'Server load is high', time: '15 min ago', read: false, icon: 'fa-server' },
-    { id: 3, text: 'Report generated successfully', time: '1 hour ago', read: true, icon: 'fa-file-alt' },
-    { id: 4, text: 'Database backup completed', time: '2 hours ago', read: true, icon: 'fa-database' },
+    {
+      id: 3,
+      text: 'Report generated successfully',
+      time: '1 hour ago',
+      read: true,
+      icon: 'fa-file-alt',
+    },
+    {
+      id: 4,
+      text: 'Database backup completed',
+      time: '2 hours ago',
+      read: true,
+      icon: 'fa-database',
+    },
   ]);
 
-  unreadCount = computed(() => this.notifications().filter(n => !n.read).length);
+  unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
 
   // Use signal from SidebarService
   isSidebarCollapsed = this.sidebarService.sidebarCollapsedSignal;
 
   constructor() {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      takeUntilDestroyed()
-    ).subscribe(() => this.closeDropdowns());
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.closeDropdowns());
   }
 
   ngAfterViewInit(): void {
@@ -79,8 +95,8 @@ export class Header implements AfterViewInit {
   }
 
   markAsRead(notificationId: number): void {
-    this.notifications.update(list => 
-      list.map(n => n.id === notificationId ? { ...n, read: true } : n)
+    this.notifications.update((list) =>
+      list.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
     );
   }
 
@@ -104,5 +120,8 @@ export class Header implements AfterViewInit {
   @HostListener('document:keydown.escape')
   onEsc(): void {
     this.closeDropdowns();
+  }
+  reloadData() {
+    this.componentService.revalidate('*');
   }
 }
