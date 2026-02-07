@@ -109,7 +109,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
     // Listen for parent-triggered revalidation
     this.sub = this.componentService.revalidate$.subscribe((value) => {
-      if (value && value === this.tableName) {
+      if (value && (value === this.tableName || value === '*')) {
         this.refresh(); // refresh already calls loadData and emits tableEvent
       }
     });
