@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ApiService } from '../api/api.service';
-import { map, Observable } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 import { ShareHelper } from '../../helpers/SHare-helper';
 import { HttpParams } from '@angular/common/http';
 
@@ -14,6 +14,12 @@ export class ComponentService {
   }
   request(method: string, url: string, data: any) {
     return this.api.request(method, url, data);
+  }
+  private revalidateSubject = new Subject<string | null>();
+  revalidate$ = this.revalidateSubject.asObservable();
+
+  revalidate(id: string | null) {
+    this.revalidateSubject.next(id);
   }
   load(
     url: string,
