@@ -1,19 +1,22 @@
 import { NgClass, NgFor } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
 import { DynamicField } from '../../models/fomrBuilderModel';
 import { DynamicFormBuilderComponent } from '../../components/ui/dynamic-form-builder/dynamic-form-builder';
 import { DataTableConfig, RowAction } from '../../models/datatable.model';
 import { Datatable } from '../../components/ui/datatable/datatable';
+import { ServerData } from '../../components/ui/server-data/server-data';
+import { ComponentService } from '../../services/genral/component.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent, Datatable],
+  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent, Datatable, ServerData],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   isOpent: boolean = false;
+  private componentService = inject(ComponentService);
   openModal() {
     this.isOpent = true;
   }
@@ -323,5 +326,10 @@ export class Dashboard {
 
   handleTableEvent(event: any) {
     console.log('Table event:', event);
+  }
+  reloadData() {
+    // Trigger revalidation for the server data component with id 'users-table'
+    console.log('Reloading data...');
+    this.componentService.revalidate('users-table');
   }
 }
