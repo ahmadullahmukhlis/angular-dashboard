@@ -52,7 +52,7 @@ export class ServerData implements OnInit, OnDestroy {
 
     // Listen for parent revalidation
     this.sub = this.componentService.revalidate$.subscribe((value) => {
-      if (value === this.id || value === '*') {
+      if (value && (value === this.id || value === '*')) {
         this.data = null; // Clear old data
         this.loading = true; // Trigger loading
         this.renderKey++; // Force template re-render
