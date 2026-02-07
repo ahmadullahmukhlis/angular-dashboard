@@ -9,7 +9,6 @@ import {
   OnDestroy,
   inject,
 } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 
 import { ApiService } from '../../../services/api/api.service';
