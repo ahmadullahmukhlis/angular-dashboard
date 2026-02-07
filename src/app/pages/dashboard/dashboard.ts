@@ -328,8 +328,6 @@ export class Dashboard {
     console.log('Table event:', event);
   }
   reloadData() {
-    // Trigger revalidation for the server data component with id 'users-table'
-    console.log('Reloading data...');
     this.componentService.revalidate('users-table');
   }
 }
