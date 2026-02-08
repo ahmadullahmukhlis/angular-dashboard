@@ -1,6 +1,7 @@
-import { Component, input, Input } from '@angular/core';
+import { Component, inject, input, Input } from '@angular/core';
 import { IAxisChart } from '../../../../models/chart.model';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { ApiService } from '../../../../services/api/api.service';
 
 @Component({
   selector: 'app-linear-chart',
@@ -16,6 +17,7 @@ export class LinearChart {
   @Input() url?: string;
   loading = false;
   data: any = [];
+  private api = inject(ApiService);
   ngOnInit() {
     if (this.isLoading !== undefined) {
       this.loading = this.isLoading;
