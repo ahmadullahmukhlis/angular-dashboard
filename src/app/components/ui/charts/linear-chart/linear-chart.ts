@@ -17,10 +17,33 @@ export class LinearChart {
   @Input() url?: string;
   loading = false;
   data: any = [];
+  error: any = null;
+
   private api = inject(ApiService);
   ngOnInit() {
     if (this.isLoading !== undefined) {
       this.loading = this.isLoading;
     }
+  }
+
+  loadData() {
+    if (!this.url) return;
+
+    this.loading = true;
+    this.error = null;
+
+    this.api.get(this.url).subscribe({
+      next: (res: any) => {
+        // Normalize data (array or object)
+        this.data = Array.isArray(res) ? res : (res?.data ?? res);
+
+        this.loading = false;
+        console.log('Server component data:', this.data);
+      },
+      error: (err) => {
+        this.error = err;
+        this.loading = false;
+      },
+    });
   }
 }
