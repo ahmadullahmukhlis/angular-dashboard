@@ -24,6 +24,10 @@ export class LinearChart {
     if (this.isLoading !== undefined) {
       this.loading = this.isLoading;
     }
+    if (this.isServer && this.url) {
+      this.loadData();
+      this.config.categories = this.data; // Update config with fetched data
+    }
   }
 
   loadData() {
@@ -38,7 +42,7 @@ export class LinearChart {
         this.data = Array.isArray(res) ? res : (res?.data ?? res);
 
         this.loading = false;
-        console.log('Server component data:', this.data);
+        console.log(' data:', this.data);
       },
       error: (err) => {
         this.error = err;
