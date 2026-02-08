@@ -12,7 +12,10 @@ export class LinearChart {
   @Input() config!: IAxisChart;
   @Input() title: string = 'Linear Data';
   @Input() isLoading?: boolean = false;
+  @Input() isServer: boolean = false;
+  @Input() url?: string;
   loading = false;
+  data: any = [];
   ngOnInit() {
     if (this.isLoading !== undefined) {
       this.loading = this.isLoading;
