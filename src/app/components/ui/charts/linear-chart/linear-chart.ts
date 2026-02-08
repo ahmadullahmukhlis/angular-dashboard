@@ -15,6 +15,7 @@ export class LinearChart {
   @Input() isLoading?: boolean = false;
   @Input() isServer: boolean = false;
   @Input() url?: string;
+  @Input() height: number = 350;
   loading = false;
   data: any = [];
   error: any = null;
