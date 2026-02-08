@@ -1,0 +1,8 @@
+<apx-chart
+  [series]="config.series"
+  [chart]="{ type: config.type, height: 350 }"
+  [labels]="[config.label]"
+  [plotOptions]="config.plotOptions || { radialBar: { hollow: { size: '70%' } } }"
+  [title]="{ text: title }"
+>
+</apx-chart>
