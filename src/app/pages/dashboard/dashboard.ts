@@ -7,10 +7,19 @@ import { DataTableConfig, RowAction } from '../../models/datatable.model';
 import { Datatable } from '../../components/ui/datatable/datatable';
 import { ServerData } from '../../components/ui/server-data/server-data';
 import { ComponentService } from '../../services/genral/component.service';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [NgClass, NgFor, Modal, DynamicFormBuilderComponent, Datatable, ServerData],
+  imports: [
+    NgClass,
+    NgFor,
+    Modal,
+    DynamicFormBuilderComponent,
+    Datatable,
+    ServerData,
+    NgApexchartsModule,
+  ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
