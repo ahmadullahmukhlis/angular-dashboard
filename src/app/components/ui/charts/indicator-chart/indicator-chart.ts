@@ -11,4 +11,6 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 export class IndicatorChart {
   @Input() config!: IIndicatorChart;
   @Input() title: string = 'Performance Indicator';
+  isLoading: boolean = false;
+  
 }
