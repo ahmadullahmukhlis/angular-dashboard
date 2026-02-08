@@ -21,9 +21,5 @@
 
 <!-- Content -->
 @if (!loading && data && template) {
-  <ng-container [ngSwitch]="renderKey">
-    <ng-container *ngSwitchCase="renderKey">
-      <ng-container *ngTemplateOutlet="template; context: { $implicit: data }"></ng-container>
-    </ng-container>
-  </ng-container>
+  <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="{ $implicit: data }" />
 }
