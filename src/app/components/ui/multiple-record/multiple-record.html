@@ -5,27 +5,33 @@
       {{ label }}
     </p>
 
-    <!-- Add Record Modal -->
-    <app-modal-provider title="Record creation form">
-      <ng-template #activator let-handleModal="handleModal">
-        <button
-          type="button"
-          class="px-3 py-1 text-sm border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
-          (click)="handleModal(true)"
-        >
-          {{ field?.add_btn_label ?? 'Add new record' }}
-        </button>
-      </ng-template>
-
-      <ng-template #default let-handleModal="handleModal">
-        <app-form-multiple-record-form
-          [record]="null"
-          [form]="field?.form"
-          (formSubmitted)="onFormSubmitted($event, null); handleModal(false)"
-        />
-      </ng-template>
-    </app-modal-provider>
+    <!-- Add Button -->
+    <button
+      type="button"
+      class="px-3 py-1 text-sm border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
+      (click)="openAddModal()"
+    >
+      {{ field?.add_btn_label ?? 'Add new record' }}
+    </button>
   </div>
+
+  <!-- ADD MODAL -->
+  <app-modal [visible]="addModalVisible" title="Record creation form" (onClose)="closeAddModal()">
+    <app-form-multiple-record-form
+      [record]="null"
+      [form]="field?.form"
+      (formSubmitted)="handleAddSubmit($event)"
+    />
+  </app-modal>
+
+  <!-- EDIT MODAL -->
+  <app-modal [visible]="editModalVisible" title="Record edit form" (onClose)="closeEditModal()">
+    <app-form-multiple-record-form
+      [record]="selectedRecord"
+      [form]="field?.form"
+      (formSubmitted)="handleEditSubmit($event)"
+    />
+  </app-modal>
 
   <!-- Table -->
   <div class="my-4 overflow-auto">
@@ -42,7 +48,6 @@
       </thead>
 
       <tbody>
-        <!-- No records -->
         @if (values.length < 1) {
           <tr>
             <td
@@ -52,10 +57,8 @@
               No record found
             </td>
           </tr>
-        }
 
-        <!-- Records -->
-        @else {
+        } @else {
           @for (value of values; track value?.id) {
             <tr>
               @for (f of field?.form?.fields; track f?.name) {
@@ -65,24 +68,10 @@
               }
 
               <td class="border px-3 py-2 space-x-2">
-                <!-- Edit Modal -->
-                <app-modal-provider title="Record edit form">
-                  <ng-template #activator let-handleModal="handleModal">
-                    <button type="button" class="text-orange-500" (click)="handleModal(true)">
-                      Edit
-                    </button>
-                  </ng-template>
+                <button type="button" class="text-orange-500" (click)="openEditModal(value)">
+                  Edit
+                </button>
 
-                  <ng-template #default let-handleModal="handleModal">
-                    <app-form-multiple-record-form
-                      [record]="value"
-                      [form]="field?.form"
-                      (formSubmitted)="onFormSubmitted($event, value); handleModal(false)"
-                    />
-                  </ng-template>
-                </app-modal-provider>
-
-                <!-- Delete -->
                 <button type="button" class="text-red-500" (click)="handleDelete(value?.id)">
                   Delete
                 </button>
@@ -94,7 +83,6 @@
     </table>
   </div>
 
-  <!-- Error -->
   @if (errorMessage) {
     <p class="text-red-500 text-sm mt-2">
       {{ errorMessage }}
