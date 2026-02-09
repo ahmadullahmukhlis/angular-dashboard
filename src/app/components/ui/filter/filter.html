@@ -11,7 +11,7 @@
           pInputText
           [formControlName]="field.name"
           [placeholder]="field.label"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
           class="w-full"
           (blur)="form.get(field.name)?.markAsTouched()"
         />
@@ -21,7 +21,7 @@
       @if (field.type === 'number') {
         <p-inputNumber
           [formControlName]="field.name"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
           class="w-full"
           (onBlur)="form.get(field.name)?.markAsTouched()"
         ></p-inputNumber>
@@ -31,7 +31,7 @@
       @if (field.type === 'date') {
         <p-datePicker
           [formControlName]="field.name"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
           (onBlur)="form.get(field.name)?.markAsTouched()"
         ></p-datePicker>
       }
@@ -42,7 +42,7 @@
           pTextarea
           rows="4"
           [formControlName]="field.name"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
           class="w-full"
           (blur)="form.get(field.name)?.markAsTouched()"
         ></textarea>
@@ -53,13 +53,16 @@
         <p-checkbox
           binary="true"
           [formControlName]="field.name"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
         ></p-checkbox>
       }
 
       <!-- SWITCH -->
       @if (field.type === 'switch') {
-        <p-toggleSwitch [formControlName]="field.name" [disabled]="field.disabled"></p-toggleSwitch>
+        <p-toggleSwitch
+          [formControlName]="field.name"
+          [disabled]="field.disabled ?? false"
+        ></p-toggleSwitch>
       }
 
       <!-- SELECT -->
@@ -67,7 +70,7 @@
         <p-select
           [options]="field.options"
           [formControlName]="field.name"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
           [optionLabel]="field.optionLabel ?? 'id'"
           class="w-full"
           appendTo="body"
@@ -79,7 +82,7 @@
       @if (field.type === 'server-select') {
         <app-single-select
           [url]="field.url"
-          [disabled]="field.disabled"
+          [disabled]="field.disabled ?? false"
           [optionLabel]="field.optionLabel ?? 'id'"
           [optionValue]="field.optionValue ?? 'name'"
           (valueChange)="handleSelectChange(field, $event)"

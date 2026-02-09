@@ -8,6 +8,7 @@ import { Datatable } from '../../components/ui/datatable/datatable';
 import { ServerData } from '../../components/ui/server-data/server-data';
 import { ComponentService } from '../../services/genral/component.service';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { MultipleRecord } from '../../components/ui/multiple-record/multiple-record';
 
 @Component({
   selector: 'app-dashboard',
@@ -253,6 +254,31 @@ export class Dashboard {
       url: 'posts',
       optionLabel: 'title',
       optionValue: 'id',
+    },
+    {
+      name: 'addresses',
+      label: 'Addresses',
+      type: 'multiple',
+      disabled: false,
+      defaultValue: [],
+      form: {
+        fields: [
+          {
+            name: 'street',
+            label: 'Street',
+            type: 'text',
+            required: true,
+            disabled: false,
+          },
+          {
+            name: 'city',
+            label: 'City',
+            type: 'text',
+            required: true,
+            disabled: false,
+          },
+        ],
+      },
     },
   ];
 

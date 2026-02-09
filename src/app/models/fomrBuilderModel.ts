@@ -25,7 +25,7 @@ export interface DynamicField {
   label: string;
 
   defaultValue?: any;
-  disabled: boolean;
+  disabled?: boolean;
   required?: boolean;
 
   className?: string;
@@ -48,6 +48,11 @@ export interface DynamicField {
   optionLabel?: string;
   optionValue?: string;
   multiple?: boolean;
+  form?: {
+    className?: string;
+    submitAreaClassName?: string;
+    fields: DynamicField[];
+  };
 
   /* mapping */
   changeValue?: string;

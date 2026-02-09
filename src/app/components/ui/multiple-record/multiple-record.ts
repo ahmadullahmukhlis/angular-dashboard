@@ -1,4 +1,12 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormMultipleRecordForm } from '../form-multiple-record-form/form-multiple-record-form';
 import { Modal } from '../modal/modal';
@@ -10,7 +18,7 @@ import { Modal } from '../modal/modal';
   templateUrl: './multiple-record.html',
   styleUrl: './multiple-record.css',
 })
-export class MultipleRecord implements OnInit {
+export class MultipleRecord implements OnInit, OnChanges {
   @Input() defaultValues: any[] = [];
   @Input() label: string | undefined;
   @Input() field: any;
@@ -25,11 +33,32 @@ export class MultipleRecord implements OnInit {
   editModalVisible = false;
   selectedRecord: any = null;
 
+  /* =========================
+     LIFECYCLE
+  ========================== */
+
   ngOnInit(): void {
-    if (this.defaultValues && Array.isArray(this.defaultValues)) {
-      this.values = [...this.defaultValues];
+    this.initializeValues();
+    console.log('MultipleRecord initialized with values:', this.values);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['defaultValues']) {
+      this.initializeValues();
     }
   }
+
+  private initializeValues() {
+    if (Array.isArray(this.defaultValues)) {
+      this.values = [...this.defaultValues];
+    } else {
+      this.values = [];
+    }
+  }
+
+  /* =========================
+     UTIL
+  ========================== */
 
   generateRandomId(): string {
     return Math.random().toString(36).substring(2, 15);
@@ -62,13 +91,12 @@ export class MultipleRecord implements OnInit {
   ========================== */
 
   handleAddSubmit(formValues: any) {
-    this.values = [
-      ...this.values,
-      {
-        id: this.generateRandomId(),
-        ...formValues,
-      },
-    ];
+    const newRecord = {
+      id: this.generateRandomId(),
+      ...formValues,
+    };
+
+    this.values = [...this.values, newRecord];
 
     this.onChange.emit(this.values);
     this.closeAddModal();
@@ -82,6 +110,8 @@ export class MultipleRecord implements OnInit {
         id: this.selectedRecord.id,
         ...formValues,
       };
+
+      this.values = [...this.values]; // trigger change detection
     }
 
     this.onChange.emit(this.values);
@@ -90,6 +120,7 @@ export class MultipleRecord implements OnInit {
 
   handleDelete(id: string) {
     this.values = this.values.filter((v) => v.id !== id);
+
     this.onChange.emit(this.values);
   }
 }

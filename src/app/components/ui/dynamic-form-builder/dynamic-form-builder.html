@@ -6,7 +6,7 @@
         @if (field.type === 'profile-image') {
           <app-add-profile-image
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             (valueChange)="handleSingleFileChange(field, $event)"
           ></app-add-profile-image>
         }
@@ -16,7 +16,7 @@
             pInputText
             [formControlName]="field.name"
             [placeholder]="field.placeholder ?? field.label"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
           />
@@ -26,7 +26,7 @@
         @if (field.type === 'number') {
           <p-inputNumber
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             class="w-full"
             (onBlur)="form.get(field.name)?.markAsTouched()"
@@ -38,7 +38,7 @@
           <p-password
             toggleMask
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-password>
@@ -48,7 +48,7 @@
         @if (field.type === 'date') {
           <p-datePicker
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-datePicker>
@@ -60,7 +60,7 @@
             pTextarea
             rows="4"
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
@@ -72,7 +72,7 @@
           <p-checkbox
             binary="true"
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
           ></p-checkbox>
         }
         @if (field.type === 'radio') {
@@ -83,7 +83,7 @@
                   [name]="field.name"
                   [value]="opt[field.optionValue ?? 'value']"
                   [formControlName]="field.name"
-                  [disabled]="field.disabled"
+                  [disabled]="field.disabled ?? false"
                 ></p-radioButton>
 
                 <label>
@@ -101,7 +101,7 @@
                   [binary]="false"
                   [value]="opt[field.optionValue ?? 'value']"
                   [formControlName]="field.name"
-                  [disabled]="field.disabled"
+                  [disabled]="field.disabled ?? false"
                 ></p-checkbox>
 
                 <label>
@@ -116,7 +116,7 @@
         @if (field.type === 'switch') {
           <p-toggleSwitch
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
           ></p-toggleSwitch>
         }
 
@@ -125,7 +125,7 @@
           <p-select
             [options]="field.options"
             [formControlName]="field.name"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             [optionLabel]="field.optionLabel ?? 'id'"
             [optionValue]="field.optionValue ?? 'id'"
             [placeholder]="field.placeholder ?? 'Select'"
@@ -166,7 +166,7 @@
           <p-editor
             [formControlName]="field.name"
             placeholder="Enter text here..."
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-editor>
         }
@@ -177,7 +177,7 @@
             type="file"
             [placeholder]="field.placeholder ?? 'select file'"
             (change)="form.get(field.name)?.setValue($any($event.target).files[0])"
-            [disabled]="field.disabled"
+            [disabled]="field.disabled ?? false"
           />
         }
         @if (field.type === 'file-upload') {
@@ -187,9 +187,10 @@
           ></app-file-upload>
         }
         @if (field.type === 'multiple') {
+          <p>{{ field.type }}</p>
           <app-multiple-record
             [label]="field?.label"
-            [defaultValues]="field?.defaultValue || []"
+            [defaultValues]="form.get(field.name)?.value || []"
             [field]="field"
             (onChange)="form.get(field.name)?.setValue($event)"
           />
