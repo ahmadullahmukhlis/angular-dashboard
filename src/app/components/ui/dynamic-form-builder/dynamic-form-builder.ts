@@ -24,6 +24,7 @@ import { ComponentService } from '../../../services/genral/component.service';
 import { FileUpload } from '../file-upload/file-upload';
 import { RadioButton } from 'primeng/radiobutton';
 import { AddProfileImage } from '../add-profile-image/add-profile-image';
+import { MultipleRecord } from '../multiple-record/multiple-record';
 
 @Component({
   selector: 'app-dynamic-form-builder',
@@ -46,6 +47,7 @@ import { AddProfileImage } from '../add-profile-image/add-profile-image';
     FileUpload,
     RadioButton,
     AddProfileImage,
+    MultipleRecord,
   ],
   templateUrl: './dynamic-form-builder.html',
 })

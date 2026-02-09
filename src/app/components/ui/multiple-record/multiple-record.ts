@@ -12,7 +12,7 @@ import { Modal } from '../modal/modal';
 })
 export class MultipleRecord implements OnInit {
   @Input() defaultValues: any[] = [];
-  @Input() label!: string;
+  @Input() label: string | undefined;
   @Input() field: any;
   @Input() errorMessage!: string;
 

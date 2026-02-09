@@ -186,6 +186,14 @@
             (fileChange)="handleFileChange(field, $event)"
           ></app-file-upload>
         }
+        @if (field.type === 'multiple') {
+          <app-multiple-record
+            [label]="field?.label"
+            [defaultValues]="field?.defaultValue || []"
+            [field]="field"
+            (onChange)="form.get(field.name)?.setValue($event)"
+          />
+        }
 
         <!-- DIV (Label only) -->
         @if (field.type === 'div') {
