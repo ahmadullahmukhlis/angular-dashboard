@@ -186,7 +186,7 @@
             (fileChange)="handleFileChange(field, $event)"
           ></app-file-upload>
         }
-        @if (field.type === 'multiple') {
+        @if (field.type === 'reaper') {
           <p>{{ field.type }}</p>
           <app-multiple-record
             [label]="field?.label"

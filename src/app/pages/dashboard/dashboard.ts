@@ -258,7 +258,7 @@ export class Dashboard {
     {
       name: 'addresses',
       label: 'Addresses',
-      type: 'multiple',
+      type: 'reaper',
       disabled: false,
       defaultValue: [],
       form: {
