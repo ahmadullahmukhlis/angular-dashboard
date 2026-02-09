@@ -254,12 +254,14 @@ export class Dashboard {
       url: 'posts',
       optionLabel: 'title',
       optionValue: 'id',
+      className: 'col-span-2',
     },
     {
       name: 'addresses',
       label: 'Addresses',
       type: 'reaper',
       disabled: false,
+      className: 'col-span-2',
       defaultValue: [],
       form: {
         fields: [
