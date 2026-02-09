@@ -66,6 +66,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
   @Output() submitCompleted = new EventEmitter<any>();
   @Output() valuesChanged = new EventEmitter<any>();
+  @Output() formSubmitted = new EventEmitter<any>();
 
   form!: FormGroup;
   loading = false;
@@ -214,6 +215,11 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
       this.hiddenFields?.forEach((h) => fd.append(h.name, h.value));
       payload = fd;
+    }
+
+    if (this.formSubmitted.observed) {
+      this.formSubmitted.emit(payload);
+      return;
     }
 
     this.componentService
