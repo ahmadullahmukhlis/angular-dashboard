@@ -52,7 +52,7 @@ export class FormMultipleRecordForm implements OnChanges, AfterViewInit {
       'fields',
       this.form.fields.map((f: any) => ({
         ...f,
-        value: this.record ? this.record[f.name] : f.value,
+        defaultValue: this.record ? this.record[f.name] : f.value,
       })),
     );
     cmpRef.setInput('className', this.form.className);
