@@ -34,13 +34,14 @@ import { NgClass } from '@angular/common';
 import { Modal } from '../modal/modal';
 import { Filter } from '../filter/filter';
 import { Loading } from "../loading/loading";
+import { Error } from "../error/error";
 
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter, Loading],
+  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter, Loading, Error],
 })
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ✅ API URL
