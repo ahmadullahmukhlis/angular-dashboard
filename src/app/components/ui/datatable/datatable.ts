@@ -33,8 +33,8 @@ import { Paginator } from 'primeng/paginator';
 import { NgClass } from '@angular/common';
 import { Modal } from '../modal/modal';
 import { Filter } from '../filter/filter';
-import { Loading } from "../loading/loading";
-import { Error } from "../error/error";
+import { Loading } from '../loading/loading';
+import { Error } from '../error/error';
 
 @Component({
   selector: 'app-datatable',
@@ -174,7 +174,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = err.message || 'Error loading data';
+        this.error = err?.message ?? 'An unexpected error occurred';
         this.loading = false;
       },
     });

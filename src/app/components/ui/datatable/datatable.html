@@ -380,11 +380,7 @@
               "
               class="text-center"
             >
-              <app-error
-                [error]="'Failed to load data.'"
-                [size]="'sm'"
-                (refresh)="refresh()"
-              ></app-error>
+              <app-error [error]="error" [size]="'sm'" (refresh)="refresh()"></app-error>
             </td>
           </tr>
         }
