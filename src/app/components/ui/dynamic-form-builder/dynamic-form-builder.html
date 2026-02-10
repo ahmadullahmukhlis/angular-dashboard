@@ -2,7 +2,10 @@
   <div [class]="className">
     @for (field of visibleFields(); track field.name) {
       <div [class]="field.className">
-        <label class="block mb-1 font-medium">{{ field.label }}</label>
+        @if (field.type !== 'repeater') {
+          <label class="block mb-1 font-medium">{{ field.label }}</label>
+        }
+
         @if (field.type === 'profile-image') {
           <app-add-profile-image
             [formControlName]="field.name"
@@ -187,7 +190,6 @@
           ></app-file-upload>
         }
         @if (field.type === 'repeater') {
-          <p>{{ field.type }}</p>
           <app-multiple-record
             [label]="field?.label"
             [defaultValues]="form.get(field.name)?.value || []"
