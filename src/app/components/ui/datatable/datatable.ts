@@ -235,7 +235,9 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   handleSelectAll() {
-    this.selectedRows = this.selectAll ? [...this.data] : [];
+    this.selectAll = !this.selectAll;
+    this.selectedRows = this.selectAll ? this.data : [];
+    console.log('Selected Rows after toggle:', this.data);
     this.internalState.selection.selectedRows = [...this.selectedRows];
     this.onRowSelect.emit([...this.selectedRows]);
   }
