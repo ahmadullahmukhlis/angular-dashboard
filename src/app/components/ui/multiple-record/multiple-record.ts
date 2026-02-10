@@ -8,12 +8,13 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormMultipleRecordForm } from '../form-multiple-record-form/form-multiple-record-form';
 import { Modal } from '../modal/modal';
 
 @Component({
   selector: 'app-multiple-record',
   standalone: true,
-  imports: [CommonModule, Modal],
+  imports: [CommonModule, Modal, FormMultipleRecordForm],
   templateUrl: './multiple-record.html',
   styleUrl: './multiple-record.css',
 })

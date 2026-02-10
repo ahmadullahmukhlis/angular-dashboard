@@ -1,40 +1,66 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DynamicFormBuilderComponent } from "../dynamic-form-builder/dynamic-form-builder";
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+  ViewChild,
+  ViewContainerRef,
+  AfterViewInit,
+} from '@angular/core';
 
 @Component({
   selector: 'app-form-multiple-record-form',
-  imports: [DynamicFormBuilderComponent],
-  templateUrl: './form-multiple-record-form.html',
-  styleUrl: './form-multiple-record-form.css',
+  standalone: true,
+  templateUrl: './form-multiple-record-form.html', // using HTML file
+  styleUrls: ['./form-multiple-record-form.css'],
 })
-export class FormMultipleRecordForm implements OnChanges {
+export class FormMultipleRecordForm implements OnChanges, AfterViewInit {
   @Input() form: any;
   @Input() record: any | null = null;
-
   @Output() formSubmitted = new EventEmitter<any>();
 
-  mappedFields: any[] = [];
+  @ViewChild('container', { read: ViewContainerRef, static: true })
+  container!: ViewContainerRef;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['form'] || changes['record']) {
-      this.mapFields();
+  ngAfterViewInit() {
+    this.loadDynamicComponent();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (this.container) {
+      this.loadDynamicComponent();
     }
   }
 
-  private mapFields() {
-    if (!this.form?.fields) {
-      this.mappedFields = [];
-      return;
-    }
+  private async loadDynamicComponent() {
+    if (!this.form?.fields) return;
 
-    this.mappedFields = this.form.fields.map((field: any) => ({
-      ...field,
-      value: this.record ? this.record?.[field?.name] : field?.value,
-    }));
-  }
+    // Lazy load like Vue's defineAsyncComponent
+    const { DynamicFormBuilderComponent } =
+      await import('../dynamic-form-builder/dynamic-form-builder');
 
-  handleSubmit(values: any) {
-    this.formSubmitted.emit(values);
+    // Clear previous component
+    this.container.clear();
+
+    // Create dynamic component
+    const cmpRef = this.container.createComponent(DynamicFormBuilderComponent);
+
+    // Set inputs
+    cmpRef.setInput(
+      'fields',
+      this.form.fields.map((f: any) => ({
+        ...f,
+        value: this.record ? this.record[f.name] : f.value,
+      })),
+    );
+    cmpRef.setInput('className', this.form.className);
+    cmpRef.setInput('submitAreaClassName', this.form.submitAreaClassName);
+
+    // Subscribe to output
+    cmpRef.instance.formSubmitted.subscribe((values: any) => {
+      this.formSubmitted.emit(values);
+    });
   }
 }
