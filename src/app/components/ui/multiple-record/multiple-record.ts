@@ -39,8 +39,6 @@ export class MultipleRecord implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initializeValues();
-    console.log('MultipleRecord initialized with values:', this.values);
-    alert('MultipleRecord component initialized. Check console for details.');
   }
 
   ngOnChanges(changes: SimpleChanges): void {

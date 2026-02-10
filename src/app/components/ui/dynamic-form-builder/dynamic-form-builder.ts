@@ -222,6 +222,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     if (this.formSubmitted.observed) {
       this.formSubmitted.emit(payload);
+      this.loading = false;
       return;
     }
 
