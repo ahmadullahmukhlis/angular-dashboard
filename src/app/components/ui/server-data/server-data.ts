@@ -15,11 +15,12 @@ import { CommonModule } from '@angular/common';
 
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
+import { Error } from "../error/error";
 
 @Component({
   selector: 'app-server-data',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Error],
   templateUrl: './server-data.html',
   styleUrls: ['./server-data.css'],
 })

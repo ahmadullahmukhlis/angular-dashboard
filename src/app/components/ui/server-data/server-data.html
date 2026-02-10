@@ -9,9 +9,7 @@
 
 <!-- Error -->
 @if (error) {
-  <div class="text-center text-red-500 py-12">
-    {{ error?.error?.message || 'Something went wrong' }}
-  </div>
+  <app-error [error]="error" [size]="'sm'" (refresh)="loadData()"></app-error>
 }
 
 <!-- No Data -->
