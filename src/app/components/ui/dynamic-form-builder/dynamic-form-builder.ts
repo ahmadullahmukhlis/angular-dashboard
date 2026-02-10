@@ -209,15 +209,16 @@ export class DynamicFormBuilderComponent implements OnChanges {
     if (hasFileWithValue) {
       // Use FormData
       const fd = new FormData();
+
       Object.keys(payload).forEach((k) => {
         const val = payload[k];
+
         if (val instanceof File) {
-          fd.append(k, val);
-        } else if (Array.isArray(val) && val[0] instanceof File) {
+          fd.append(k, val); // single file
+        } else if (Array.isArray(val) && val.length > 0 && val[0] instanceof File) {
           val.forEach((file: File) => fd.append(k, file));
         } else {
-          // JSON.stringify for arrays/objects
-          fd.append(k, val instanceof Object ? JSON.stringify(val) : val);
+          fd.append(k, val);
         }
       });
 
