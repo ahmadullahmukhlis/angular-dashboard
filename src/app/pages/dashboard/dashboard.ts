@@ -264,6 +264,7 @@ export class Dashboard {
       className: 'col-span-2',
       defaultValue: [],
       form: {
+        className: 'grid grid-cols-2 gap-4',
         fields: [
           {
             name: 'street',
