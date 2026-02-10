@@ -6,23 +6,23 @@ import { HttpClient, HttpEventType } from '@angular/common/http';
 /* PrimeNG 18+ Updated Imports */
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { DatePickerModule } from 'primeng/datepicker'; // Replaces CalendarModule
+import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { CheckboxModule } from 'primeng/checkbox';
-import { ToggleSwitchModule } from 'primeng/toggleswitch'; // Replaces InputSwitchModule
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { SelectModule } from 'primeng/select'; // Replaces DropdownModule
+import { SelectModule } from 'primeng/select';
+import { RadioButton } from 'primeng/radiobutton';
 
-/* Custom Imports */
+/* Custom Components */
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { SingleSelect } from '../single-select/single-select';
 import { MultiSelected } from '../multi-selected/multi-selected';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { FileUpload } from '../file-upload/file-upload';
-import { RadioButton } from 'primeng/radiobutton';
 import { AddProfileImage } from '../add-profile-image/add-profile-image';
 import { MultipleRecord } from '../multiple-record/multiple-record';
 
@@ -52,7 +52,6 @@ import { MultipleRecord } from '../multiple-record/multiple-record';
   templateUrl: './dynamic-form-builder.html',
 })
 export class DynamicFormBuilderComponent implements OnChanges {
-  // Use inject() for all services to follow Angular 18+ best practices
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   toastService = inject(ToastService);
@@ -85,7 +84,6 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     this.fields.forEach((f) => {
       const validators = [];
-
       if (f.required) {
         if (f.type === 'checkbox-group') {
           validators.push(this.checkboxGroupRequiredValidator());
@@ -100,8 +98,6 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (f.pattern) validators.push(Validators.pattern(f.pattern));
 
       let defaultValue: any = f.defaultValue ?? null;
-
-      // 🔹 Proper default values by type
       if (f.type === 'checkbox') defaultValue = f.defaultValue ?? false;
       if (f.type === 'switch') defaultValue = f.defaultValue ?? false;
       if (f.type === 'checkbox-group') defaultValue = f.defaultValue ?? [];
@@ -113,6 +109,8 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     this.form = this.fb.group(group);
 
+    // Reset submitted flag and emit changes
+    this.submitted = false;
     this.form.valueChanges.subscribe((v) => this.valuesChanged.emit(v));
   }
 
@@ -126,55 +124,40 @@ export class DynamicFormBuilderComponent implements OnChanges {
     this.form.get(field.name)?.setValue(val);
     field.onSelect?.(row);
   }
+
   handleFileChange(field: DynamicField, files: File[]) {
     if (!files || files.length === 0) return;
-
-    // If multiple = false → store single file
-    if (!field.multiple) {
-      this.form.get(field.name)?.setValue(files[0]);
-    } else {
-      this.form.get(field.name)?.setValue(files);
-    }
-
-    // Mark control as touched to trigger validation
+    this.form.get(field.name)?.setValue(field.multiple ? files : files[0]);
     this.form.get(field.name)?.markAsTouched();
     this.form.get(field.name)?.updateValueAndValidity();
   }
 
-  // Handles single file upload only
   handleSingleFileChange(field: DynamicField, file: File | string) {
     if (!file) return;
-
-    // Set the form control value to this single file
-    this.form.get(field.name)?.setValue(file);
-
-    // Mark control as touched to trigger validation
     const control = this.form.get(field.name);
-    if (control) {
-      control.markAsTouched();
-      control.updateValueAndValidity();
-    }
+    control?.setValue(file);
+    control?.markAsTouched();
+    control?.updateValueAndValidity();
   }
 
+  /** ======================
+   * FORM SUBMISSION
+   * ====================== */
   submit() {
     this.submitted = true;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.loading = false;
       return;
     }
 
     if (this.beforeSubmit) {
       const r = this.beforeSubmit(this.form.value);
-      if (r !== true) {
-        this.loading = false;
-        return;
-      }
+      if (r !== true) return;
     }
 
     if (this.needConfirmation) {
-      this.toastService.confirmAction({ name: 'Do you want to submit the form' }, () =>
+      this.toastService.confirmAction({ name: 'Do you want to submit the form?' }, () =>
         this.dataSubmit(),
       );
       return;
@@ -182,26 +165,26 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     this.dataSubmit();
   }
+
   private checkboxGroupRequiredValidator() {
-    return (control: any) => {
-      return Array.isArray(control.value) && control.value.length > 0 ? null : { required: true };
-    };
+    return (control: any) =>
+      Array.isArray(control.value) && control.value.length > 0 ? null : { required: true };
   }
 
-  dataSubmit() {
+  private dataSubmit() {
     this.loading = true;
     this.progress = false;
     this.percent = 0;
 
     let payload: any = { ...this.form.value };
 
-    // Sanitize null values
+    // Replace nulls with empty strings
     Object.keys(payload).forEach((k) => {
       if (payload[k] === null) payload[k] = '';
     });
 
-    const hasFile = this.fields.some(
-      (f) => f.type === 'file' || f.type === 'file-upload' || f.type === 'profile-image',
+    const hasFile = this.fields.some((f) =>
+      ['file', 'file-upload', 'profile-image'].includes(f.type),
     );
 
     if (hasFile) {
@@ -222,7 +205,8 @@ export class DynamicFormBuilderComponent implements OnChanges {
 
     if (this.formSubmitted.observed) {
       this.formSubmitted.emit(payload);
-      this.resetLoadingState();
+      this.resetForm();
+      this.resetLoading();
       return;
     }
 
@@ -238,21 +222,28 @@ export class DynamicFormBuilderComponent implements OnChanges {
             this.progress = true;
             this.percent = Math.round((e.loaded * 100) / e.total);
           }
-
           if (!hasFile || e.type === HttpEventType.Response) {
             this.submitCompleted.emit(e.body ?? e);
+            this.resetForm();
           }
         },
         error: (err: any) => {
-          console.error('Error submitting form:', err);
+          console.error('Form submission error:', err);
           this.toastService.error('Error submitting form');
-          this.resetLoadingState();
+          this.resetLoading();
         },
-        complete: () => this.resetLoadingState(),
+        complete: () => this.resetLoading(),
       });
   }
 
-  private resetLoadingState() {
+  /** Reset form after submit */
+  private resetForm() {
+    this.form.reset();
+    this.buildForm(); // rebuild to reset default values
+    this.submitted = false;
+  }
+
+  private resetLoading() {
     this.loading = false;
     this.progress = false;
     this.percent = 0;
