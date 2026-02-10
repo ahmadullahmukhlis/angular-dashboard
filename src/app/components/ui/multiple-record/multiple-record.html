@@ -17,20 +17,20 @@
 
   <!-- ADD MODAL -->
   <app-modal [visible]="addModalVisible" title="Record creation form" (onClose)="closeAddModal()">
-    <app-form-multiple-record-form
+    <!-- <app-form-multiple-record-form
       [record]="null"
       [form]="field?.form"
       (formSubmitted)="handleAddSubmit($event)"
-    />
+    /> -->
   </app-modal>
 
   <!-- EDIT MODAL -->
   <app-modal [visible]="editModalVisible" title="Record edit form" (onClose)="closeEditModal()">
-    <app-form-multiple-record-form
+    <!-- <app-form-multiple-record-form
       [record]="selectedRecord"
       [form]="field?.form"
       (formSubmitted)="handleEditSubmit($event)"
-    />
+    /> -->
   </app-modal>
 
   <!-- Table -->

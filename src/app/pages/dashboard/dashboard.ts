@@ -259,7 +259,7 @@ export class Dashboard {
     {
       name: 'addresses',
       label: 'Addresses',
-      type: 'reaper',
+      type: 'repeater',
       disabled: false,
       className: 'col-span-2',
       defaultValue: [],

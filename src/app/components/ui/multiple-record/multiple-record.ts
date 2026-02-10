@@ -8,13 +8,12 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormMultipleRecordForm } from '../form-multiple-record-form/form-multiple-record-form';
 import { Modal } from '../modal/modal';
 
 @Component({
   selector: 'app-multiple-record',
   standalone: true,
-  imports: [CommonModule, FormMultipleRecordForm, Modal],
+  imports: [CommonModule, Modal],
   templateUrl: './multiple-record.html',
   styleUrl: './multiple-record.css',
 })
@@ -40,6 +39,7 @@ export class MultipleRecord implements OnInit, OnChanges {
   ngOnInit(): void {
     this.initializeValues();
     console.log('MultipleRecord initialized with values:', this.values);
+    alert('MultipleRecord component initialized. Check console for details.');
   }
 
   ngOnChanges(changes: SimpleChanges): void {

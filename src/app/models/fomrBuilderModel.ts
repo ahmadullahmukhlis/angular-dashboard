@@ -16,7 +16,7 @@ export type FieldType =
   | 'file-upload'
   | 'checkbox-group'
   | 'profile-image'
-  | 'reaper';
+  | 'repeater';
 
 export interface DynamicField {
   type: FieldType;

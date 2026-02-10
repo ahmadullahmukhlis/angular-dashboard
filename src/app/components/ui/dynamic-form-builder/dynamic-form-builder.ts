@@ -105,6 +105,7 @@ export class DynamicFormBuilderComponent implements OnChanges {
       if (f.type === 'checkbox') defaultValue = f.defaultValue ?? false;
       if (f.type === 'switch') defaultValue = f.defaultValue ?? false;
       if (f.type === 'checkbox-group') defaultValue = f.defaultValue ?? [];
+      if (f.type === 'repeater') defaultValue = f.defaultValue ?? [];
       if (f.type === 'radio') defaultValue = f.defaultValue ?? null;
 
       group[f.name] = [{ value: defaultValue, disabled: f.disabled }, validators];
