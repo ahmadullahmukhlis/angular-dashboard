@@ -244,7 +244,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.selectedRows = [];
     this.selectAll = false;
     this.internalState.selection = { selectedRows: [], allSelected: false };
-    this.onRowSelect.emit([]);
   }
 
   addNew() {
