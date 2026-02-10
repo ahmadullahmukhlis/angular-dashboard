@@ -52,7 +52,6 @@ export interface DataTableConfig {
   selectable?: boolean;
   multiSelect?: boolean;
   showCheckboxes?: boolean;
-  serverSide?: boolean;
   totalRecords?: number;
   loading?: boolean;
   error?: string | null;
@@ -121,4 +120,3 @@ export interface TableState {
   filters: FilterState;
   selection: SelectionState;
 }
-        

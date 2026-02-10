@@ -47,7 +47,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   @Input() name!: string;
   @Input() config: DataTableConfig = {
     columns: [],
-    serverSide: true,
   };
   @Input() tableName: string | null = null; // optional, used for parent-triggered revalidate
 
@@ -102,7 +101,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
       this.loadData();
     });
 
-    if (this.url && this.config.serverSide) {
+    if (this.url) {
       this.pageSize = 10;
       this.loadData();
     }
@@ -190,7 +189,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   handleSort(event: any) {
-    if (!this.config.serverSide) return;
+    if (!this.url) return;
 
     const sortConfig: SortConfig = {
       column: event.field,

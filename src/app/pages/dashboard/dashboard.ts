@@ -328,7 +328,7 @@ export class Dashboard {
         },
       },
     ],
-    serverSide: true,
+
     showCheckboxes: true,
     selectable: true,
     rowActions: this.actions,
