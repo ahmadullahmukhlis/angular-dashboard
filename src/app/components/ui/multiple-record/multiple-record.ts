@@ -16,7 +16,7 @@ import { Modal } from '../modal/modal';
   standalone: true,
   imports: [CommonModule, Modal, FormMultipleRecordForm],
   templateUrl: './multiple-record.html',
-  styleUrl: './multiple-record.css',
+  styleUrls: ['./multiple-record.css'],
 })
 export class MultipleRecord implements OnInit, OnChanges {
   @Input() defaultValues: any[] = [];
@@ -29,13 +29,8 @@ export class MultipleRecord implements OnInit, OnChanges {
   values: any[] = [];
 
   // Modal States
-  addModalVisible = false;
-  editModalVisible = false;
+  modalVisible = false;
   selectedRecord: any = null;
-
-  /* =========================
-     LIFECYCLE
-  ========================== */
 
   ngOnInit(): void {
     this.initializeValues();
@@ -48,16 +43,8 @@ export class MultipleRecord implements OnInit, OnChanges {
   }
 
   private initializeValues() {
-    if (Array.isArray(this.defaultValues)) {
-      this.values = [...this.defaultValues];
-    } else {
-      this.values = [];
-    }
+    this.values = Array.isArray(this.defaultValues) ? [...this.defaultValues] : [];
   }
-
-  /* =========================
-     UTIL
-  ========================== */
 
   generateRandomId(): string {
     return Math.random().toString(36).substring(2, 15);
@@ -68,58 +55,51 @@ export class MultipleRecord implements OnInit, OnChanges {
   ========================== */
 
   openAddModal() {
-    this.addModalVisible = true;
-  }
-
-  closeAddModal() {
-    this.addModalVisible = false;
+    this.selectedRecord = null;
+    this.modalVisible = true;
   }
 
   openEditModal(record: any) {
-    this.selectedRecord = record;
-    this.editModalVisible = true;
+    this.selectedRecord = { ...record };
+    this.modalVisible = true;
   }
 
-  closeEditModal() {
-    this.editModalVisible = false;
+  closeModal() {
+    this.modalVisible = false;
     this.selectedRecord = null;
   }
 
   /* =========================
-     SUBMIT HANDLERS
+     FORM SUBMIT HANDLERS
   ========================== */
 
-  handleAddSubmit(formValues: any) {
-    const newRecord = {
-      id: this.generateRandomId(),
-      ...formValues,
-    };
-
-    this.values = [...this.values, newRecord];
-
-    this.onChange.emit(this.values);
-    this.closeAddModal();
+  handleFormSubmit(formValues: any) {
+    if (this.selectedRecord) {
+      this.updateRecord(formValues);
+    } else {
+      this.addRecord(formValues);
+    }
   }
 
-  handleEditSubmit(formValues: any) {
-    const index = this.values.findIndex((item) => item.id === this.selectedRecord?.id);
-
-    if (index > -1) {
-      this.values[index] = {
-        id: this.selectedRecord.id,
-        ...formValues,
-      };
-
-      this.values = [...this.values]; // trigger change detection
-    }
-
+  private addRecord(formValues: any) {
+    const newRecord = { id: this.generateRandomId(), ...formValues };
+    this.values = [...this.values, newRecord];
     this.onChange.emit(this.values);
-    this.closeEditModal();
+    this.closeModal();
+  }
+
+  private updateRecord(formValues: any) {
+    const index = this.values.findIndex((v) => v.id === this.selectedRecord.id);
+    if (index > -1) {
+      this.values[index] = { id: this.selectedRecord.id, ...formValues };
+      this.values = [...this.values]; // trigger change detection
+      this.onChange.emit(this.values);
+    }
+    this.closeModal();
   }
 
   handleDelete(id: string) {
     this.values = this.values.filter((v) => v.id !== id);
-
     this.onChange.emit(this.values);
   }
 }

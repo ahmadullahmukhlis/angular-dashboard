@@ -1,11 +1,7 @@
 <div>
   <!-- Header -->
   <div class="flex items-center justify-between">
-    <p class="font-medium">
-      {{ label }}
-    </p>
-
-    <!-- Add Button -->
+    <p class="font-medium">{{ label }}</p>
     <button
       type="button"
       class="px-3 py-1 text-sm border border-blue-500 text-blue-500 rounded hover:bg-blue-50"
@@ -15,77 +11,57 @@
     </button>
   </div>
 
-  <!-- ADD MODAL -->
-  <app-modal [visible]="addModalVisible" title="Record creation form" (onClose)="closeAddModal()">
-    <app-form-multiple-record-form
-      [record]="null"
-      [form]="field?.form"
-      (formSubmitted)="handleAddSubmit($event)"
-    />
-  </app-modal>
-
-  <!-- EDIT MODAL -->
-  <app-modal [visible]="editModalVisible" title="Record edit form" (onClose)="closeEditModal()">
+  <!-- MODAL -->
+  <app-modal [visible]="modalVisible" title="Record Form" (onClose)="closeModal()">
     <app-form-multiple-record-form
       [record]="selectedRecord"
       [form]="field?.form"
-      (formSubmitted)="handleEditSubmit($event)"
-    />
+      (formSubmitted)="handleFormSubmit($event)"
+    ></app-form-multiple-record-form>
   </app-modal>
 
   <!-- Table -->
   <div class="my-4 overflow-auto">
-    show the modale and text message
     <table class="min-w-full border border-gray-200 text-center">
       <thead class="bg-gray-50">
         <tr>
-          @for (f of field?.form?.fields; track f?.name) {
-            <th class="border px-3 py-2">
-              {{ f?.label }}
-            </th>
-          }
+          <th *ngFor="let f of field?.form?.fields" class="border px-3 py-2">
+            {{ f?.label }}
+          </th>
           <th class="border px-3 py-2">Actions</th>
         </tr>
       </thead>
 
       <tbody>
-        @if (values.length < 1) {
-          <tr>
-            <td
-              class="p-3 text-center text-red-500"
-              [attr.colspan]="(field?.form?.fields?.length || 0) + 1"
-            >
-              No record found
-            </td>
-          </tr>
-        } @else {
-          @for (value of values; track value?.id) {
-            <tr>
-              @for (f of field?.form?.fields; track f?.name) {
-                <td class="border px-3 py-2">
-                  {{ value[f?.name] }}
-                </td>
-              }
+        <tr *ngIf="values.length < 1">
+          <td
+            class="p-3 text-center text-red-500"
+            [attr.colspan]="(field?.form?.fields?.length || 0) + 1"
+          >
+            No record found
+          </td>
+        </tr>
 
-              <td class="border px-3 py-2 space-x-2">
-                <button type="button" class="text-orange-500" (click)="openEditModal(value)">
-                  Edit
-                </button>
+        <tr *ngFor="let value of values">
+          <td *ngFor="let f of field?.form?.fields" class="border px-3 py-2">
+            {{ value[f?.name] }}
+          </td>
 
-                <button type="button" class="text-red-500" (click)="handleDelete(value?.id)">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          }
-        }
+          <td class="border px-3 py-2 space-x-2">
+            <button type="button" class="text-orange-500" (click)="openEditModal(value)">
+              Edit
+            </button>
+            <button type="button" class="text-red-500" (click)="handleDelete(value?.id)">
+              Delete
+            </button>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  @if (errorMessage) {
-    <p class="text-red-500 text-sm mt-2">
-      {{ errorMessage }}
-    </p>
-  }
+  <!-- Error Message -->
+  <p *ngIf="errorMessage" class="text-red-500 text-sm mt-2">
+    {{ errorMessage }}
+  </p>
 </div>
