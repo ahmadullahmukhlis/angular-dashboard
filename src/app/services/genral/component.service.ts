@@ -32,27 +32,42 @@ export class ComponentService {
       extra?: any;
     },
   ): Observable<any> {
-    let params = new HttpParams().set('page', state.page).set('pageSize', state.pageSize);
+    const queryParts: string[] = [];
 
-    if (state.sortBy) params = params.set('sortBy', state.sortBy);
-    if (state.sortDir) params = params.set('sortDir', state.sortDir);
+    // Base params
+    queryParts.push(`page=${state.page}`);
+    queryParts.push(`pageSize=${state.pageSize}`);
 
-    if (state.filters) {
-      Object.keys(state.filters).forEach((k) => {
-        if (state.filters[k] !== null && state.filters[k] !== '') {
-          params = params.set(k, state.filters[k]);
+    if (state.sortBy) queryParts.push(`sortBy=${state.sortBy}`);
+    if (state.sortDir) queryParts.push(`sortDir=${state.sortDir}`);
+
+    const addParams = (obj: any) => {
+      Object.keys(obj).forEach((k) => {
+        const value = obj[k];
+        if (value === null || value === undefined || value === '') return;
+
+        if (Array.isArray(value)) {
+          value.forEach((v) => {
+            queryParts.push(`${k}=${v}`);
+          });
+        } else if (typeof value === 'object') {
+          // if you DON'T want JSON encoding, flatten it
+          Object.keys(value).forEach((innerKey) => {
+            queryParts.push(`${k}.${innerKey}=${value[innerKey]}`);
+          });
+        } else {
+          queryParts.push(`${k}=${value}`);
         }
       });
-    }
+    };
 
-    if (state.extra) {
-      Object.keys(state.extra).forEach((k) => {
-        params = params.set(k, state.extra[k]);
-      });
-    }
+    if (state.filters) addParams(state.filters);
+    if (state.extra) addParams(state.extra);
 
-    var data = this.api.get(url, { params });
-    console.log(data);
-    return data;
+    const finalUrl = queryParts.length ? `${url}?${queryParts.join('&')}` : url;
+
+    console.log('Final URL:', finalUrl);
+
+    return this.api.get(finalUrl); // no { params }
   }
 }
