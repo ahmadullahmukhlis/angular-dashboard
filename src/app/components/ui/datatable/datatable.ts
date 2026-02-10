@@ -33,13 +33,14 @@ import { Paginator } from 'primeng/paginator';
 import { NgClass } from '@angular/common';
 import { Modal } from '../modal/modal';
 import { Filter } from '../filter/filter';
+import { Loading } from "../loading/loading";
 
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter],
+  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter, Loading],
 })
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ✅ API URL

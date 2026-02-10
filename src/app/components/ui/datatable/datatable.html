@@ -364,43 +364,7 @@
               "
               class="text-center"
             >
-              <div
-                class="flex flex-col items-center justify-center"
-                [ngClass]="{
-                  'py-16': tableSize === 'default',
-                  'py-12': tableSize === 'sm',
-                  'py-10': tableSize === 'xs',
-                }"
-              >
-                <div class="relative">
-                  <div
-                    class="animate-spin rounded-full border-4 border-gray-200"
-                    [ngClass]="{
-                      'h-12 w-12': tableSize === 'default',
-                      'h-10 w-10': tableSize === 'sm',
-                      'h-8 w-8': tableSize === 'xs',
-                    }"
-                  ></div>
-                  <div
-                    class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"
-                    [ngClass]="{
-                      'h-8 w-8': tableSize === 'default',
-                      'h-6 w-6': tableSize === 'sm',
-                      'h-5 w-5': tableSize === 'xs',
-                    }"
-                  ></div>
-                </div>
-                <p
-                  class="mt-4 text-gray-600 font-medium"
-                  [ngClass]="{
-                    'text-base': tableSize === 'default',
-                    'text-sm': tableSize === 'sm',
-                    'text-xs': tableSize === 'xs',
-                  }"
-                >
-                  Loading data...
-                </p>
-              </div>
+              <app-loading [size]="tableSize" message="Loading data..."></app-loading>
             </td>
           </tr>
         }
