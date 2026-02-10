@@ -157,23 +157,21 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.error = null;
 
     const state = {
-      sortBy: this.internalState.sort?.column,
-      sortDir: this.internalState.sort?.direction,
-      filters: this.internalState.filters,
-      page: this.currentPage,
-      pageSize: this.pageSize,
+      page: this.currentPage || 1,
+      pageSize: this.pageSize || 10,
+      sortBy: this.internalState.sort?.column || null,
+      sortDir: this.internalState.sort?.direction || null,
+      filters: this.internalState.filters || {}, // always object
     };
 
     this.componentService.load(this.url, state).subscribe({
       next: (res: any) => {
-        console.log('Data loaded:', res);
         this.data = res.items || res.data || res.results || res.content || res || [];
         this.totalRecords = res.totalRecords || res.total || this.data.length;
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error(err);
         this.error = err.message || 'Error loading data';
         this.loading = false;
       },

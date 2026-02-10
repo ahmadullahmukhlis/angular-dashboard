@@ -21,53 +21,33 @@ export class ComponentService {
   revalidate(id: string | null) {
     this.revalidateSubject.next(id);
   }
-  load(
-    url: string,
-    state: {
-      page: number;
-      pageSize: number;
-      sortBy?: string;
-      sortDir?: string;
-      filters?: any;
-      extra?: any;
-    },
-  ): Observable<any> {
+  load(url: string, state: any): Observable<any> {
     const queryParts: string[] = [];
 
-    // Base params
-    queryParts.push(`page=${state.page}`);
-    queryParts.push(`pageSize=${state.pageSize}`);
+    // Always include pagination
+    queryParts.push(`page=${state.page ?? 1}`);
+    queryParts.push(`pageSize=${state.pageSize ?? 10}`);
 
     if (state.sortBy) queryParts.push(`sortBy=${state.sortBy}`);
     if (state.sortDir) queryParts.push(`sortDir=${state.sortDir}`);
 
-    const addParams = (obj: any) => {
-      Object.keys(obj).forEach((k) => {
-        const value = obj[k];
-        if (value === null || value === undefined || value === '') return;
+    if (state.filters && typeof state.filters === 'object') {
+      Object.keys(state.filters).forEach((key) => {
+        const value = state.filters[key];
 
-        if (Array.isArray(value)) {
-          value.forEach((v) => {
-            queryParts.push(`${k}=${v}`);
-          });
-        } else if (typeof value === 'object') {
-          // if you DON'T want JSON encoding, flatten it
-          Object.keys(value).forEach((innerKey) => {
-            queryParts.push(`${k}.${innerKey}=${value[innerKey]}`);
-          });
-        } else {
-          queryParts.push(`${k}=${value}`);
+        // Ignore null / undefined / objects
+        if (value === null || value === undefined || typeof value === 'object') {
+          return;
         }
+
+        queryParts.push(`${key}=${value}`);
       });
-    };
+    }
 
-    if (state.filters) addParams(state.filters);
-    if (state.extra) addParams(state.extra);
-
-    const finalUrl = queryParts.length ? `${url}?${queryParts.join('&')}` : url;
+    const finalUrl = `${url}?${queryParts.join('&')}`;
 
     console.log('Final URL:', finalUrl);
 
-    return this.api.get(finalUrl); // no { params }
+    return this.api.get(finalUrl);
   }
 }
