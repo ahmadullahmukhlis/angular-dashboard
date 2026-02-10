@@ -210,30 +210,24 @@ export class DynamicFormBuilderComponent implements OnChanges {
       return;
     }
 
-    this.componentService
-      .request(this.method, this.action, {
-        body: payload,
-        observe: hasFile ? 'events' : 'body',
-        reportProgress: hasFile,
-      })
-      .subscribe({
-        next: (e: any) => {
-          if (hasFile && e.type === HttpEventType.UploadProgress && e.total) {
-            this.progress = true;
-            this.percent = Math.round((e.loaded * 100) / e.total);
-          }
-          if (!hasFile || e.type === HttpEventType.Response) {
-            this.submitCompleted.emit(e.body ?? e);
-            this.resetForm();
-          }
-        },
-        error: (err: any) => {
-          console.error('Form submission error:', err);
-          this.toastService.error('Error submitting form');
-          this.resetLoading();
-        },
-        complete: () => this.resetLoading(),
-      });
+    this.componentService.request(this.method, this.action, payload).subscribe({
+      next: (e: any) => {
+        if (hasFile && e.type === HttpEventType.UploadProgress && e.total) {
+          this.progress = true;
+          this.percent = Math.round((e.loaded * 100) / e.total);
+        }
+        if (!hasFile || e.type === HttpEventType.Response) {
+          this.submitCompleted.emit(e.body ?? e);
+          this.resetForm();
+        }
+      },
+      error: (err: any) => {
+        console.error('Form submission error:', err);
+        this.toastService.error('Error submitting form');
+        this.resetLoading();
+      },
+      complete: () => this.resetLoading(),
+    });
   }
 
   /** Reset form after submit */
