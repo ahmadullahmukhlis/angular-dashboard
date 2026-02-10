@@ -556,7 +556,9 @@
                         @for (action of config.rowActions; track action.label) {
                           <button
                             (click)="
-                              rowAction(row, action); toggleRowActions(row); $event.stopPropagation()
+                              rowAction(row, action);
+                              toggleRowActions(row);
+                              $event.stopPropagation()
                             "
                             class="block w-full text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
                             [ngClass]="{
@@ -603,6 +605,7 @@
           [totalRecords]="totalRecords"
           [rowsPerPageOptions]="[5, 10, 20, 50]"
           (onPageChange)="handlePageChange($event)"
+          appendTo="body"
           class="[&_.p-paginator]:border-0 [&_.p-paginator]:bg-transparent [&_.p-paginator]:p-0"
         >
         </p-paginator>
