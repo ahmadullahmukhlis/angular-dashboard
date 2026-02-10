@@ -176,49 +176,82 @@ export class DynamicFormBuilderComponent implements OnChanges {
     this.progress = false;
     this.percent = 0;
 
+    // Start with form values
     let payload: any = { ...this.form.value };
 
-    // Replace nulls with empty strings
+    // Normalize empty values
     Object.keys(payload).forEach((k) => {
-      if (payload[k] === null) payload[k] = '';
+      const field = this.fields.find((f) => f.name === k);
+      if (!field) return;
+
+      if (['file', 'file-upload', 'profile-image'].includes(field.type)) {
+        // Keep empty files as null / empty array
+        if (!payload[k] || (Array.isArray(payload[k]) && payload[k].length === 0)) {
+          payload[k] = field.multiple ? [] : null;
+        }
+      } else {
+        if (payload[k] === null) payload[k] = '';
+      }
     });
 
-    const hasFile = this.fields.some((f) =>
-      ['file', 'file-upload', 'profile-image'].includes(f.type),
-    );
+    // Determine if we have any real file to upload
+    const hasFileWithValue = this.fields.some((f) => {
+      if (!['file', 'file-upload', 'profile-image'].includes(f.type)) return false;
+      const val = payload[f.name];
+      if (!val) return false;
+      if (Array.isArray(val) && val.length === 0) return false;
+      return val instanceof File || (Array.isArray(val) && val[0] instanceof File);
+    });
 
-    if (hasFile) {
+    // --- Payload type selection ---
+    let finalPayload: any;
+
+    if (hasFileWithValue) {
+      // Use FormData
       const fd = new FormData();
       Object.keys(payload).forEach((k) => {
-        if (payload[k] instanceof File) {
-          fd.append(k, payload[k]);
-        } else if (Array.isArray(payload[k]) && payload[k][0] instanceof File) {
-          payload[k].forEach((file: File) => fd.append(k, file));
+        const val = payload[k];
+        if (val instanceof File) {
+          fd.append(k, val);
+        } else if (Array.isArray(val) && val[0] instanceof File) {
+          val.forEach((file: File) => fd.append(k, file));
         } else {
-          fd.append(k, payload[k]);
+          // JSON.stringify for arrays/objects
+          fd.append(k, val instanceof Object ? JSON.stringify(val) : val);
         }
       });
 
+      // Append hidden fields
       this.hiddenFields?.forEach((h) => fd.append(h.name, h.value));
-      payload = fd;
+      finalPayload = fd;
+    } else {
+      // Use plain JSON
+      finalPayload = { ...payload };
+      this.hiddenFields?.forEach((h) => (finalPayload[h.name] = h.value));
     }
 
+    // --- Emit or send to API ---
     if (this.formSubmitted.observed) {
-      this.formSubmitted.emit(payload);
+      this.formSubmitted.emit(finalPayload);
       this.resetForm();
       this.resetLoading();
       return;
     }
 
-    this.componentService.request(this.method, this.action, payload).subscribe({
+    this.componentService.request(this.method, this.action, finalPayload).subscribe({
       next: (e: any) => {
-        if (hasFile && e.type === HttpEventType.UploadProgress && e.total) {
+        if (hasFileWithValue && e.type === HttpEventType.UploadProgress && e.total) {
           this.progress = true;
           this.percent = Math.round((e.loaded * 100) / e.total);
         }
-        if (!hasFile || e.type === HttpEventType.Response) {
+
+        if (!hasFileWithValue || e.type === HttpEventType.Response) {
           this.submitCompleted.emit(e.body ?? e);
-          this.resetForm();
+
+          // Only reset form if uploading files (FormData)
+          if (hasFileWithValue) {
+            this.resetForm();
+          }
         }
       },
       error: (err: any) => {
