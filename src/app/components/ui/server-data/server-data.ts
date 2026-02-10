@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
-import { Error } from "../error/error";
+import { Error } from '../error/error';
 
 @Component({
   selector: 'app-server-data',
@@ -81,7 +81,7 @@ export class ServerData implements OnInit, OnDestroy {
         console.log('Server component data:', this.data);
       },
       error: (err) => {
-        this.error = err;
+        this.error = err?.message ?? 'An unexpected error occurred';
         this.loading = false;
         this.cdr.detectChanges();
       },
