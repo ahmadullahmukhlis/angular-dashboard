@@ -227,8 +227,15 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   toggleRowSelection(row: any) {
     const idx = this.selectedRows.indexOf(row);
-    if (idx > -1) this.selectedRows.splice(idx, 1);
-    else this.selectedRows.push(row);
+
+    if (idx > -1) {
+      this.selectedRows.splice(idx, 1);
+    } else {
+      this.selectedRows.push(row);
+    }
+
+    // Update selectAll state
+    this.selectAll = this.selectedRows.length === this.data.length && this.data.length > 0;
 
     this.internalState.selection.selectedRows = [...this.selectedRows];
     this.onRowSelect.emit([...this.selectedRows]);
@@ -236,8 +243,9 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   handleSelectAll() {
     this.selectAll = !this.selectAll;
-    this.selectedRows = this.selectAll ? this.data : [];
-    console.log('Selected Rows after toggle:', this.data);
+
+    this.selectedRows = this.selectAll ? [...this.data] : [];
+
     this.internalState.selection.selectedRows = [...this.selectedRows];
     this.onRowSelect.emit([...this.selectedRows]);
   }
