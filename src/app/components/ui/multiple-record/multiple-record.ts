@@ -6,10 +6,12 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormMultipleRecordForm } from '../form-multiple-record-form/form-multiple-record-form';
 import { Modal } from '../modal/modal';
+import { ToastService } from '../../../services/genral/tost.service';
 
 @Component({
   selector: 'app-multiple-record',
@@ -31,6 +33,7 @@ export class MultipleRecord implements OnInit, OnChanges {
   // Modal States
   modalVisible = false;
   selectedRecord: any = null;
+  private ToastService = inject(ToastService);
 
   ngOnInit(): void {
     this.initializeValues();
@@ -99,6 +102,12 @@ export class MultipleRecord implements OnInit, OnChanges {
   }
 
   handleDelete(id: string) {
+    this.ToastService.confirmDelete({ name: 'Record' }, () => {
+      this.deleteRecord(id);
+    });
+  }
+
+  private deleteRecord(id: string) {
     this.values = this.values.filter((v) => v.id !== id);
     this.onChange.emit(this.values);
   }
