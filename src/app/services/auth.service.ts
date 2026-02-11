@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
 import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
+import { ApiService } from './api/api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class AuthService {
 
   private router: Router = inject(Router);
   private http: HttpClient = inject(HttpClient);
-  
+  private api = inject(ApiService);
 
   /* ============================
      TOKEN STORAGE
@@ -72,20 +73,16 @@ export class AuthService {
       return of(null);
     }
 
-    return this.http
-      .post<any>(`${this.API_URL}/auth/refresh`, {
-        refreshToken: refreshToken,
-      })
-      .pipe(
-        tap((response) => {
-          // expected: { accessToken, refreshToken }
-          this.setTokens(response.accessToken, response.refreshToken);
-        }),
-        catchError((error) => {
-          this.logout();
-          return of(null);
-        }),
-      );
+    return this.api.post('/auth/refresh', { refreshToken }).pipe(
+      tap((response: any) => {
+        this.setTokens(response.accessToken, response.refreshToken);
+      }),
+      catchError((error) => {
+        console.log('Refresh token failed:', error);
+        this.logout();
+        return of(null);
+      }),
+    );
   }
 
   /* ============================
