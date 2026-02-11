@@ -30,8 +30,8 @@ export class Login implements OnInit {
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
-    }else {
-      this.authService.clearToken();
+    } else {
+      this.authService.clearTokens();
     }
   }
 
@@ -56,13 +56,14 @@ export class Login implements OnInit {
         // }
         console.log(res.data);
         const accessToken = res.access_token;
+        const refreshToken = res.refresh_token;
 
         if (!accessToken) {
           this.errorMessage = 'Invalid server response';
           return;
         }
 
-        this.authService.setToken(accessToken);
+        this.authService.setTokens(accessToken, refreshToken);
         this.router.navigate(['/dashboard']);
       },
 
