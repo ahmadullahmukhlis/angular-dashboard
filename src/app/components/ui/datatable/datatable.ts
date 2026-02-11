@@ -336,12 +336,24 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.onDelete.emit(row);
     this.tableEvent.emit({ type: 'delete', data: row });
   }
+  private getVisibleData(): any[] {
+    return this.data.map((row) => {
+      const filteredRow: any = {};
+      this.visibleColumns.forEach((col) => {
+        filteredRow[col.label || col.key] = this.getCellValue(row, col);
+      });
+      return filteredRow;
+    });
+  }
 
   export(format: 'csv' | 'excel' | 'pdf') {
     this.onExport.emit(format);
     this.tableEvent.emit({ type: 'export', data: format });
-    this.downloadFile(this.data, this.tableName || 'export', format);
+
+    const dataToExport = this.getVisibleData(); // only visible columns
+    this.downloadFile(dataToExport, this.tableName || 'export', format);
   }
+
   rowAction(row: any, action: any) {
     if (action.confirm) {
       this.toastService.confirmAction({ name: action.confirm.Message }, () => action.action(row));
