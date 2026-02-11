@@ -38,14 +38,13 @@ export class FormMultipleRecordForm implements OnChanges, AfterViewInit {
     if (!this.form?.fields) return;
 
     // Lazy load like Vue's defineAsyncComponent
-    const { DynamicFormBuilderComponent } =
-      await import('../dynamic-form-builder/dynamic-form-builder');
+    const { DynamicFormBuilder } = await import('../dynamic-form-builder/dynamic-form-builder');
 
     // Clear previous component
     this.container.clear();
 
     // Create dynamic component
-    const cmpRef = this.container.createComponent(DynamicFormBuilderComponent);
+    const cmpRef = this.container.createComponent(DynamicFormBuilder);
 
     // Set inputs
     cmpRef.setInput(

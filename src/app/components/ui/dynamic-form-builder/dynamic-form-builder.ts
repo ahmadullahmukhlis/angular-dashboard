@@ -51,7 +51,7 @@ import { MultipleRecord } from '../multiple-record/multiple-record';
   ],
   templateUrl: './dynamic-form-builder.html',
 })
-export class DynamicFormBuilderComponent implements OnChanges {
+export class DynamicFormBuilder implements OnChanges {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   toastService = inject(ToastService);
