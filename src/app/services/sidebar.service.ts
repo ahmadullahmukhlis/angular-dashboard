@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, effect } from '@angular/core';
 import { SidebarItem } from '../models/sidebar-item.model';
 import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
 
@@ -7,18 +7,28 @@ import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
 })
 export class SidebarService {
   private sidebarItems: SidebarItem[] = structuredClone(SIDEBAR_ROUTES);
-  private _isCollapsed = signal(false); // ✅ signal for collapsed state
 
-  // expose collapsed state as signal
+  private readonly STORAGE_KEY = 'sidebar-collapsed';
+
+  // ✅ Initialize from localStorage
+  private _isCollapsed = signal<boolean>(localStorage.getItem(this.STORAGE_KEY) === 'true');
+
+  // Expose signal
   sidebarCollapsedSignal = this._isCollapsed;
 
-  constructor() {}
+  constructor() {
+    // ✅ Persist automatically whenever value changes
+    effect(() => {
+      localStorage.setItem(this.STORAGE_KEY, this._isCollapsed().toString());
+    });
+  }
 
-  // Breadcrumb logic
+  // ---------------- Breadcrumb Logic ----------------
+
   getBreadcrumb(): SidebarItem[] {
     const path: SidebarItem[] = [];
 
-    function findActive(items: SidebarItem[]) {
+    const findActive = (items: SidebarItem[]) => {
       for (const item of items) {
         if (item.isActive) {
           path.push(item);
@@ -28,18 +38,21 @@ export class SidebarService {
           findActive(item.children);
         }
       }
-    }
+    };
 
     findActive(this.sidebarItems);
     return path;
   }
+
+  // ---------------- Sidebar Items ----------------
 
   getSidebarItems(): SidebarItem[] {
     return this.sidebarItems;
   }
 
   toggleItemExpansion(itemId: number): void {
-    if (this._isCollapsed()) return; // don't expand if sidebar is collapsed
+    if (this._isCollapsed()) return; // prevent expanding when collapsed
+
     const item = this.findItemById(this.sidebarItems, itemId);
     if (item && item.children) {
       item.isExpanded = !item.isExpanded;
@@ -51,6 +64,8 @@ export class SidebarService {
     const item = this.findItemById(this.sidebarItems, itemId);
     if (item) item.isActive = true;
   }
+
+  // ---------------- Sidebar Collapse ----------------
 
   toggleSidebar(): void {
     this._isCollapsed.set(!this._isCollapsed());
@@ -64,15 +79,19 @@ export class SidebarService {
     return this._isCollapsed();
   }
 
+  // ---------------- Private Helpers ----------------
+
   private deactivateAllItems(items: SidebarItem[]): void {
-    items.forEach(item => {
+    items.forEach((item) => {
       item.isActive = false;
-      if (item.children) this.deactivateAllItems(item.children);
+      if (item.children) {
+        this.deactivateAllItems(item.children);
+      }
     });
   }
 
   private collapseAllItems(items: SidebarItem[]): void {
-    items.forEach(item => {
+    items.forEach((item) => {
       if (item.children) {
         item.isExpanded = false;
         this.collapseAllItems(item.children);
@@ -83,6 +102,7 @@ export class SidebarService {
   private findItemById(items: SidebarItem[], id: number): SidebarItem | null {
     for (const item of items) {
       if (item.id === id) return item;
+
       if (item.children) {
         const found = this.findItemById(item.children, id);
         if (found) return found;
