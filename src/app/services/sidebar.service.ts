@@ -28,19 +28,35 @@ export class SidebarService {
   getBreadcrumb(): SidebarItem[] {
     const path: SidebarItem[] = [];
 
-    const findActive = (items: SidebarItem[]) => {
+    const traverse = (items: SidebarItem[]): boolean => {
       for (const item of items) {
+        // If this item is active, add to path
         if (item.isActive) {
           path.push(item);
-          if (item.children) findActive(item.children);
-          break;
-        } else if (item.children) {
-          findActive(item.children);
+
+          // If children exist, keep digging
+          if (item.children?.length) {
+            const foundChild = traverse(item.children);
+            if (foundChild) {
+              return true;
+            }
+          }
+          return true;
+        }
+
+        // If not active but has children, search deeper
+        if (item.children?.length) {
+          const foundChild = traverse(item.children);
+          if (foundChild) {
+            path.unshift(item); // add parent before child
+            return true;
+          }
         }
       }
+      return false;
     };
 
-    findActive(this.sidebarItems);
+    traverse(this.sidebarItems);
     return path;
   }
 

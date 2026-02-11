@@ -5,12 +5,15 @@ import { RouterModule } from '@angular/router';
 import { SidebarItem } from '../../../models/sidebar-item.model';
 import { SidebarService } from '../../../services/sidebar.service';
 
+import { ChangeDetectionStrategy } from '@angular/core';
+
 @Component({
   selector: 'app-breadcrumb',
-  standalone: true, // ✅ important
-  imports: [CommonModule, RouterModule], // ✅ required for ngFor, ngIf, routerLink
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, RouterModule],
   templateUrl: './breadcrumb.html',
-  styleUrl: './breadcrumb.css',
+  styleUrls: ['./breadcrumb.css'],
 })
 export class Breadcrumb {
   breadcrumb$ = signal<SidebarItem[]>([]);
