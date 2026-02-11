@@ -2,7 +2,7 @@ import { NgClass, NgFor } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Modal } from '../../components/ui/modal/modal';
 import { DynamicField } from '../../models/fomrBuilderModel';
-import { DynamicFormBuilderComponent } from '../../components/ui/dynamic-form-builder/dynamic-form-builder';
+import { DynamicFormBuilder } from '../../components/ui/dynamic-form-builder/dynamic-form-builder';
 import { DataTableConfig, RowAction } from '../../models/datatable.model';
 import { Datatable } from '../../components/ui/datatable/datatable';
 import { ServerData } from '../../components/ui/server-data/server-data';
@@ -12,15 +12,7 @@ import { MultipleRecord } from '../../components/ui/multiple-record/multiple-rec
 
 @Component({
   selector: 'app-dashboard',
-  imports: [
-    NgClass,
-    NgFor,
-    Modal,
-    DynamicFormBuilderComponent,
-    Datatable,
-    ServerData,
-    NgApexchartsModule,
-  ],
+  imports: [NgClass, NgFor, Modal, DynamicFormBuilder, Datatable, ServerData, NgApexchartsModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
