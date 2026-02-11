@@ -1,3 +1,4 @@
+import { inject } from '@angular/core';
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
@@ -12,10 +13,9 @@ import { tap, catchError } from 'rxjs/operators';
 export class AuthService {
   private API_URL = 'http://localhost:8080/api'; // change to your backend
 
-  constructor(
-    private router: Router,
-    private http: HttpClient,
-  ) {}
+  private router: Router = inject(Router);
+  private http: HttpClient = inject(HttpClient);
+  
 
   /* ============================
      TOKEN STORAGE
