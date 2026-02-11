@@ -91,6 +91,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private componentService = inject(ComponentService);
   private sub!: Subscription;
+  exportOpen: boolean = false;
 
   // ================= LIFECYCLE =================
 
@@ -186,6 +187,9 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.loadData();
     this.tableEvent.emit({ type: 'refresh', data: null });
     console.log('Data table refreshed', this.totalRecords);
+  }
+  toggleExport() {
+    this.exportOpen = !this.exportOpen;
   }
 
   handleSort(event: any) {
