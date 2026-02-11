@@ -36,6 +36,11 @@ import { Filter } from '../filter/filter';
 import { Loading } from '../loading/loading';
 import { Error } from '../error/error';
 
+import { Injectable } from '@angular/core';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable, { RowInput } from 'jspdf-autotable';
+
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
@@ -151,6 +156,61 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
     this.pageSize = 10;
     this.clearSelection();
+  }
+  private exportToCsv(data: any[], filename: string): void {
+    const csvContent = this.convertToCsv(data);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', `${filename}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // 2. Excel Export (Using SheetJS)
+  private exportToExcel(data: any[], filename: string): void {
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+    const workbook: XLSX.WorkBook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
+    XLSX.writeFile(workbook, `${filename}.xlsx`);
+  }
+
+  private downloadFile(data: any[], filename: string, type: 'csv' | 'excel' | 'pdf'): void {
+    switch (type) {
+      case 'csv':
+        this.exportToCsv(data, filename);
+        break;
+      case 'excel':
+        this.exportToExcel(data, filename);
+        break;
+      case 'pdf':
+        this.exportToPdf(data, filename);
+        break;
+    }
+  }
+
+  // 3. PDF Export (Using jsPDF)
+  private exportToPdf(data: any[], filename: string): void {
+    const doc = new jsPDF();
+
+    // 2. Extract headers
+    const head = [Object.keys(data[0])];
+
+    // 3. Map values and cast explicitly to RowInput[]
+    const body = data.map((item) => Object.values(item)) as RowInput[];
+
+    autoTable(doc, {
+      head: head,
+      body: body,
+    });
+
+    doc.save(`${filename}.pdf`);
+  }
+
+  private convertToCsv(data: any[]): string {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map((row) => Object.values(row).join(','));
+    return [headers, ...rows].join('\n');
   }
 
   private loadData() {
@@ -280,6 +340,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   export(format: 'csv' | 'excel' | 'pdf') {
     this.onExport.emit(format);
     this.tableEvent.emit({ type: 'export', data: format });
+    this.downloadFile(this.data, this.tableName || 'export', format);
   }
   rowAction(row: any, action: any) {
     if (action.confirm) {
