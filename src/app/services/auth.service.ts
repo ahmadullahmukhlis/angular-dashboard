@@ -1,6 +1,4 @@
-import { inject } from '@angular/core';
-// src/app/services/auth.service.ts
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
@@ -12,11 +10,22 @@ import { ApiService } from './api/api.service';
   providedIn: 'root',
 })
 export class AuthService {
-  private API_URL = 'http://localhost:8080/api'; // change to your backend
+  // Use inject() for modern DI in field initializers
+  private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
+  private readonly api = inject(ApiService);
 
-  private router: Router = inject(Router);
-  private http: HttpClient = inject(HttpClient);
-  private api = inject(ApiService);
+  // Signal to track the current token state reactively
+  private readonly _accessToken = signal<string | null>(localStorage.getItem('accessToken'));
+
+  /**
+   * Computed signal to check if the user is logged in.
+   * Components can use authService.isLoggedIn() reactively.
+   */
+  readonly isLoggedIn = computed(() => {
+    const token = this._accessToken();
+    return !!token && !this.isTokenExpired(token);
+  });
 
   /* ============================
      TOKEN STORAGE
@@ -25,10 +34,11 @@ export class AuthService {
   setTokens(accessToken: string, refreshToken: string) {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
+    this._accessToken.set(accessToken); // Update signal
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
+    return this._accessToken();
   }
 
   getRefreshToken(): string | null {
@@ -38,6 +48,7 @@ export class AuthService {
   clearTokens() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    this._accessToken.set(null);
   }
 
   /* ============================
@@ -47,18 +58,10 @@ export class AuthService {
   isTokenExpired(token: string): boolean {
     try {
       const decoded: any = jwtDecode(token);
-      const now = Date.now() / 1000;
-      return decoded.exp < now;
+      return decoded.exp < Date.now() / 1000;
     } catch {
       return true;
     }
-  }
-
-  isLoggedIn(): boolean {
-    const accessToken = this.getAccessToken();
-    if (!accessToken) return false;
-
-    return !this.isTokenExpired(accessToken);
   }
 
   /* ============================
@@ -78,7 +81,7 @@ export class AuthService {
         this.setTokens(response.accessToken, response.refreshToken);
       }),
       catchError((error) => {
-        console.log('Refresh token failed:', error);
+        console.error('Refresh token failed:', error);
         this.logout();
         return of(null);
       }),
