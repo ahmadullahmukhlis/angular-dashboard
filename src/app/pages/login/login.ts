@@ -30,6 +30,8 @@ export class Login implements OnInit {
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
+    }else {
+      this.authService.clearToken();
     }
   }
 
