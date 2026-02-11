@@ -1,20 +1,18 @@
 import {
   Component,
-  HostListener,
-  Inject,
-  PLATFORM_ID,
-  AfterViewInit,
   ElementRef,
   inject,
   signal,
   computed,
+  PLATFORM_ID,
+  afterNextRender,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarService } from '../../../services/sidebar.service';
 import { Breadcrumb } from '../breadcrumb/breadcrumb';
 import { Router, NavigationEnd } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs/operators';
 import { ComponentService } from '../../../services/genral/component.service';
 
 @Component({
@@ -23,18 +21,24 @@ import { ComponentService } from '../../../services/genral/component.service';
   imports: [CommonModule, Breadcrumb],
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
+  // NEW: Consolidate global listeners here instead of using @HostListener
+  host: {
+    '(window:resize)': 'onResize()',
+    '(document:click)': 'onDocumentClick($event)',
+    '(document:keydown.escape)': 'onEsc()',
+  },
 })
-export class Header implements AfterViewInit {
+export class Header {
   private readonly sidebarService = inject(SidebarService);
   private readonly elRef = inject(ElementRef);
   private readonly router = inject(Router);
-  private readonly platformId = inject(PLATFORM_ID);
-  private componentService = inject(ComponentService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly componentService = inject(ComponentService);
 
-  isNotificationsOpen = false;
-  isProfileMenuOpen = false;
-  isMobile = false;
-  isBrowser = isPlatformBrowser(this.platformId);
+  // Use Signals for state management
+  isNotificationsOpen = signal(false);
+  isProfileMenuOpen = signal(false);
+  isMobile = signal(false);
 
   notifications = signal([
     { id: 1, text: 'New user registered', time: '5 min ago', read: false, icon: 'fa-user-plus' },
@@ -56,11 +60,15 @@ export class Header implements AfterViewInit {
   ]);
 
   unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
-
-  // Use signal from SidebarService
   isSidebarCollapsed = this.sidebarService.sidebarCollapsedSignal;
 
   constructor() {
+    // NEW: afterNextRender is the modern, browser-safe replacement for ngAfterViewInit
+    afterNextRender(() => {
+      this.checkMobile();
+    });
+
+    // Handle router events reactively
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
@@ -69,29 +77,24 @@ export class Header implements AfterViewInit {
       .subscribe(() => this.closeDropdowns());
   }
 
-  ngAfterViewInit(): void {
-    if (this.isBrowser) this.checkMobile();
-  }
-
-  @HostListener('window:resize')
   onResize(): void {
     if (this.isBrowser) this.checkMobile();
   }
 
   private checkMobile(): void {
-    this.isMobile = window.innerWidth < 768;
+    this.isMobile.set(window.innerWidth < 768);
   }
 
   toggleNotifications(event?: MouseEvent): void {
     event?.stopPropagation();
-    this.isNotificationsOpen = !this.isNotificationsOpen;
-    this.isProfileMenuOpen = false;
+    this.isNotificationsOpen.update((v) => !v);
+    this.isProfileMenuOpen.set(false);
   }
 
   toggleProfileMenu(event?: MouseEvent): void {
     event?.stopPropagation();
-    this.isProfileMenuOpen = !this.isProfileMenuOpen;
-    this.isNotificationsOpen = false;
+    this.isProfileMenuOpen.update((v) => !v);
+    this.isNotificationsOpen.set(false);
   }
 
   markAsRead(notificationId: number): void {
@@ -105,22 +108,20 @@ export class Header implements AfterViewInit {
   }
 
   private closeDropdowns(): void {
-    this.isNotificationsOpen = false;
-    this.isProfileMenuOpen = false;
+    this.isNotificationsOpen.set(false);
+    this.isProfileMenuOpen.set(false);
   }
 
-  @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.isBrowser) return;
-    if (!this.elRef.nativeElement.contains(event.target)) {
+    if (this.isBrowser && !this.elRef.nativeElement.contains(event.target)) {
       this.closeDropdowns();
     }
   }
 
-  @HostListener('document:keydown.escape')
   onEsc(): void {
     this.closeDropdowns();
   }
+
   reloadData() {
     this.componentService.revalidate('*');
   }
