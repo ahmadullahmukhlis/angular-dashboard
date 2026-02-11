@@ -53,7 +53,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   @Input() tableName: string | null = null; // optional, used for parent-triggered revalidate
 
   filterModal: boolean = false;
-
+  private readonly elRef = inject(ElementRef);
   loading: boolean = false;
   error: string | null = null;
 
@@ -391,11 +391,17 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
 
-    // Check if click is inside a row action menu button or menu
-    const insideMenu = target.closest('.row-action-container');
-    if (!insideMenu) {
-      this.closeAllRowActions();
+    // --- Handle row action menus ---
+    const insideRowMenu = target.closest('.row-action-container');
+    if (!insideRowMenu) {
+      this.closeAllRowActions(); // close any open row menus
       this.cdr.detectChanges(); // update UI
+    }
+
+    // --- Handle export dropdown ---
+    const clickedInsideExport = this.elRef.nativeElement.contains(target);
+    if (!clickedInsideExport) {
+      this.exportOpen = false; // close export menu if clicked outside
     }
   }
 
