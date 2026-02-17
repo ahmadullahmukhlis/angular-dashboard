@@ -45,7 +45,10 @@ export class Login implements OnInit {
     const { username, password } = this.loginForm.value;
     const loginUrl = import.meta.env.NG_APP_LOGIN_URL;
     const params = new HttpParams().set('username', username).set('password', password);
-    this.http.post<any>(loginUrl + '/login', params).subscribe({
+    this.http.post<any>(loginUrl + '/login',{
+      username:username,
+      password:password
+    }).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.loginForm.enable(); // ✅ re-enable form
