@@ -45,18 +45,18 @@ export class Login implements OnInit {
     const { username, password } = this.loginForm.value;
     const loginUrl = import.meta.env.NG_APP_LOGIN_URL;
     const params = new HttpParams().set('username', username).set('password', password);
-    this.http.post<any>(loginUrl + '/keycloak-admin/login', params).subscribe({
+    this.http.post<any>(loginUrl + '/login', params).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.loginForm.enable(); // ✅ re-enable form
         console.log(res);
-        // if (!res?.status) {
-        //   this.errorMessage = res?.message || 'Login failed';
-        //   return;
-        // }
+        if (!res?.status) {
+          this.errorMessage = res?.message || 'Login failed';
+          return;
+        }
         console.log(res.data);
-        const accessToken = res.access_token;
-        const refreshToken = res.refresh_token;
+        const accessToken = res.data.access_token;
+        const refreshToken = res.data.refresh_token;
 
         if (!accessToken) {
           this.errorMessage = 'Invalid server response';
