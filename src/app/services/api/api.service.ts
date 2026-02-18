@@ -1,16 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuthService } from '../auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
   private BASE_URL = this.endsWithSlash(import.meta.env.NG_APP_API_URL);
 
   private getHeaders(isFormData: boolean = false) {
-    const token = localStorage.getItem('token');
+    const token = this.authService.getAccessToken();
     let headers = new HttpHeaders({
       Authorization: token ? `Bearer ${token}` : '',
     });
