@@ -58,8 +58,8 @@ export class Login implements OnInit {
           return;
         }
         console.log(res.data);
-        const accessToken = res.data.access_token;
-        const refreshToken = res.data.refresh_token;
+        const accessToken = res.data.accessToken;
+        const refreshToken = res.data.refreshToken;
 
         if (!accessToken) {
           this.errorMessage = 'Invalid server response';
