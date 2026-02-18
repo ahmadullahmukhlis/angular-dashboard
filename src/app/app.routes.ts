@@ -17,8 +17,8 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) 
       },
       { 
-        path: 'profile', 
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) 
+        path: 'user-management/clients', 
+        loadComponent: () => import('./pages/user-management/client/client').then(m => m.Client) 
       },
     ]
   },
