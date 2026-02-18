@@ -1,1 +1,14 @@
-<p>client works!</p>
+<app-datatable
+  [url]="'/users'"
+  [config]="tableConfig"
+  tableName="users-table"
+  (onRowClick)="handleRowClick($event)"
+  (onRowSelect)="handleRowSelect($event)"
+  (onAdd)="handleAdd()"
+  (onEdit)="handleEdit($event)"
+  (onDelete)="handleDelete($event)"
+  (onExport)="handleExport($event)"
+  (tableEvent)="handleTableEvent($event)"
+  [name]="'Users Table'"
+>
+</app-datatable>
