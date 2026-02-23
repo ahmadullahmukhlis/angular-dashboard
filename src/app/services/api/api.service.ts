@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private BASE_URL = this.endsWithSlash(import.meta.env.NG_APP_API_URL);
+  private BASE_URL = this.stripTrailingSlash(import.meta.env.NG_APP_API_URL);
 
   private getHeaders(isFormData: boolean = false) {
     const token = localStorage.getItem('accessToken');
@@ -30,12 +30,8 @@ export class ApiService {
     }
     return '/' + value;
   }
-  private endsWithSlash(value: string): string {
-    const isBool = value.endsWith('/');
-    if (isBool) {
-      return value;
-    }
-    return value + '/';
+  private stripTrailingSlash(value: string): string {
+    return value.endsWith('/') ? value.slice(0, -1) : value;
   }
 
   get<T>(url: string, params: Record<string, any> = {}): Observable<T> {
