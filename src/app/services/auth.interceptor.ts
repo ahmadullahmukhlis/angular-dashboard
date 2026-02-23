@@ -23,9 +23,9 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // If 401 (Unauthorized) or 403 (Forbidden), clear token and redirect to login
-      // if (error.status === 401 || error.status === 403) {
-      //   authService.logout();
-      // }
+      if (error.status === 401 || error.status === 403) {
+        authService.logout();
+      }
       return throwError(() => error);
     })
   );
