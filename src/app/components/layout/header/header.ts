@@ -14,6 +14,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 import { ComponentService } from '../../../services/genral/component.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -34,6 +35,7 @@ export class Header {
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly componentService = inject(ComponentService);
+  private readonly authService = inject(AuthService);
 
   // Use Signals for state management
   isNotificationsOpen = signal(false);
@@ -124,5 +126,8 @@ export class Header {
 
   reloadData() {
     this.componentService.revalidate('*');
+  }
+  logout(){
+    this.authService.logout();
   }
 }
