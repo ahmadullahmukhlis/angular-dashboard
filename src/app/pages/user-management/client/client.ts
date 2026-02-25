@@ -17,12 +17,12 @@ export class Client {
   addCLient :  boolean = false;
      actions: RowAction[] = [
         {
-          label: 'View',
-          icon: 'fa-eye',
+          label: 'Edit',
+          icon: 'fa-edit',
           action: (row: any) => {
             console.log('View action on row:', row);
           },
-          color: 'primary',
+          color: 'warning',
         },
         {
           label: 'Delete',
