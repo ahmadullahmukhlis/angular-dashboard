@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Datatable } from '../../../components/ui/datatable/datatable';
-import { DataTableConfig } from '../../../models/datatable.model';
+import { DataTableConfig, RowAction } from '../../../models/datatable.model';
 import { ComponentService } from '../../../services/genral/component.service';
 import { Modal } from "../../../components/ui/modal/modal";
 import { DynamicField } from '../../../models/fomrBuilderModel';
@@ -15,6 +15,30 @@ import { DynamicFormBuilder } from "../../../components/ui/dynamic-form-builder/
 export class Client {
   private componentService = inject(ComponentService)
   addCLient :  boolean = false;
+     actions: RowAction[] = [
+        {
+          label: 'View',
+          icon: 'fa-eye',
+          action: (row: any) => {
+            console.log('View action on row:', row);
+          },
+          color: 'primary',
+        },
+        {
+          label: 'Delete',
+          icon: 'fa-trash',
+          action: (row: any) => {
+            console.log('Delete action on row:', row);
+          },
+          color: 'danger',
+          confirm: {
+            title: 'Confirm Deletion',
+            message: 'Are you sure you want to delete this item?',
+            confirmText: 'Yes, Delete',
+            cancelText: 'Cancel',
+          },
+        },
+      ];
 
     tableConfig: DataTableConfig= {
       columns: [
@@ -36,9 +60,11 @@ export class Client {
   
       showCheckboxes: true,
       selectable: true,
+      
       onAdd : ()=>{
         this.addCLient = true;
-      }
+      },
+      rowActions:this.actions
     
     };
     handleRowClick(row: any) {
@@ -52,7 +78,11 @@ export class Client {
         disabled: false,
         className: 'col-span-2',
         placeholder:"client name"
-      },]
+      },
+   
+    
+    ]
+   
   handleClose(){
     this.addCLient= false;
   }
