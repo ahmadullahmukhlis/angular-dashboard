@@ -56,6 +56,10 @@ export class Client {
   handleClose(){
     this.addCLient= false;
   }
+  handleSubmit(){
+    this.componentService.revalidate('CLients-table');
+
+  }
 
   handleRowSelect(rows: any[]) {
     console.log('Rows selected:', rows);
