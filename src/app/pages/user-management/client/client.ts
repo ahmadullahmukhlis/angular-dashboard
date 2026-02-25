@@ -3,10 +3,12 @@ import { Datatable } from '../../../components/ui/datatable/datatable';
 import { DataTableConfig } from '../../../models/datatable.model';
 import { ComponentService } from '../../../services/genral/component.service';
 import { Modal } from "../../../components/ui/modal/modal";
+import { DynamicField } from '../../../models/fomrBuilderModel';
+import { DynamicFormBuilder } from "../../../components/ui/dynamic-form-builder/dynamic-form-builder";
 
 @Component({
   selector: 'app-client',
-  imports: [Datatable, Modal],
+  imports: [Datatable, Modal, DynamicFormBuilder],
   templateUrl: './client.html',
   styleUrl: './client.css',
 })
@@ -42,6 +44,14 @@ export class Client {
     handleRowClick(row: any) {
     console.log('Row clicked:', row);
   }
+    fields: DynamicField[] = [
+      {
+        type: 'text',
+        name: 'name',
+        label: '',
+        disabled: false,
+        className: 'col-span-2 mx-auto mb-4',
+      },]
   handleClose(){
     this.addCLient= false;
   }

@@ -14,5 +14,12 @@
 >
 </app-datatable>
 <app-modal [visible]="addCLient" title="Add Client "  (onClose)="handleClose()" >
+   <app-dynamic-form-builder
+    [className]="'grid grid-cols-2 gap-4'"
+    [fields]="fields"
+    [action]="`client`"
+    method="POST"
+    [needConfirmation]="false"
+  ></app-dynamic-form-builder>
 
 </app-modal>
