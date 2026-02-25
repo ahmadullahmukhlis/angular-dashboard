@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { Datatable } from '../../../components/ui/datatable/datatable';
 import { DataTableConfig } from '../../../models/datatable.model';
 import { ComponentService } from '../../../services/genral/component.service';
+import { Modal } from "../../../components/ui/modal/modal";
 
 @Component({
   selector: 'app-client',
-  imports: [Datatable],
+  imports: [Datatable, Modal],
   templateUrl: './client.html',
   styleUrl: './client.css',
 })
