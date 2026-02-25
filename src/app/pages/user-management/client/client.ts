@@ -11,6 +11,7 @@ import { ComponentService } from '../../../services/genral/component.service';
 })
 export class Client {
   private componentService = inject(ComponentService)
+  addCLient :  boolean = false;
 
     tableConfig: DataTableConfig= {
       columns: [
@@ -32,6 +33,9 @@ export class Client {
   
       showCheckboxes: true,
       selectable: true,
+      onAdd : ()=>{
+        this.addCLient = true;
+      }
     
     };
     handleRowClick(row: any) {
