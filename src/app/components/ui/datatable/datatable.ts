@@ -323,6 +323,9 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   addNew() {
+    if (this.config?.onAdd) {
+      this.config.onAdd();
+    }
     this.onAdd.emit();
     this.tableEvent.emit({ type: 'add', data: null });
   }

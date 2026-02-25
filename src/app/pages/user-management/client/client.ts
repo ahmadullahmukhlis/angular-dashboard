@@ -48,9 +48,10 @@ export class Client {
       {
         type: 'text',
         name: 'name',
-        label: '',
+        label: 'Client Name',
         disabled: false,
-        className: 'col-span-2 mx-auto mb-4',
+        className: 'col-span-2',
+        placeholder:"client name"
       },]
   handleClose(){
     this.addCLient= false;
