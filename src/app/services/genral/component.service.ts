@@ -3,11 +3,13 @@ import { ApiService } from '../api/api.service';
 import { map, Observable, Subject } from 'rxjs';
 import { ShareHelper } from '../../helpers/SHare-helper';
 import { HttpParams } from '@angular/common/http';
+import { ToastService } from './tost.service';
 
 @Injectable({ providedIn: 'root' })
 export class ComponentService {
   private api = inject(ApiService);
   private sharehelper = inject(ShareHelper);
+  private toastService = inject(ToastService);
 
   getList<T>(url: string): Observable<T[]> {
     return this.api.get(url).pipe(map((res: any) => this.sharehelper.extractItems(res)));
@@ -49,5 +51,25 @@ export class ComponentService {
     console.log('Final URL:', finalUrl);
 
     return this.api.get(finalUrl);
+  }
+
+  delete<T>(
+    url: string,
+    handlers: {
+      onSuccess: (res: T) => void;
+      onError: (err: any) => void;
+    }
+  ) {
+    this.api.delete<T>(url).subscribe({
+      next: (res) => {
+        this.toastService.success('Deleted', 'Item deleted successfully');
+        handlers.onSuccess(res);
+      },
+      error: (err) => {
+        const message = err?.message ?? err;
+        this.toastService.deleteError(message);
+        handlers.onError(err);
+      },
+    });
   }
 }

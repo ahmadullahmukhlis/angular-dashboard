@@ -5,6 +5,8 @@ import { ComponentService } from '../../../services/genral/component.service';
 import { Modal } from "../../../components/ui/modal/modal";
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { DynamicFormBuilder } from "../../../components/ui/dynamic-form-builder/dynamic-form-builder";
+import { ApiService } from '../../../services/api/api.service';
+import e from 'express';
 
 @Component({
   selector: 'app-client',
@@ -14,13 +16,14 @@ import { DynamicFormBuilder } from "../../../components/ui/dynamic-form-builder/
 })
 export class Client {
   private componentService = inject(ComponentService)
+  private readonly api = inject(ApiService);
   addCLient :  boolean = false;
      actions: RowAction[] = [
         {
           label: 'Edit',
           icon: 'fa-edit',
           action: (row: any) => {
-            console.log('View action on row:', row);
+            this.delete(row.id)
           },
           color: 'warning',
         },
@@ -28,7 +31,8 @@ export class Client {
           label: 'Delete',
           icon: 'fa-trash',
           action: (row: any) => {
-            console.log('Delete action on row:', row);
+             this.delete(row.id)
+
           },
           color: 'danger',
           confirm: {
@@ -117,5 +121,16 @@ export class Client {
   }
   reloadData() {
     this.componentService.revalidate('users-table');
+  }
+  delete(id:any){
+      this.componentService.delete(`client/${id}`, {
+         onSuccess: (e:any) => {
+          this.componentService.revalidate('CLients-table');
+          this.handleClose()
+        },
+         onError: (err) => {
+           console.error('Delete failed:', err);
+         },
+       });
   }
 }
