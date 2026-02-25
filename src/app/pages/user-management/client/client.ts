@@ -16,9 +16,9 @@ export class Client {
       columns: [
         { key: 'id', label: 'ID', sortable: true, width: '50px', className: 'font-bold text-center' },
         { key: 'name', label: 'full Name', sortable: true, filterType: 'text' },
-        { key: 'username', label: 'User Name', sortable: true, filterType: 'text' },
-        { key: 'email', label: 'Email', sortable: true, filterType: 'text' },
-        { key: 'phone', label: 'Phone', sortable: true, type: 'text' },
+        { key: 'publicKey', label: 'Public Key', sortable: false, filterType: 'text' },
+        { key: 'privateKey', label: 'Private Key', sortable: false, filterType: 'text' },
+   
         {
           key: 'website',
           label: 'Website',
