@@ -248,11 +248,10 @@ export class DynamicFormBuilder implements OnChanges {
 
         if (!hasFileWithValue || e.type === HttpEventType.Response) {
           this.submitCompleted.emit(e.body ?? e);
-
-          // Only reset form if uploading files (FormData)
-          if (hasFileWithValue) {
+           this.toastService.success(e.message)
+          
             this.resetForm();
-          }
+          
         }
       },
       error: (err: any) => {
