@@ -41,6 +41,9 @@ export class Client {
     handleRowClick(row: any) {
     console.log('Row clicked:', row);
   }
+  handleClose(){
+    this.addCLient= false;
+  }
 
   handleRowSelect(rows: any[]) {
     console.log('Rows selected:', rows);
