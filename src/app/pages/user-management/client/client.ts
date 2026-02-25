@@ -57,6 +57,7 @@ export class Client {
     this.addCLient= false;
   }
   handleSubmit(){
+    this.handleClose()
     this.componentService.revalidate('CLients-table');
 
   }
