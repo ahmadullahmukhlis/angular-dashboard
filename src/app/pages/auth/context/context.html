@@ -1,0 +1,26 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="title">Client Context</h2>
+      <p class="subtitle">Set the current client for API requests.</p>
+    </div>
+    <button class="btn-outline" (click)="clear()">Clear Context</button>
+  </div>
+
+  @if (message) {
+    <div class="notice">{{ message }}</div>
+  }
+
+  <div class="card">
+    <app-dynamic-form-builder
+      [fields]="fields"
+      [action]="''"
+      [method]="'POST'"
+      (formSubmitted)="save($event)"
+    ></app-dynamic-form-builder>
+  </div>
+
+  @if (currentClientId) {
+    <div class="current">Current Client: <strong>{{ currentClientId }}</strong></div>
+  }
+</div>

@@ -356,7 +356,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   rowAction(row: any, action: any) {
     if (action.confirm) {
-      this.toastService.confirmAction({ name: action.confirm.Message }, () => action.action(row));
+      this.toastService.confirmAction({ name: action.confirm.message }, () => action.action(row));
     } else {
       action.action(row);
     }

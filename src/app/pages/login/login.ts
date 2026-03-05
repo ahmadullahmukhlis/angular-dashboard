@@ -50,10 +50,6 @@ export class Login implements OnInit {
         this.isLoading = false;
         this.loginForm.enable(); // ✅ re-enable form
         console.log(res);
-        // if (!res?.status) {
-        //   this.errorMessage = res?.message || 'Login failed';
-        //   return;
-        // }
         console.log(res.data);
         const accessToken = res.access_token;
         const refreshToken = res.refresh_token;
@@ -96,4 +92,5 @@ export class Login implements OnInit {
   get passwordControl() {
     return this.loginForm.get('password');
   }
+
 }
