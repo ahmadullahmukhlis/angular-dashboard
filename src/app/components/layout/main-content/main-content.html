@@ -1,6 +1,8 @@
 <div class="min-h-screen bg-gray-50">
   <!-- Sidebar -->
-  <app-sidebar *ngIf="!isMobile"></app-sidebar>
+  @if (!isMobile) {
+    <app-sidebar></app-sidebar>
+  }
 
   <!-- Header -->
   <app-header></app-header>

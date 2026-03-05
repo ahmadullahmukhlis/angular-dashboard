@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { DynamicFormBuilder } from '../../../components/ui/dynamic-form-builder/dynamic-form-builder';
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { ClientContextService } from '../../../services/client-context.service';
@@ -7,7 +6,7 @@ import { ClientContextService } from '../../../services/client-context.service';
 @Component({
   selector: 'app-auth-context',
   standalone: true,
-  imports: [NgIf, DynamicFormBuilder],
+  imports: [DynamicFormBuilder],
   templateUrl: './context.html',
   styleUrl: './context.css',
 })

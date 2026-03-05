@@ -49,14 +49,15 @@
   </div>
 
   <!-- File Previews -->
-  <div *ngIf="previews.length > 0" class="mt-6 animate-fade-in">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div
-        *ngFor="let p of previews; let i = index"
-        class="relative border border-gray-200 rounded-lg p-3 bg-white transition-all duration-200 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 overflow-hidden"
-        [class.opacity-70]="p.loading"
-        [class.border-red-300]="p.error"
-      >
+  @if (previews.length > 0) {
+    <div class="mt-6 animate-fade-in">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        @for (p of previews; track $index) {
+          <div
+            class="relative border border-gray-200 rounded-lg p-3 bg-white transition-all duration-200 hover:border-blue-400 hover:shadow-md hover:-translate-y-0.5 overflow-hidden"
+            [class.opacity-70]="p.loading"
+            [class.border-red-300]="p.error"
+          >
         <!-- Remove Button -->
         <button
           class="absolute top-2 right-2 w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-red-500 hover:text-white hover:border-red-500 flex items-center justify-center transition-all duration-200 z-30"
@@ -77,22 +78,22 @@
         </button>
 
         <!-- Preview Content -->
-        <div
-          class="w-full h-28 sm:h-32 flex items-center justify-center mb-3 bg-gray-50 rounded-md overflow-hidden"
-        >
+          <div
+            class="w-full h-28 sm:h-32 flex items-center justify-center mb-3 bg-gray-50 rounded-md overflow-hidden"
+          >
           <!-- Loading State -->
-          <div *ngIf="p.loading" class="flex flex-col items-center justify-center gap-2">
+            @if (p.loading) {
+              <div class="flex flex-col items-center justify-center gap-2">
             <div
               class="w-8 h-8 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"
             ></div>
             <p class="text-xs text-gray-500">Loading...</p>
-          </div>
+              </div>
+            }
 
           <!-- Error State -->
-          <div
-            *ngIf="p.error && !p.loading"
-            class="flex flex-col items-center justify-center gap-2 text-red-500"
-          >
+            @if (p.error && !p.loading) {
+              <div class="flex flex-col items-center justify-center gap-2 text-red-500">
             <svg
               class="w-10 h-10"
               viewBox="0 0 24 24"
@@ -105,26 +106,24 @@
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <p class="text-xs">Preview failed</p>
-          </div>
+              </div>
+            }
 
           <!-- Image Preview -->
-          <div
-            *ngIf="p.url && !p.loading && !p.error"
-            class="w-full h-full flex items-center justify-center"
-          >
+            @if (p.url && !p.loading && !p.error) {
+              <div class="w-full h-full flex items-center justify-center">
             <img
               [src]="p.url"
               [alt]="p.file.name"
               (load)="p.loading = false"
               class="max-w-full max-h-full object-contain"
             />
-          </div>
+              </div>
+            }
 
           <!-- File Icon for non-images -->
-          <div
-            *ngIf="!p.url && !p.loading && !p.error"
-            class="flex flex-col items-center justify-center gap-2 text-gray-400"
-          >
+            @if (!p.url && !p.loading && !p.error) {
+              <div class="flex flex-col items-center justify-center gap-2 text-gray-400">
             <svg
               class="w-10 h-10"
               viewBox="0 0 24 24"
@@ -135,7 +134,8 @@
               <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
               <polyline points="13 2 13 9 20 9" />
             </svg>
-          </div>
+              </div>
+            }
         </div>
 
         <!-- File Info -->
@@ -147,7 +147,9 @@
             <span class="bg-gray-100 px-2 py-1 rounded">{{ formatFileSize(p.file.size) }}</span>
           </div>
         </div>
+        </div>
+      }
       </div>
     </div>
-  </div>
+  }
 </div>

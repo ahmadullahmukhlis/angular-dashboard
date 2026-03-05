@@ -30,7 +30,6 @@ import {
 } from '../../../models/datatable.model';
 import { ComponentService } from '../../../services/genral/component.service';
 import { Paginator } from 'primeng/paginator';
-import { NgClass } from '@angular/common';
 import { Modal } from '../modal/modal';
 import { Filter } from '../filter/filter';
 import { Loading } from '../loading/loading';
@@ -46,7 +45,7 @@ import autoTable, { RowInput } from 'jspdf-autotable';
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter, Loading, Error],
+  imports: [TableModule, FormsModule, Paginator, Modal, Filter, Loading, Error],
 })
 export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ✅ API URL

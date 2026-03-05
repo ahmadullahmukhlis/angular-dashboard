@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { DynamicFormBuilder } from '../../../components/ui/dynamic-form-builder/dynamic-form-builder';
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { ApiService } from '../../../services/api/api.service';
@@ -7,7 +6,7 @@ import { ApiService } from '../../../services/api/api.service';
 @Component({
   selector: 'app-mfa',
   standalone: true,
-  imports: [NgIf, DynamicFormBuilder],
+  imports: [DynamicFormBuilder],
   templateUrl: './mfa.html',
   styleUrl: './mfa.css',
 })

@@ -1,9 +1,8 @@
-import { NgClass } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-error',
-  imports: [NgClass],
+  imports: [],
   templateUrl: './error.html',
   styleUrl: './error.css',
 })

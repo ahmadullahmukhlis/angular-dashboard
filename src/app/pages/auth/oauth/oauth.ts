@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { DynamicFormBuilder } from '../../../components/ui/dynamic-form-builder/dynamic-form-builder';
 import { DynamicField } from '../../../models/fomrBuilderModel';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
@@ -8,7 +7,7 @@ import { JwtSignService } from '../../../services/crypto/jwt-sign.service';
 @Component({
   selector: 'app-oauth-tools',
   standalone: true,
-  imports: [NgIf, DynamicFormBuilder],
+  imports: [DynamicFormBuilder],
   templateUrl: './oauth.html',
   styleUrl: './oauth.css',
 })

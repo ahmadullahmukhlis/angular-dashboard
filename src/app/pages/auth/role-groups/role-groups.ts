@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { DynamicFormBuilder } from '../../../components/ui/dynamic-form-builder/dynamic-form-builder';
 import { Datatable } from '../../../components/ui/datatable/datatable';
 import { Modal } from '../../../components/ui/modal/modal';
@@ -11,7 +10,7 @@ import { ComponentService } from '../../../services/genral/component.service';
 @Component({
   selector: 'app-role-groups',
   standalone: true,
-  imports: [NgIf, DynamicFormBuilder, Datatable, Modal],
+  imports: [DynamicFormBuilder, Datatable, Modal],
   templateUrl: './role-groups.html',
   styleUrl: './role-groups.css',
 })
