@@ -1,10 +1,10 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
+  const authService = inject(AuthService);
   
   // 1. Retrieve the token from storage (localStorage/Cookie)
   const token = localStorage.getItem('accessToken');
