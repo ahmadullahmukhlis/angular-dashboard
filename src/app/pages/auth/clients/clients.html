@@ -1,0 +1,30 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="title">Clients</h2>
+      <p class="subtitle">Manage OAuth clients, redirect URIs, and grants.</p>
+    </div>
+    <button class="btn" (click)="openCreate()">New Client</button>
+  </div>
+
+  <app-datatable
+    [url]="'/client'"
+    [name]="'clients'"
+    [tableName]="'clients-table'"
+    [config]="clientTableConfig"
+  ></app-datatable>
+
+  <app-modal
+    [visible]="showClientModal"
+    [title]="isEdit ? 'Edit Client' : 'Create Client'"
+    [widthClass]="'w-[900px]'"
+    (onClose)="closeModal()"
+  >
+    <app-dynamic-form-builder
+      [fields]="clientFields"
+      [action]="''"
+      [method]="isEdit ? 'PUT' : 'POST'"
+      (formSubmitted)="submitClient($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+</div>

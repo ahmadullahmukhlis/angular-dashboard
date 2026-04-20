@@ -2,37 +2,36 @@
 
 <!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-  <div
-    *ngFor="let stat of stats"
-    class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
-  >
-    <div class="flex justify-between items-start">
-      <div>
-        <p class="text-sm text-gray-500 font-medium">{{ stat.title }}</p>
-        <p class="text-2xl font-bold text-gray-800 mt-2">{{ stat.value }}</p>
-        <div class="flex items-center mt-3">
-          <span
-            [ngClass]="{
-              'text-green-600 bg-green-50': stat.changeType === 'increase',
-              'text-red-600 bg-red-50': stat.changeType === 'decrease',
-            }"
-            class="text-sm font-medium px-2 py-1 rounded"
-          >
-            <i
-              [class]="
-                stat.changeType === 'increase' ? 'fas fa-arrow-up mr-1' : 'fas fa-arrow-down mr-1'
-              "
-            ></i>
-            {{ stat.change }}
-          </span>
-          <span class="text-gray-500 text-sm ml-2">{{ stat.period }}</span>
+  @for (stat of stats; track $index) {
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">{{ stat.title }}</p>
+          <p class="text-2xl font-bold text-gray-800 mt-2">{{ stat.value }}</p>
+          <div class="flex items-center mt-3">
+            <span
+              class="text-sm font-medium px-2 py-1 rounded"
+              [class.text-green-600]="stat.changeType === 'increase'"
+              [class.bg-green-50]="stat.changeType === 'increase'"
+              [class.text-red-600]="stat.changeType === 'decrease'"
+              [class.bg-red-50]="stat.changeType === 'decrease'"
+            >
+              <i
+                [class]="
+                  stat.changeType === 'increase' ? 'fas fa-arrow-up mr-1' : 'fas fa-arrow-down mr-1'
+                "
+              ></i>
+              {{ stat.change }}
+            </span>
+            <span class="text-gray-500 text-sm ml-2">{{ stat.period }}</span>
+          </div>
+        </div>
+        <div [class]="stat.bgColor + ' p-3 rounded-xl'">
+          <i [class]="stat.icon + ' ' + stat.iconColor + ' text-2xl'"></i>
         </div>
       </div>
-      <div [ngClass]="stat.bgColor" class="p-3 rounded-xl">
-        <i [class]="stat.icon + ' ' + stat.iconColor + ' text-2xl'"></i>
-      </div>
     </div>
-  </div>
+  }
 </div>
 
 <!-- Charts Section -->
@@ -143,32 +142,25 @@
       <button class="text-sm text-primary-600 hover:text-primary-800 font-medium">View All</button>
     </div>
     <div class="space-y-4">
-      <div
-        *ngFor="let activity of recentActivities"
-        class="flex items-start p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
-      >
-        <div class="flex-shrink-0">
-          <div
-            class="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm"
-            [ngClass]="activity.bgColor"
-          >
-            <i class="fas {{ activity.icon }} text-white"></i>
+      @for (activity of recentActivities; track $index) {
+        <div class="flex items-start p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+          <div class="flex-shrink-0">
+            <div [class]="activity.bgColor + ' w-10 h-10 rounded-lg flex items-center justify-center shadow-sm'">
+              <i class="fas {{ activity.icon }} text-white"></i>
+            </div>
+          </div>
+          <div class="ml-4 flex-1">
+            <p class="font-medium text-gray-800">{{ activity.title }}</p>
+            <p class="text-sm text-gray-600 mt-1">{{ activity.description }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-500">{{ activity.time }}</p>
+            <span [class]="activity.statusColor + ' inline-block mt-1 text-xs px-2 py-1 rounded-full font-medium'">
+              {{ activity.status }}
+            </span>
           </div>
         </div>
-        <div class="ml-4 flex-1">
-          <p class="font-medium text-gray-800">{{ activity.title }}</p>
-          <p class="text-sm text-gray-600 mt-1">{{ activity.description }}</p>
-        </div>
-        <div class="text-right">
-          <p class="text-sm text-gray-500">{{ activity.time }}</p>
-          <span
-            class="inline-block mt-1 text-xs px-2 py-1 rounded-full font-medium"
-            [ngClass]="activity.statusColor"
-          >
-            {{ activity.status }}
-          </span>
-        </div>
-      </div>
+      }
     </div>
   </div>
 
@@ -179,27 +171,24 @@
       <button class="text-sm text-primary-600 hover:text-primary-800 font-medium">See All</button>
     </div>
     <div class="space-y-4">
-      <div
-        *ngFor="let product of topProducts"
-        class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
-      >
-        <div>
-          <p class="font-medium text-gray-800">{{ product.name }}</p>
-          <p class="text-sm text-gray-500">{{ product.sales }} sales</p>
+      @for (product of topProducts; track $index) {
+        <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+          <div>
+            <p class="font-medium text-gray-800">{{ product.name }}</p>
+            <p class="text-sm text-gray-500">{{ product.sales }} sales</p>
+          </div>
+          <div class="text-right">
+            <p class="font-medium text-gray-800">{{ product.revenue }}</p>
+            <p
+              class="text-sm"
+              [class.text-green-600]="product.growth.startsWith('+')"
+              [class.text-red-600]="product.growth.startsWith('-')"
+            >
+              {{ product.growth }}
+            </p>
+          </div>
         </div>
-        <div class="text-right">
-          <p class="font-medium text-gray-800">{{ product.revenue }}</p>
-          <p
-            class="text-sm"
-            [ngClass]="{
-              'text-green-600': product.growth.startsWith('+'),
-              'text-red-600': product.growth.startsWith('-'),
-            }"
-          >
-            {{ product.growth }}
-          </p>
-        </div>
-      </div>
+      }
     </div>
     <div class="mt-6 pt-6 border-t border-gray-200">
       <div class="flex items-center justify-between">
@@ -247,9 +236,9 @@
 
 <app-server-data url="/users" id="users-table">
   <ng-template let-data>
-    <div *ngFor="let user of data">
-      {{ user.name }}
-    </div>
+    @for (user of data; track $index) {
+      <div>{{ user.name }}</div>
+    }
     <ol>
       @for (user of data; track $index) {
         <li>{{ user.id }} {{ user.name }}</li>

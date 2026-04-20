@@ -1,10 +1,8 @@
 <div
   class="flex flex-col items-center justify-center"
-  [ngClass]="{
-    'py-16': size === 'default',
-    'py-12': size === 'sm',
-    'py-10': size === 'xs',
-  }"
+  [class.py-16]="size === 'default'"
+  [class.py-12]="size === 'sm'"
+  [class.py-10]="size === 'xs'"
 >
   <div class="p-4 bg-red-50 rounded-full mb-4">
     <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">

@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
-import { NgIf, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-modal',

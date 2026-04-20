@@ -11,9 +11,14 @@ export class ApiService {
 
   private getHeaders(isFormData: boolean = false) {
     const token = localStorage.getItem('accessToken');
+    const clientId = localStorage.getItem('clientId');
+    const clientAssertion = localStorage.getItem('clientAssertion');
     let headers = new HttpHeaders({
       Authorization: token ? `Bearer ${token}` : '',
     });
+
+    if (clientId) headers = headers.set('X-Client-Id', clientId);
+    if (clientAssertion) headers = headers.set('X-Client-Assertion', clientAssertion);
 
     // Only add JSON content type if it's NOT FormData
     if (!isFormData) {
