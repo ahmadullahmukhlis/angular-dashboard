@@ -59,7 +59,6 @@ export class AuthUsers {
       url: '/user-management/roles?fetch_all=true',
       optionLabel: 'name',
       optionValue: 'id',
-      required: true,
       className: 'md:col-span-2',
     },
     {
@@ -100,10 +99,25 @@ export class AuthUsers {
         color: 'warning',
       },
       {
+        label: 'Inactive',
+        icon: 'fa-user-slash',
+        action: (row) => this.updateUserActiveStatus(row, false),
+        color: 'danger',
+        hidden: (row) => !row?.is_active,
+      },
+      {
+        label: 'Activate',
+        icon: 'fa-user-check',
+        action: (row) => this.updateUserActiveStatus(row, true),
+        color: 'success',
+        hidden: (row) => !!row?.is_active,
+      },
+      {
         label: 'Unassign Roles',
         icon: 'fa-user-minus',
         action: (row) => this.openUnassignRoles(row),
         color: 'danger',
+        hidden: (row) => !Array.isArray(row?.roles) || row.roles.length === 0,
       },
       {
         label: 'Delete',
@@ -194,7 +208,6 @@ export class AuthUsers {
         url: '/user-management/roles?fetch_all=true',
         optionLabel: 'name',
         optionValue: 'id',
-        required: true,
         searchable: true,
         defaultValue: Array.isArray(row?.roles) ? row.roles.map((role: any) => role?.id ?? role?.role_id) : [],
       },
@@ -245,9 +258,8 @@ export class AuthUsers {
           : [],
         optionLabel: 'name',
         optionValue: 'id',
-        required: true,
         searchable: true,
-        defaultValue: Array.isArray(row?.roles) ? row.roles.map((role: any) => role?.id ?? role?.role_id) : [],
+        defaultValue: [],
       },
     ];
     this.showUnassignRolesModal = true;
@@ -258,12 +270,13 @@ export class AuthUsers {
 
     this.api.get(`/user-management/users/${this.selectedUserId}`).subscribe({
       next: (user: any) => {
-        const removeIds = new Set(
-          Array.isArray(payload.roles) ? payload.roles.map((id: any) => Number(id)) : [],
-        );
-        const remainingRoles = (user?.roles ?? [])
-          .filter((role: any) => !removeIds.has(Number(role?.id ?? role?.role_id)))
-          .map((role: any) => ({ id: Number(role?.id ?? role?.role_id) }));
+        const selectedRoleIds = Array.isArray(payload.roles) ? payload.roles.map((id: any) => Number(id)) : [];
+        const remainingRoles =
+          selectedRoleIds.length === 0
+            ? []
+            : (user?.roles ?? [])
+                .filter((role: any) => !selectedRoleIds.includes(Number(role?.id ?? role?.role_id)))
+                .map((role: any) => ({ id: Number(role?.id ?? role?.role_id) }));
 
         this.api.put(`/user-management/users/${this.selectedUserId}`, {
           first_name: user.first_name,
@@ -290,6 +303,31 @@ export class AuthUsers {
       next: () => {
         this.toastService.success('Deleted', 'User deleted successfully');
         this.componentService.revalidate('users-table');
+      },
+    });
+  }
+
+  updateUserActiveStatus(row: any, isActive: boolean) {
+    if (!row?.id) return;
+
+    this.api.get(`/user-management/users/${row.id}`).subscribe({
+      next: (user: any) => {
+        this.api.put(`/user-management/users/${row.id}`, {
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          password: null,
+          confirm_password: null,
+          roles: Array.isArray(user.roles)
+            ? user.roles.map((role: any) => ({ id: Number(role?.id ?? role?.role_id) }))
+            : [],
+          is_active: isActive,
+        }).subscribe({
+          next: () => {
+            this.toastService.success('Success', isActive ? 'User activated successfully' : 'User inactivated successfully');
+            this.componentService.revalidate('users-table');
+          },
+        });
       },
     });
   }
