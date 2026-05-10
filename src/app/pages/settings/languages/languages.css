@@ -15,7 +15,6 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
 }
 
 .title {
@@ -68,7 +67,22 @@
 }
 
 .dictionary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 14px;
+}
+
+.dictionary-header > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dictionary-header .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  align-self: flex-start;
 }
 
 .dictionary-title {
@@ -82,4 +96,11 @@
   margin: 4px 0 0;
   color: #64748b;
   font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .page-header,
+  .dictionary-header {
+    flex-wrap: wrap;
+  }
 }
