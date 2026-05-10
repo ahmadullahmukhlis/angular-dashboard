@@ -47,6 +47,8 @@ export interface DataTableConfig {
   columns: ColumnDefinition[];
   sort?: SortConfig;
   filters?: DynamicField[];
+  searchKey?: string;
+  filterWidthClass?: string;
   rowActions?: RowAction[];
   headerActions?: RowAction[];
   selectable?: boolean;

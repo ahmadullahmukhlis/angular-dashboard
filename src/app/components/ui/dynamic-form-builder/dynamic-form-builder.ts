@@ -22,6 +22,7 @@ import { SingleSelect } from '../single-select/single-select';
 import { MultiSelected } from '../multi-selected/multi-selected';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
+import { AppErrorService } from '../../../services/genral/app-error.service';
 import { FileUpload } from '../file-upload/file-upload';
 import { AddProfileImage } from '../add-profile-image/add-profile-image';
 import { MultipleRecord } from '../multiple-record/multiple-record';
@@ -56,6 +57,7 @@ export class DynamicFormBuilder implements OnChanges {
   private http = inject(HttpClient);
   toastService = inject(ToastService);
   componentService = inject(ComponentService);
+  private errorService = inject(AppErrorService);
 
   @Input({ required: true }) fields: DynamicField[] = [];
   @Input() action!: string;
@@ -64,6 +66,10 @@ export class DynamicFormBuilder implements OnChanges {
   @Input() needConfirmation = false;
   @Input() hiddenFields?: { name: string; value: any }[];
   @Input() className: string = '';
+  @Input() resetFormOnSubmit = true;
+  @Input() initialValues?: Record<string, any>;
+  @Input() showSubmitButton = true;
+  @Input() submitLabel = 'Submit';
 
   @Output() submitCompleted = new EventEmitter<any>();
   @Output() valuesChanged = new EventEmitter<any>();
@@ -74,6 +80,7 @@ export class DynamicFormBuilder implements OnChanges {
   progress = false;
   percent = 0;
   submitted = false;
+  private syncingDisabledStates = false;
 
   ngOnChanges() {
     this.buildForm();
@@ -83,35 +90,34 @@ export class DynamicFormBuilder implements OnChanges {
     const group: any = {};
 
     this.fields.forEach((f) => {
-      const validators = [];
-      if (f.required) {
-        if (f.type === 'checkbox-group') {
-          validators.push(this.checkboxGroupRequiredValidator());
-        } else {
-          validators.push(Validators.required);
-        }
-      }
+      const validators = this.getFieldValidators(f);
       if (f.min !== undefined) validators.push(Validators.min(f.min));
       if (f.max !== undefined) validators.push(Validators.max(f.max));
       if (f.minLength) validators.push(Validators.minLength(f.minLength));
       if (f.maxLength) validators.push(Validators.maxLength(f.maxLength));
       if (f.pattern) validators.push(Validators.pattern(f.pattern));
 
-      let defaultValue: any = f.defaultValue ?? null;
-      if (f.type === 'checkbox') defaultValue = f.defaultValue ?? false;
-      if (f.type === 'switch') defaultValue = f.defaultValue ?? false;
-      if (f.type === 'checkbox-group') defaultValue = f.defaultValue ?? [];
-      if (f.type === 'repeater') defaultValue = f.defaultValue ?? [];
-      if (f.type === 'radio') defaultValue = f.defaultValue ?? null;
+      const hasInitialValue = !!this.initialValues && Object.prototype.hasOwnProperty.call(this.initialValues, f.name);
 
-      group[f.name] = [{ value: defaultValue, disabled: f.disabled }, validators];
+      let defaultValue: any = hasInitialValue ? this.initialValues?.[f.name] : (f.defaultValue ?? null);
+      if (!hasInitialValue && f.type === 'checkbox') defaultValue = f.defaultValue ?? false;
+      if (!hasInitialValue && f.type === 'switch') defaultValue = f.defaultValue ?? false;
+      if (!hasInitialValue && f.type === 'checkbox-group') defaultValue = f.defaultValue ?? [];
+      if (!hasInitialValue && f.type === 'repeater') defaultValue = f.defaultValue ?? [];
+      if (!hasInitialValue && f.type === 'radio') defaultValue = f.defaultValue ?? null;
+
+      group[f.name] = [{ value: defaultValue, disabled: f.disabled ?? false }, validators];
     });
 
     this.form = this.fb.group(group);
+    this.syncConditionalDisabledStates();
 
     // Reset submitted flag and emit changes
     this.submitted = false;
-    this.form.valueChanges.subscribe((v) => this.valuesChanged.emit(v));
+    this.form.valueChanges.subscribe((v) => {
+      this.syncConditionalDisabledStates();
+      this.valuesChanged.emit(v);
+    });
   }
 
   visibleFields() {
@@ -119,10 +125,53 @@ export class DynamicFormBuilder implements OnChanges {
     return this.fields.filter((f) => (f.show ? f.show(values) : true));
   }
 
+  isFieldDisabled(field: DynamicField) {
+    const values = this.form?.value;
+    return field.disabledWhen ? field.disabledWhen(values) : (field.disabled ?? false);
+  }
+
+  private syncConditionalDisabledStates() {
+    if (!this.form || this.syncingDisabledStates) return;
+
+    this.syncingDisabledStates = true;
+
+    try {
+      this.fields.forEach((field) => {
+        const control = this.form.get(field.name);
+        if (!control) return;
+
+        control.setValidators(this.getFieldValidators(field));
+        control.updateValueAndValidity({ emitEvent: false });
+
+        const shouldDisable = this.isFieldDisabled(field);
+        if (shouldDisable && control.enabled) {
+          control.disable({ emitEvent: false });
+        } else if (!shouldDisable && control.disabled && !field.disabled) {
+          control.enable({ emitEvent: false });
+        }
+      });
+    } finally {
+      this.syncingDisabledStates = false;
+    }
+  }
+
+  getFieldUrl(field: DynamicField): string | undefined {
+    if (field.type !== 'server-select' && field.type !== 'multi-select') {
+      return field.url;
+    }
+
+    if (field.urlFactory) {
+      const resolved = field.urlFactory(this.form?.value ?? {});
+      return resolved || undefined;
+    }
+
+    return field.url;
+  }
+
   handleSelectChange(field: DynamicField, row: any) {
     const val = field.changeValue ? row?.[field.changeValue] : row;
     this.form.get(field.name)?.setValue(val);
-    field.onSelect?.(row);
+    field.onSelect?.(row, this.form);
   }
 
   handleFileChange(field: DynamicField, files: File[]) {
@@ -169,6 +218,22 @@ export class DynamicFormBuilder implements OnChanges {
   private checkboxGroupRequiredValidator() {
     return (control: any) =>
       Array.isArray(control.value) && control.value.length > 0 ? null : { required: true };
+  }
+
+  private getFieldValidators(field: DynamicField) {
+    const validators = [];
+    const values = this.form?.getRawValue?.() ?? this.initialValues ?? {};
+    const isRequired = field.requiredWhen ? field.requiredWhen(values) : field.required;
+
+    if (isRequired) {
+      if (field.type === 'checkbox-group') {
+        validators.push(this.checkboxGroupRequiredValidator());
+      } else {
+        validators.push(Validators.required);
+      }
+    }
+
+    return validators;
   }
 
   private dataSubmit() {
@@ -234,7 +299,9 @@ export class DynamicFormBuilder implements OnChanges {
     // --- Emit or send to API ---
     if (this.formSubmitted.observed) {
       this.formSubmitted.emit(finalPayload);
-      this.resetForm();
+      if (this.resetFormOnSubmit) {
+        this.resetForm();
+      }
       this.resetLoading();
       return;
     }
@@ -246,18 +313,18 @@ export class DynamicFormBuilder implements OnChanges {
           this.percent = Math.round((e.loaded * 100) / e.total);
         }
 
-        if (!hasFileWithValue || e.type === HttpEventType.Response) {
+        if (e.type === undefined || e.type === HttpEventType.Response) {
           this.submitCompleted.emit(e.body ?? e);
-
-          // Only reset form if uploading files (FormData)
-          if (hasFileWithValue) {
+          this.toastService.success(e.body?.message ?? e.message);
+          if (this.resetFormOnSubmit) {
             this.resetForm();
           }
         }
       },
       error: (err: any) => {
         console.error('Form submission error:', err);
-        this.toastService.error('Error submitting form');
+        const normalized = this.errorService.normalize(err, this.action || 'form submission');
+        this.toastService.error(normalized.message, normalized.title);
         this.resetLoading();
       },
       complete: () => this.resetLoading(),

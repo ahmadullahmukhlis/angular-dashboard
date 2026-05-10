@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 /* PrimeNG */
 import { InputTextModule } from 'primeng/inputtext';
@@ -39,9 +40,11 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
   templateUrl: './filter.html',
   styleUrls: ['./filter.css'],
 })
-export class Filter implements OnInit {
+export class Filter implements OnInit, OnChanges, OnDestroy {
   @Input({ required: true }) fields: DynamicField[] = [];
   @Input() className: string = '';
+  @Input() searchKey: string = 'search';
+  @Input() searchPlaceholder: string = 'Search records...';
   @Output() onFilter = new EventEmitter<any>();
   @Output() valuesChanged = new EventEmitter<any>();
   labelTypes = [
@@ -55,24 +58,64 @@ export class Filter implements OnInit {
     'server-select',
   ];
 
-  form!: FormGroup; // Declare form here
+  form!: FormGroup;
+  private formSub?: Subscription;
 
   constructor(private fb: FormBuilder) {}
 
   ngOnInit() {
-    this.form = this.fb.group({});
+    this.buildForm();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['fields'] || changes['searchKey']) {
+      this.buildForm();
+    }
+  }
+
+  ngOnDestroy() {
+    this.formSub?.unsubscribe();
+  }
+
+  private buildForm() {
+    this.formSub?.unsubscribe();
+
+    const controls: Record<string, any> = {};
+    controls[this.searchKey] = this.fb.control(null);
 
     this.fields.forEach((field) => {
-      this.form.addControl(field.name, this.fb.control(field.changeValue ?? null));
+      controls[field.name] = this.fb.control({
+        value: field.defaultValue ?? null,
+        disabled: field.disabled ?? false,
+      });
     });
 
-    this.form.valueChanges.subscribe((values) => {
+    this.form = this.fb.group(controls);
+    this.syncDisabledStates();
+
+    this.formSub = this.form.valueChanges.subscribe((values) => {
+      this.syncDisabledStates();
       this.valuesChanged.emit(values);
     });
   }
 
+  private syncDisabledStates() {
+    if (!this.form) return;
+
+    this.fields.forEach((field) => {
+      const control = this.form.get(field.name);
+      if (!control) return;
+
+      const shouldDisable = field.disabledWhen ? field.disabledWhen(this.form.value) : field.disabled ?? false;
+      if (shouldDisable && control.enabled) {
+        control.disable({ emitEvent: false });
+      } else if (!shouldDisable && control.disabled && !field.disabled) {
+        control.enable({ emitEvent: false });
+      }
+    });
+  }
+
   handleSelectChange(field: DynamicField, selected: any | any[]) {
-    console.log('Selected value:', selected);
     if (field.type === 'multi-select') {
       const values = selected?.map((item: any) =>
         field.changeValue ? item[field.changeValue] : item,
@@ -83,7 +126,7 @@ export class Filter implements OnInit {
       this.form.get(field.name)?.setValue(val);
     }
 
-    field.onSelect?.(selected);
+    field.onSelect?.(selected, this.form);
   }
 
   applyFilter() {

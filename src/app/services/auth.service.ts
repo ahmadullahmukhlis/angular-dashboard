@@ -59,12 +59,22 @@ export class AuthService {
   ============================ */
 
   isTokenExpired(token: string): boolean {
+    // Some backends return opaque bearer tokens instead of JWTs.
+    // If the token is not a JWT, treat its presence as a valid logged-in state.
+    if (!this.isJwtToken(token)) {
+      return false;
+    }
+
     try {
       const decoded: any = jwtDecode(token);
       return decoded.exp < Date.now() / 1000;
     } catch {
       return true;
     }
+  }
+
+  private isJwtToken(token: string): boolean {
+    return token.split('.').length === 3;
   }
 
   /* ============================

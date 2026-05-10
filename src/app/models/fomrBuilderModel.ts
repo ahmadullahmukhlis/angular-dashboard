@@ -39,12 +39,20 @@ export interface DynamicField {
   /* validation */
   min?: number;
   max?: number;
+  step?: number;
+  minFractionDigits?: number;
+  maxFractionDigits?: number;
+  useGrouping?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
+  searchable?: boolean;
+  disabledWhen?: (values: any) => boolean;
+  requiredWhen?: (values: any) => boolean;
 
   /* server select */
   url?: string;
+  urlFactory?: (values: any) => string | undefined | null;
   optionLabel?: string;
   optionValue?: string;
   multiple?: boolean;
@@ -56,7 +64,7 @@ export interface DynamicField {
 
   /* mapping */
   changeValue?: string;
-  onSelect?: (row: any) => void;
+  onSelect?: (row: any, form?: any) => void;
 
   onChange?: (value: any) => void;
 }

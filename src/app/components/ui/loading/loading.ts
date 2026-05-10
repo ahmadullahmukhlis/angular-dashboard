@@ -1,8 +1,9 @@
+import { NgClass } from '@angular/common';
 import { Component, Input, input } from '@angular/core';
 
 @Component({
   selector: 'app-loading',
-  imports: [],
+  imports: [NgClass],
   templateUrl: './loading.html',
   styleUrl: './loading.css',
 })

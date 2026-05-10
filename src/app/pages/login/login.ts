@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +22,7 @@ export class Login implements OnInit {
     private router: Router,
   ) {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(3)]],
     });
   }
@@ -42,20 +42,20 @@ export class Login implements OnInit {
     this.errorMessage = '';
     this.loginForm.disable(); // ✅ prevent double submit
 
-    const { username, password } = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
     const loginUrl = import.meta.env.NG_APP_LOGIN_URL;
-    const params = new HttpParams().set('username', username).set('password', password);
-    this.http.post<any>(loginUrl + '/login', params).subscribe({
+    const payload = { email, password };
+
+    this.http.post<any>(loginUrl + '/login', payload).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.loginForm.enable(); // ✅ re-enable form
-        console.log(res);
-        console.log(res.data);
-        const accessToken = res.data.accessToken;
-        const refreshToken = res.data.refreshToken;
+        const accessToken = res?.accessToken ?? res?.data?.accessToken;
+        const refreshToken = res?.refreshToken ?? res?.data?.refreshToken;
  
         if (!accessToken) {
           this.errorMessage = 'Invalid server response';
+          alert('Login failed: No access token received');
           return;
         }
 
@@ -85,8 +85,8 @@ export class Login implements OnInit {
     });
   }
 
-  get usernameControl() {
-    return this.loginForm.get('username');
+  get emailControl() {
+    return this.loginForm.get('email');
   }
 
   get passwordControl() {

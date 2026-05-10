@@ -9,7 +9,15 @@
 
 <!-- Error -->
 @if (error) {
-  <app-error [error]="error" [size]="'sm'" (refresh)="loadData()"></app-error>
+  <app-error
+    [title]="error.title"
+    [error]="error.message"
+    [details]="error.details"
+    [code]="error.code"
+    [retryable]="error.retryable"
+    [size]="'sm'"
+    (refresh)="loadData()"
+  ></app-error>
 }
 
 <!-- No Data -->

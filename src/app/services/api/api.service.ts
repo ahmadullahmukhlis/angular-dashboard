@@ -2,12 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+interface ApiRequestOptions {
+  suppressGlobalError?: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private BASE_URL = this.endsWithSlash(import.meta.env.NG_APP_API_URL);
+  private BASE_URL = this.stripTrailingSlash(import.meta.env.NG_APP_API_URL);
 
   private getHeaders(isFormData: boolean = false) {
     const token = localStorage.getItem('accessToken');
@@ -27,50 +31,43 @@ export class ApiService {
 
     return headers;
   }
-  // Check if string starts with "/"
-  private startsWithSlash(value: string): String {
-    const isBool = value.startsWith('/');
-    if (isBool) {
-      return value;
-    }
-    return '/' + value;
-  }
-  private endsWithSlash(value: string): string {
-    const isBool = value.endsWith('/');
-    if (isBool) {
-      return value;
-    }
-    return value + '/';
+  private stripTrailingSlash(value: string): string {
+    return value.replace(/\/+$/, '');
   }
 
-  get<T>(url: string, params: Record<string, any> = {}): Observable<T> {
-    return this.http.get<T>(`${this.BASE_URL}${this.startsWithSlash(url)}`, {
+  private buildUrl(path: string): string {
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    return `${this.BASE_URL}${normalizedPath}`;
+  }
+
+  get<T>(url: string, params: Record<string, any> = {}, _options: ApiRequestOptions = {}): Observable<T> {
+    return this.http.get<T>(this.buildUrl(url), {
       headers: this.getHeaders(),
       params: params,
     });
   }
 
   post<T>(url: string, body: any): Observable<T> {
-    return this.http.post<T>(`${this.BASE_URL}${this.startsWithSlash(url)}`, body, {
+    return this.http.post<T>(this.buildUrl(url), body, {
       headers: this.getHeaders(),
     });
   }
 
   put<T>(url: string, body: any): Observable<T> {
-    return this.http.put<T>(`${this.BASE_URL}${this.startsWithSlash(url)}`, body, {
+    return this.http.put<T>(this.buildUrl(url), body, {
       headers: this.getHeaders(),
     });
   }
 
   delete<T>(url: string): Observable<T> {
-    return this.http.delete<T>(`${this.BASE_URL}${this.startsWithSlash(url)}`, {
+    return this.http.delete<T>(this.buildUrl(url), {
       headers: this.getHeaders(),
     });
   }
   request<T>(method: string, url: string, body: any): Observable<HttpEvent<T>> {
     const isFormData = body instanceof FormData;
 
-    return this.http.request<T>(method, `${this.BASE_URL}${this.startsWithSlash(url)}`, {
+    return this.http.request<T>(method, this.buildUrl(url), {
       body: body,
       headers: this.getHeaders(isFormData),
       observe: 'events', // Required for progress bars

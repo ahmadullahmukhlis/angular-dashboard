@@ -1,7 +1,6 @@
-import { Message } from './../../../../../node_modules/esbuild/lib/main.d';
-import { ToastService } from './../../../services/genral/tost.service';
 
 import {
+  ChangeDetectorRef,
   Component,
   Input,
   Output,
@@ -11,8 +10,6 @@ import {
   SimpleChanges,
   ViewChild,
   ElementRef,
-  AfterViewInit,
-  ChangeDetectorRef,
   inject,
   HostListener,
 } from '@angular/core';
@@ -30,24 +27,26 @@ import {
 } from '../../../models/datatable.model';
 import { ComponentService } from '../../../services/genral/component.service';
 import { Paginator } from 'primeng/paginator';
+import { NgClass } from '@angular/common';
 import { Modal } from '../modal/modal';
 import { Filter } from '../filter/filter';
 import { Loading } from '../loading/loading';
 import { Error } from '../error/error';
-
-import { Injectable } from '@angular/core';
+import { AppErrorService } from '../../../services/genral/app-error.service';
+import { AppErrorState } from '../../../models/app-error.model';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable, { RowInput } from 'jspdf-autotable';
+import { ToastService } from '../../../services/genral/tost.service';
 
 @Component({
   selector: 'app-datatable',
   templateUrl: './datatable.html',
   styleUrls: ['./datatable.css'],
   standalone: true,
-  imports: [TableModule, FormsModule, Paginator, Modal, Filter, Loading, Error],
+  imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter, Loading, Error],
 })
-export class Datatable implements OnInit, OnChanges, AfterViewInit {
+export class Datatable implements OnInit, OnChanges {
   // ✅ API URL
   @Input() url!: string;
   @Input() name!: string;
@@ -55,14 +54,19 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     columns: [],
   };
   @Input() tableName: string | null = null; // optional, used for parent-triggered revalidate
+  @Input() rows: any[] = [];
+  @Input() hidePagination = false;
+  @Input() showDetails = false;
+  @Input() hiddenHeader = false;
 
   filterModal: boolean = false;
   private readonly elRef = inject(ElementRef);
   loading: boolean = false;
-  error: string | null = null;
+  error: AppErrorState | null = null;
 
   data: any[] = [];
   totalRecords: number = 0; // total records for pagination
+  totalPages: number = 0;
   currentPage: number = 1;
   pageSize: number = 10;
 
@@ -86,16 +90,23 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   filterInputs: { [key: string]: any } = {};
   private filterSubject = new Subject<FilterState>();
   private toastService = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
 
   currentSort: SortConfig | null = null;
   selectedRows: any[] = [];
+  activeRow: any | null = null;
+  activeRowKey: string | number | null = null;
   selectAll: boolean = false;
   visibleColumns: ColumnDefinition[] = [];
   showFilters: boolean = false;
-  private cdr = inject(ChangeDetectorRef);
+  selectedDetailRow: any | null = null;
+  activeDetailTab = 'general';
   private componentService = inject(ComponentService);
+  private errorService = inject(AppErrorService);
   private sub!: Subscription;
   exportOpen: boolean = false;
+  rowActionMenuPosition: { [key: string]: { top: number; left: number } } = {};
+  private rowActionCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ================= LIFECYCLE =================
 
@@ -111,6 +122,8 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     if (this.url) {
       this.pageSize = 10;
       this.loadData();
+    } else {
+      this.syncLocalRows();
     }
 
     // Listen for parent-triggered revalidation
@@ -123,12 +136,16 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['config']) this.initializeTable();
-    if (changes['url'] && this.url) this.loadData();
+    if (changes['url'] && this.url) {
+      this.currentPage = 1;
+      this.internalState.filters = {};
+      this.filterInputs = {};
+      this.currentSort = null;
+      this.loadData();
+    }
+    if (changes['rows'] && !this.url) this.syncLocalRows();
   }
 
-  ngAfterViewInit() {
-    this.cdr.detectChanges();
-  }
   showMoreFilters() {
     this.showFilters = true;
   }
@@ -156,7 +173,24 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.pageSize = 10;
     this.clearSelection();
   }
+
+  private syncLocalRows() {
+    Promise.resolve().then(() => {
+      this.data = [...(this.rows || [])];
+      this.totalRecords = this.data.length;
+      this.totalPages = this.data.length > 0 ? 1 : 0;
+      this.syncActiveRowReference();
+      this.loading = false;
+      this.error = null;
+      this.cdr.detectChanges();
+    });
+  }
   private exportToCsv(data: any[], filename: string): void {
+    if (data.length === 0) {
+      this.toastService.warn('Export unavailable', 'There is no data to export.');
+      return;
+    }
+
     const csvContent = this.convertToCsv(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -169,6 +203,11 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   // 2. Excel Export (Using SheetJS)
   private exportToExcel(data: any[], filename: string): void {
+    if (data.length === 0) {
+      this.toastService.warn('Export unavailable', 'There is no data to export.');
+      return;
+    }
+
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
     const workbook: XLSX.WorkBook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
     XLSX.writeFile(workbook, `${filename}.xlsx`);
@@ -190,6 +229,11 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
   // 3. PDF Export (Using jsPDF)
   private exportToPdf(data: any[], filename: string): void {
+    if (data.length === 0) {
+      this.toastService.warn('Export unavailable', 'There is no data to export.');
+      return;
+    }
+
     const doc = new jsPDF();
 
     // 2. Extract headers
@@ -213,13 +257,17 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   private loadData() {
-    if (!this.url) return;
+    if (!this.url) {
+      this.syncLocalRows();
+      return;
+    }
 
     this.loading = true;
     this.error = null;
 
     const state = {
       page: this.currentPage || 1,
+      pageNum: Math.max((this.currentPage || 1) - 1, 0),
       pageSize: this.pageSize || 10,
       sortBy: this.internalState.sort?.column || null,
       sortDir: this.internalState.sort?.direction || null,
@@ -228,14 +276,19 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
 
     this.componentService.load(this.url, state).subscribe({
       next: (res: any) => {
-        this.data = res.items || res.data || res.results || res.content || res || [];
-        this.totalRecords = res.totalRecords || res.total || this.data.length;
+        this.data = res.content || res.items || res.data || res.results || res || [];
+        this.totalRecords = res.totalElements || res.totalRecords || res.total || this.data.length;
+        this.totalPages = res.totalPages || 0;
+        this.syncActiveRowReference();
         this.loading = false;
+        this.error = null;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.error = err?.message ?? 'An unexpected error occurred';
+        this.error = this.errorService.normalize(err, this.name || this.url || 'table data');
         this.loading = false;
+        this.toastService.dataLoadingError(this.error.message);
+        this.cdr.detectChanges();
       },
     });
   }
@@ -243,7 +296,11 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   // ================= EVENTS =================
 
   refresh() {
-    this.loadData();
+    if (this.url) {
+      this.loadData();
+    } else {
+      this.syncLocalRows();
+    }
     this.tableEvent.emit({ type: 'refresh', data: null });
     console.log('Data table refreshed', this.totalRecords);
   }
@@ -285,7 +342,16 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.filterSubject.next(newFilters);
   }
 
+  get searchKey(): string {
+    return this.config.searchKey || 'search';
+  }
+
   handleRowClick(row: any) {
+    if (this.showDetails) {
+      this.selectedDetailRow = row;
+      this.activeDetailTab = this.buildDetailTabs(row)[0]?.key || 'general';
+    }
+    this.config.onRowClick?.(row);
     this.onRowClick.emit(row);
     this.tableEvent.emit({ type: 'rowClick', data: row });
   }
@@ -319,9 +385,14 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     this.selectedRows = [];
     this.selectAll = false;
     this.internalState.selection = { selectedRows: [], allSelected: false };
+    this.activeRow = null;
+    this.activeRowKey = null;
   }
 
   addNew() {
+    if (this.config?.onAdd) {
+      this.config.onAdd();
+    }
     this.onAdd.emit();
     this.tableEvent.emit({ type: 'add', data: null });
   }
@@ -339,7 +410,7 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     return this.data.map((row) => {
       const filteredRow: any = {};
       this.visibleColumns.forEach((col) => {
-        filteredRow[col.label || col.key] = this.getCellValue(row, col);
+        filteredRow[col.label || col.key] = this.getExportValue(row, col);
       });
       return filteredRow;
     });
@@ -362,8 +433,14 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
   // ================= DISPLAY =================
 
+  private resolveValue(row: any, key: string): any {
+    if (!row || !key) return undefined;
+
+    return key.split('.').reduce((current, part) => current?.[part], row);
+  }
+
   getCellValue(row: any, column: ColumnDefinition): any {
-    const val = row[column.key];
+    const val = this.resolveValue(row, column.key);
 
     // 1️⃣ Use custom renderer if defined
     if (column.renderer) return column.renderer(val, row);
@@ -402,6 +479,37 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     }
   }
 
+  getCellDisplayValue(row: any, column: ColumnDefinition): string {
+    const value = this.getCellValue(row, column);
+    return value === null || value === undefined || value === '' ? '—' : String(value);
+  }
+
+  getCellTitle(row: any, column: ColumnDefinition): string {
+    return this.stripHtml(this.getCellDisplayValue(row, column));
+  }
+
+  getColumnAlignmentClass(column: ColumnDefinition): string {
+    switch (column.align) {
+      case 'right':
+        return 'text-right';
+      case 'center':
+        return 'text-center';
+      default:
+        return 'text-left';
+    }
+  }
+
+  private getExportValue(row: any, column: ColumnDefinition): string {
+    return this.stripHtml(this.getCellDisplayValue(row, column));
+  }
+
+  private stripHtml(value: string): string {
+    return value
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   isColumnFilterable(column: ColumnDefinition): boolean {
     return !!column.filterType;
   }
@@ -425,7 +533,22 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   getRowClass(row: any): string {
-    return this.selectedRows.includes(row) ? 'bg-blue-50' : '';
+    const classes = [];
+
+    if (this.selectedDetailRow === row) {
+      classes.push('!bg-[#fff5b8]', 'hover:!bg-[#ffef9c]');
+    }
+
+    if (this.selectedRows.includes(row)) {
+      classes.push('bg-blue-50');
+    }
+
+    if (this.config.rowClass) {
+      const customClass = this.config.rowClass(row);
+      if (customClass) classes.push(customClass);
+    }
+
+    return classes.join(' ').trim();
   }
 
   getColumnWidth(column: ColumnDefinition): string {
@@ -433,31 +556,324 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
   }
 
   getCellClasses(column: ColumnDefinition): string {
-    return column.cellClass || column.className || '';
+    return `${this.getColumnAlignmentClass(column)} ${column.cellClass || column.className || ''}`.trim();
   }
 
   getHeaderClasses(column: ColumnDefinition): string {
-    let classes = 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
+    let classes = 'whitespace-nowrap text-[12px] font-semibold text-white';
     if (column.sortable) classes += ' cursor-pointer';
-    classes += ` ${column.headerClass || 'text-center'}`;
+    classes += ` ${this.getColumnAlignmentClass(column)} ${column.headerClass || ''}`;
     return classes;
+  }
+
+  closeDetails() {
+    this.selectedDetailRow = null;
+    this.activeDetailTab = 'general';
+  }
+
+  get detailTabs(): Array<{
+    key: string;
+    label: string;
+    rows: Array<Array<{ label: string; value: string }>>;
+  }> {
+    return this.buildDetailTabs(this.selectedDetailRow);
+  }
+
+  get activeDetailRows(): Array<Array<{ label: string; value: string }>> {
+    return this.detailTabs.find((tab) => tab.key === this.activeDetailTab)?.rows || [];
+  }
+
+  get detailArrayTables(): Array<{
+    label: string;
+    columns: string[];
+    rows: string[][];
+  }> {
+    return this.getArrayTables(this.selectedDetailRow);
+  }
+
+  selectDetailTab(key: string) {
+    this.activeDetailTab = key;
+  }
+
+  isDetailTabActive(key: string): boolean {
+    return this.activeDetailTab === key;
+  }
+
+  private buildDetailTabs(row: any): Array<{
+    key: string;
+    label: string;
+    rows: Array<Array<{ label: string; value: string }>>;
+  }> {
+    if (!row || typeof row !== 'object') return [];
+
+    const tabs: Array<{
+      key: string;
+      label: string;
+      rows: Array<Array<{ label: string; value: string }>>;
+    }> = [];
+
+    const generalEntries = this.getGeneralEntries(row);
+    if (generalEntries.length > 0) {
+      tabs.push({
+        key: 'general',
+        label: 'General',
+        rows: this.chunkDetailEntries(generalEntries),
+      });
+    }
+
+    Object.entries(row).forEach(([key, value]) => {
+      if (
+        key === 'general' ||
+        value === null ||
+        value === undefined ||
+        Array.isArray(value) ||
+        typeof value !== 'object' ||
+        value instanceof Date
+      ) {
+        return;
+      }
+
+      const entries = this.flattenObjectEntries(value);
+      if (entries.length > 0) {
+        tabs.push({
+          key,
+          label: this.getDetailTabLabel(key),
+          rows: this.chunkDetailEntries(entries),
+        });
+      }
+    });
+
+    return tabs;
+  }
+
+  private getGeneralEntries(row: any): Array<{ label: string; value: string }> {
+    const visibleColumnEntries = this.visibleColumns
+      .filter((column) => !column.key.includes('.'))
+      .map((column) => ({
+        key: column.key,
+        label: column.label,
+        value: this.getCellDisplayValue(row, column),
+      }))
+      .filter((item) => item.value !== '—');
+
+    const seen = new Set(visibleColumnEntries.map((item) => item.key));
+    const primitiveEntries = Object.entries(row)
+      .filter(
+        ([key, value]) =>
+          !seen.has(key) &&
+          !Array.isArray(value) &&
+          (value === null ||
+            value === undefined ||
+            typeof value !== 'object' ||
+            value instanceof Date),
+      )
+      .map(([key, value]) => ({
+        label: this.formatDetailLabel(key),
+        value: this.stringifyDetailValue(value),
+      }))
+      .filter((item) => item.value !== '—');
+
+    return [
+      ...visibleColumnEntries.map(({ label, value }) => ({ label, value })),
+      ...primitiveEntries,
+    ];
+  }
+
+  private flattenObjectEntries(
+    value: any,
+    parentKey = '',
+  ): Array<{ label: string; value: string }> {
+    if (value === null || value === undefined) return [];
+
+    if (Array.isArray(value)) return [];
+
+    if (typeof value !== 'object' || value instanceof Date) {
+      return parentKey
+        ? [{ label: this.formatDetailLabel(parentKey), value: this.stringifyDetailValue(value) }]
+        : [];
+    }
+
+    const entries: Array<{ label: string; value: string }> = [];
+    Object.entries(value).forEach(([key, nestedValue]) => {
+      const nextKey = parentKey ? `${parentKey}.${key}` : key;
+      if (
+        nestedValue !== null &&
+        typeof nestedValue === 'object' &&
+        !(nestedValue instanceof Date) &&
+        !Array.isArray(nestedValue)
+      ) {
+        entries.push(...this.flattenObjectEntries(nestedValue, nextKey));
+      } else if (!Array.isArray(nestedValue)) {
+        const stringValue = this.stringifyDetailValue(nestedValue);
+        if (stringValue !== '—') {
+          entries.push({
+            label: this.formatDetailLabel(nextKey),
+            value: stringValue,
+          });
+        }
+      }
+    });
+
+    return entries;
+  }
+
+  private chunkDetailEntries(entries: Array<{ label: string; value: string }>) {
+    const chunkSize = 4;
+    const rows: Array<Array<{ label: string; value: string }>> = [];
+
+    for (let i = 0; i < entries.length; i += chunkSize) {
+      rows.push(entries.slice(i, i + chunkSize));
+    }
+
+    return rows;
+  }
+
+  private getArrayTables(row: any): Array<{ label: string; columns: string[]; rows: string[][] }> {
+    if (!row || typeof row !== 'object') return [];
+
+    return Object.entries(row)
+      .filter(([, value]) => Array.isArray(value) && value.length > 0)
+      .map(([key, value]) => this.buildArrayTable(key, value as any[]))
+      .filter((table): table is { label: string; columns: string[]; rows: string[][] } => !!table);
+  }
+
+  private buildArrayTable(
+    key: string,
+    items: any[],
+  ): { label: string; columns: string[]; rows: string[][] } | null {
+    if (!items.length) return null;
+
+    if (items.every((item) => item !== null && typeof item === 'object' && !Array.isArray(item))) {
+      const columnSet = new Set<string>();
+      items.forEach((item) => {
+        Object.keys(item).forEach((column) => columnSet.add(column));
+      });
+
+      const columns = Array.from(columnSet);
+      const rows = items.map((item) =>
+        columns.map((column) => this.stringifyDetailValue(item?.[column])),
+      );
+
+      return {
+        label: this.formatDetailLabel(key),
+        columns: columns.map((column) => this.formatDetailLabel(column)),
+        rows,
+      };
+    }
+
+    return {
+      label: this.formatDetailLabel(key),
+      columns: ['Value'],
+      rows: items.map((item) => [this.stringifyDetailValue(item)]),
+    };
+  }
+
+  private stringifyDetailValue(value: any): string {
+    if (value === null || value === undefined || value === '') return '—';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (value instanceof Date) return value.toLocaleString();
+    return String(value);
+  }
+
+  private formatDetailLabel(key: string): string {
+    return key
+      .split('.')
+      .map((part) =>
+        part
+          .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+          .replace(/[_-]+/g, ' ')
+          .replace(/^./, (char) => char.toUpperCase()),
+      )
+      .join(' ');
+  }
+
+  private getDetailTabLabel(key: string): string {
+    const labels: Record<string, string> = {
+      fromInstitution: 'From Institution',
+      toInstitution: 'To Institution',
+      exchangeRate: 'Exchange Rate',
+      requestedBy: 'Requested By',
+      normalizedCurrency: 'Normalized Currency',
+    };
+
+    return labels[key] || this.formatDetailLabel(key);
   }
 
   isRowSelected(row: any): boolean {
     return this.selectedRows.includes(row);
   }
+
+  private getRowKey(row: any): string | number | null {
+    if (!row || typeof row !== 'object') return null;
+    return row.id ?? row.uuid ?? row.code ?? null;
+  }
+
+  private setActiveRow(row: any) {
+    this.activeRow = row;
+    this.activeRowKey = this.getRowKey(row);
+  }
+
+  private syncActiveRowReference() {
+    if (!this.activeRow) return;
+
+    if (this.activeRowKey !== null) {
+      const matched = this.data.find((row) => this.getRowKey(row) === this.activeRowKey);
+      this.activeRow = matched ?? null;
+      if (!matched) this.activeRowKey = null;
+      return;
+    }
+
+    const stillExists = this.data.includes(this.activeRow);
+    if (!stillExists) this.activeRow = null;
+  }
+
+  isActiveRow(row: any): boolean {
+    if (!this.activeRow) return false;
+    if (this.activeRowKey !== null) return this.getRowKey(row) === this.activeRowKey;
+    return row === this.activeRow;
+  }
   rowActionMenuOpen: { [key: string]: boolean } = {};
 
-  toggleRowActions(row: any) {
+  openRowActions(row: any, event?: MouseEvent) {
     const key = row.id || row.key || JSON.stringify(row);
+    const isAlreadyOpen = !!this.rowActionMenuOpen[key];
+
+    if (isAlreadyOpen) {
+      this.closeAllRowActions();
+      return;
+    }
+
+    this.clearRowActionCloseTimer();
 
     // Close all other menus first
     Object.keys(this.rowActionMenuOpen).forEach((k) => {
       if (k !== key) this.rowActionMenuOpen[k] = false;
     });
 
-    // Toggle current row menu
-    this.rowActionMenuOpen[key] = !this.rowActionMenuOpen[key];
+    this.rowActionMenuOpen[key] = true;
+
+    if (event?.currentTarget instanceof HTMLElement) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const menuWidth = 180;
+      const padding = 8;
+      const left = Math.min(window.innerWidth - menuWidth - padding, Math.max(padding, rect.right - menuWidth));
+      const top = rect.bottom + 6;
+      this.rowActionMenuPosition[key] = { top, left };
+    }
+  }
+
+  scheduleCloseRowActions() {
+    this.clearRowActionCloseTimer();
+    this.rowActionCloseTimer = setTimeout(() => {
+      this.closeAllRowActions();
+    }, 120);
+  }
+
+  private clearRowActionCloseTimer() {
+    if (this.rowActionCloseTimer) {
+      clearTimeout(this.rowActionCloseTimer);
+      this.rowActionCloseTimer = null;
+    }
   }
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
@@ -467,7 +883,6 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     const insideRowMenu = target.closest('.row-action-container');
     if (!insideRowMenu) {
       this.closeAllRowActions(); // close any open row menus
-      this.cdr.detectChanges(); // update UI
     }
 
     // --- Handle export dropdown ---
@@ -482,8 +897,14 @@ export class Datatable implements OnInit, OnChanges, AfterViewInit {
     return !!this.rowActionMenuOpen[key];
   }
 
+  getRowActionKey(row: any): string {
+    return row.id || row.key || JSON.stringify(row);
+  }
+
   closeAllRowActions() {
+    this.clearRowActionCloseTimer();
     this.rowActionMenuOpen = {};
+    this.rowActionMenuPosition = {};
   }
   applyFilters(filters: any) {
     this.internalState.filters = filters;

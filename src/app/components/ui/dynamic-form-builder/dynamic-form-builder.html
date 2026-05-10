@@ -9,7 +9,6 @@
         @if (field.type === 'profile-image') {
           <app-add-profile-image
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
             (valueChange)="handleSingleFileChange(field, $event)"
           ></app-add-profile-image>
         }
@@ -19,7 +18,6 @@
             pInputText
             [formControlName]="field.name"
             [placeholder]="field.placeholder ?? field.label"
-            [disabled]="field.disabled ?? false"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
           />
@@ -29,8 +27,11 @@
         @if (field.type === 'number') {
           <p-inputNumber
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
+            [step]="field.step ?? 1"
+            [minFractionDigits]="field.minFractionDigits ?? 0"
+            [maxFractionDigits]="field.maxFractionDigits ?? 0"
+            [useGrouping]="field.useGrouping ?? false"
             class="w-full"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-inputNumber>
@@ -41,7 +42,6 @@
           <p-password
             toggleMask
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-password>
@@ -51,9 +51,10 @@
         @if (field.type === 'date') {
           <p-datePicker
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
+            class="w-full"
+
           ></p-datePicker>
         }
 
@@ -63,7 +64,6 @@
             pTextarea
             rows="4"
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
             [placeholder]="field.placeholder ?? field.label"
             class="w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
@@ -75,7 +75,6 @@
           <p-checkbox
             binary="true"
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
           ></p-checkbox>
         }
         @if (field.type === 'radio') {
@@ -86,7 +85,6 @@
                   [name]="field.name"
                   [value]="opt[field.optionValue ?? 'value']"
                   [formControlName]="field.name"
-                  [disabled]="field.disabled ?? false"
                 ></p-radioButton>
 
                 <label>
@@ -104,7 +102,6 @@
                   [binary]="false"
                   [value]="opt[field.optionValue ?? 'value']"
                   [formControlName]="field.name"
-                  [disabled]="field.disabled ?? false"
                 ></p-checkbox>
 
                 <label>
@@ -119,7 +116,6 @@
         @if (field.type === 'switch') {
           <p-toggleSwitch
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
           ></p-toggleSwitch>
         }
 
@@ -128,10 +124,10 @@
           <p-select
             [options]="field.options"
             [formControlName]="field.name"
-            [disabled]="field.disabled ?? false"
             [optionLabel]="field.optionLabel ?? 'id'"
             [optionValue]="field.optionValue ?? 'id'"
             [placeholder]="field.placeholder ?? 'Select'"
+            [filter]="field.searchable ?? true"
             class="w-full"
             appendTo="body"
             (onBlur)="form.get(field.name)?.markAsTouched()"
@@ -142,12 +138,13 @@
         @if (field.type === 'server-select') {
           <app-single-select
             [formControlName]="field.name"
-            [url]="field.url"
+            [url]="getFieldUrl(field)"
+            [disabled]="isFieldDisabled(field)"
             [optionLabel]="field.optionLabel ?? 'id'"
             [optionValue]="field.optionValue ?? 'id'"
             [placeholder]="field.placeholder ?? 'Select'"
             [showClear]="true"
-            [isSearable]="true"
+            [isSearable]="field.searchable ?? true"
             [multiple]="false"
             (valueChange)="handleSelectChange(field, $event)"
           ></app-single-select>
@@ -157,10 +154,12 @@
         @if (field.type === 'multi-select') {
           <app-multi-selected
             [formControlName]="field.name"
-            [url]="field.url ?? ''"
+            [url]="getFieldUrl(field) ?? ''"
+            [disabled]="isFieldDisabled(field)"
             [optionLabel]="field.optionLabel ?? 'id'"
             [optionValue]="field.optionValue ?? 'id'"
             [placeholder]="field.placeholder ?? 'Select'"
+            [isSearable]="field.searchable ?? true"
             (valueChange)="handleSelectChange(field, $event)"
           ></app-multi-selected>
         }
@@ -169,7 +168,6 @@
           <p-editor
             [formControlName]="field.name"
             placeholder="Enter text here..."
-            [disabled]="field.disabled ?? false"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-editor>
         }
@@ -180,7 +178,6 @@
             type="file"
             [placeholder]="field.placeholder ?? 'select file'"
             (change)="form.get(field.name)?.setValue($any($event.target).files[0])"
-            [disabled]="field.disabled ?? false"
           />
         }
         @if (field.type === 'file-upload') {
@@ -242,9 +239,17 @@
   </div>
 
   <!-- SUBMIT BUTTON -->
-  <div class="mt-4">
-    <button pButton type="submit" label="Submit" [loading]="loading" [disabled]="loading"></button>
-  </div>
+  @if (showSubmitButton) {
+    <div class="mt-4">
+      <button
+        pButton
+        type="submit"
+        [label]="submitLabel"
+        [loading]="loading"
+        [disabled]="loading"
+      ></button>
+    </div>
+  }
 
   <!-- PROGRESS BAR -->
   @if (progress) {

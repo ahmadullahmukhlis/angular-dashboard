@@ -1,6 +1,6 @@
 <div>
   <p-select
-    [options]="options"
+    [options]="options()"
     [optionLabel]="optionLabel"
     [optionValue]="optionValue"
     [showClear]="showClear"
@@ -8,9 +8,10 @@
     [placeholder]="placeholder"
     class="w-full"
     appendTo="body"
-    [(ngModel)]="selected"
+    [ngModel]="selected()"
+    (ngModelChange)="selected.set($event)"
     (onChange)="onSelectChange($event)"
     [filter]="isSearable"
-    [disabled]="disabled"
+    [disabled]="disabledState()"
   ></p-select>
 </div>

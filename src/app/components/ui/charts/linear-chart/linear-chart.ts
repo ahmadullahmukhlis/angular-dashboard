@@ -35,7 +35,7 @@ export class LinearChart implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.api.get(this.url).subscribe({
+    this.api.get(this.url, {}, { suppressGlobalError: true }).subscribe({
       next: (res: any) => {
         this.data = Array.isArray(res) ? res : (res?.data ?? []);
 

@@ -16,6 +16,8 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { Error } from '../error/error';
+import { AppErrorService } from '../../../services/genral/app-error.service';
+import { AppErrorState } from '../../../models/app-error.model';
 
 @Component({
   selector: 'app-server-data',
@@ -36,13 +38,14 @@ export class ServerData implements OnInit, OnDestroy {
   @ContentChild(TemplateRef) template!: TemplateRef<any>;
 
   data: any = undefined;
-  error: any = null;
+  error: AppErrorState | null = null;
   loading = false;
   renderKey = 0;
 
   private sub!: Subscription;
   private api = inject(ApiService);
   private componentService = inject(ComponentService);
+  private errorService = inject(AppErrorService);
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit() {
@@ -68,7 +71,7 @@ export class ServerData implements OnInit, OnDestroy {
     this.loading = true;
     this.error = null;
 
-    this.api.get(this.url).subscribe({
+    this.api.get(this.url, {}, { suppressGlobalError: true }).subscribe({
       next: (res: any) => {
         // Normalize data (array or object)
         this.data = Array.isArray(res) ? res : (res?.data ?? res);
@@ -81,7 +84,7 @@ export class ServerData implements OnInit, OnDestroy {
         console.log('Server component data:', this.data);
       },
       error: (err) => {
-        this.error = err?.message ?? 'An unexpected error occurred';
+        this.error = this.errorService.normalize(err, this.url || 'server data');
         this.loading = false;
         this.cdr.detectChanges();
       },

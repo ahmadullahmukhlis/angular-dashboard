@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, Output, EventEmitter, forwardRef } from '@angular/core';
+import { Component, inject, Input, OnChanges, OnInit, SimpleChanges, Output, EventEmitter, forwardRef, signal, OnDestroy } from '@angular/core';
 import { ComponentService } from '../../../services/genral/component.service';
 import { FormsModule, NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
@@ -17,7 +17,7 @@ import { SelectModule } from 'primeng/select';
     },
   ],
 })
-export class SingleSelect implements OnInit, ControlValueAccessor {
+export class SingleSelect implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() url?: string;
   @Input() optionLabel!: string;
   @Input() optionValue!: string;
@@ -29,11 +29,14 @@ export class SingleSelect implements OnInit, ControlValueAccessor {
 
   @Output() valueChange = new EventEmitter<any>();
 
-  options: any[] = [];
-  loading = false;
+  options = signal<any[]>([]);
+  loading = signal(false);
+  disabledState = signal(false);
+  private initialized = false;
+  private loadTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Internal value for ngModel / formControl
-  selected: any;
+  selected = signal<any>(null);
 
   componentService = inject(ComponentService);
 
@@ -42,40 +45,82 @@ export class SingleSelect implements OnInit, ControlValueAccessor {
   private onTouched: any = () => {};
 
   ngOnInit() {
-    if (this.url) this.loadOptions();
+    this.initialized = true;
+    if (this.url && !this.disabled) this.scheduleLoad();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.initialized) return;
+
+    if (changes['url'] && !this.url) {
+      this.options.set([]);
+      this.loading.set(false);
+      return;
+    }
+
+    const urlChanged =
+      !!changes['url'] && changes['url'].currentValue !== changes['url'].previousValue;
+    const reEnabled =
+      !!changes['disabled'] &&
+      changes['disabled'].previousValue === true &&
+      changes['disabled'].currentValue === false;
+
+    if ((urlChanged || reEnabled) && this.url && !this.disabled) {
+      this.scheduleLoad();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.loadTimer) {
+      clearTimeout(this.loadTimer);
+      this.loadTimer = null;
+    }
+  }
+
+  private scheduleLoad() {
+    if (this.loadTimer) {
+      clearTimeout(this.loadTimer);
+    }
+
+    this.loadTimer = setTimeout(() => {
+      this.loadTimer = null;
+      this.loadOptions();
+    }, 0);
   }
 
   loadOptions() {
-    this.loading = true;
+    if (!this.url) {
+      this.loading.set(false);
+      return;
+    }
+
+    this.loading.set(true);
     this.componentService.getList(this.url ?? '').subscribe({
       next: (res) => {
-        this.options = res;
-        this.loading = false;
-
-        // 🔹 If form already has value (edit mode), make sure selected is set
-        if (this.selected != null) {
-          this.selected = this.selected;
-        }
+        this.options.set([...(res ?? [])]);
+        this.loading.set(false);
       },
-      error: () => (this.loading = false),
+      error: () => {
+        this.loading.set(false);
+      },
     });
   }
 
   // Called by PrimeNG p-select
   onSelectChange(e: any) {
-    this.selected = e.value;
+    this.selected.set(e.value);
 
     // 🔹 Update formControl if used
-    this.onChange(this.selected);
+    this.onChange(this.selected());
     this.onTouched();
 
     // 🔹 Keep valueChange for filters / other uses
-    this.valueChange.emit(this.selected);
+    this.valueChange.emit(this.selected());
   }
 
   // 🔹 ControlValueAccessor methods
   writeValue(value: any): void {
-    this.selected = value; // 👈 defaultValue from formControl or edit data
+    this.selected.set(value); // 👈 defaultValue from formControl or edit data
   }
 
   registerOnChange(fn: any): void {
@@ -88,5 +133,6 @@ export class SingleSelect implements OnInit, ControlValueAccessor {
 
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    this.disabledState.set(isDisabled);
   }
 }

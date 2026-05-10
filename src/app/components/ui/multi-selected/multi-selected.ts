@@ -1,4 +1,16 @@
-import { Component, EventEmitter, inject, Input, Output, forwardRef, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  forwardRef,
+  OnInit,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from '@angular/core';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ComponentService } from '../../../services/genral/component.service';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor, FormsModule } from '@angular/forms';
@@ -17,7 +29,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor, FormsModule } from '@angular/f
     },
   ],
 })
-export class MultiSelected implements OnInit, ControlValueAccessor {
+export class MultiSelected implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() url!: string;
   @Input() optionLabel!: string;
   @Input() optionValue!: string;
@@ -29,6 +41,10 @@ export class MultiSelected implements OnInit, ControlValueAccessor {
 
   options: any[] = [];
   loading = false;
+  private initialized = false;
+  private loadTimer: ReturnType<typeof setTimeout> | null = null;
+  private lastLoadedUrl?: string;
+  private cdr = inject(ChangeDetectorRef);
 
   // internal value for ngModel / formControl
   selected: any[] = [];
@@ -40,23 +56,79 @@ export class MultiSelected implements OnInit, ControlValueAccessor {
   private onTouched: any = () => {};
 
   ngOnInit() {
-    if (this.url) this.loadOptions();
+    this.initialized = true;
+    if (this.url && !this.disabled) this.scheduleLoad();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!this.initialized) return;
+
+    if (changes['url'] && !this.url) {
+      this.options = [];
+      this.loading = false;
+      this.lastLoadedUrl = undefined;
+      return;
+    }
+
+    const urlChanged =
+      !!changes['url'] && changes['url'].currentValue !== changes['url'].previousValue;
+    const reEnabled =
+      !!changes['disabled'] &&
+      changes['disabled'].previousValue === true &&
+      changes['disabled'].currentValue === false;
+
+    if ((urlChanged || reEnabled) && this.url && !this.disabled) {
+      this.scheduleLoad();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.loadTimer) {
+      clearTimeout(this.loadTimer);
+      this.loadTimer = null;
+    }
+  }
+
+  private scheduleLoad() {
+    if (this.loadTimer) {
+      clearTimeout(this.loadTimer);
+    }
+
+    this.loadTimer = setTimeout(() => {
+      this.loadTimer = null;
+      this.loadOptions();
+    }, 0);
   }
 
   loadOptions() {
+    if (!this.url || this.disabled) {
+      this.options = [];
+      this.loading = false;
+      return;
+    }
+
+    if (this.lastLoadedUrl === this.url && this.options.length > 0) {
+      return;
+    }
+
+    this.lastLoadedUrl = this.url;
     this.loading = true;
 
     this.componentService.getList(this.url).subscribe({
       next: (res) => {
-        this.options = res;
-        this.loading = false;
-
-        // 🔹 if form already has value (edit mode), keep selected
-        if (this.selected && this.selected.length > 0) {
-          this.selected = this.selected;
-        }
+        setTimeout(() => {
+          this.options = Array.isArray(res) ? [...res] : [];
+          this.loading = false;
+          this.cdr.detectChanges();
+        }, 0);
       },
-      error: () => (this.loading = false),
+      error: () => {
+        setTimeout(() => {
+          this.options = [];
+          this.loading = false;
+          this.cdr.detectChanges();
+        }, 0);
+      },
     });
   }
 
@@ -87,5 +159,9 @@ export class MultiSelected implements OnInit, ControlValueAccessor {
 
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
+
+    if (!isDisabled && this.url && this.options.length === 0) {
+      this.scheduleLoad();
+    }
   }
 }
