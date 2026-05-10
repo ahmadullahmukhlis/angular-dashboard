@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.dynamic-form {
+  display: block;
+}
+
+.dynamic-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.dynamic-form__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.dynamic-form__error {
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: #dc2626;
+}
+
+.dynamic-form__actions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+:host ::ng-deep .dynamic-form__control,
+:host ::ng-deep .dynamic-form__control .p-inputtext,
+:host ::ng-deep .dynamic-form__control .p-inputnumber-input,
+:host ::ng-deep .dynamic-form__control .p-password-input,
+:host ::ng-deep .dynamic-form__control .p-select-label,
+:host ::ng-deep .dynamic-form__control .p-multiselect-label,
+:host ::ng-deep textarea.dynamic-form__control {
+  width: 100%;
+  border-radius: 0.5rem;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-inputnumber-input,
+:host ::ng-deep .p-password-input,
+:host ::ng-deep .p-select,
+:host ::ng-deep .p-multiselect,
+:host ::ng-deep .p-datepicker,
+:host ::ng-deep textarea.p-inputtextarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  box-shadow: none;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-inputnumber-input,
+:host ::ng-deep .p-password-input,
+:host ::ng-deep .p-select-label,
+:host ::ng-deep .p-multiselect-label,
+:host ::ng-deep .p-datepicker-input,
+:host ::ng-deep textarea.p-inputtextarea {
+  padding: 0.72rem 0.85rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+:host ::ng-deep .p-password {
+  width: 100%;
+}
+
+:host ::ng-deep .p-password .p-password-input {
+  width: 100%;
+}
+
+:host ::ng-deep .p-inputtext:enabled:focus,
+:host ::ng-deep .p-inputnumber-input:enabled:focus,
+:host ::ng-deep .p-password-input:enabled:focus,
+:host ::ng-deep .p-select.p-focus,
+:host ::ng-deep .p-multiselect.p-focus,
+:host ::ng-deep .p-datepicker.p-focus,
+:host ::ng-deep textarea.p-inputtextarea:enabled:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+:host ::ng-deep .dynamic-form__submit .p-button {
+  border-radius: 0.5rem;
+}

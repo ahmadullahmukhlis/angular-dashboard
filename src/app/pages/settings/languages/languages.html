@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Languages</h2>
+        <p class="subtitle">Manage languages and their translation words from one page.</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn" (click)="openLanguageModal()">Add Language</button>
+      </div>
+    </div>
+
+    <app-datatable
+      [url]="'/configurations/languages'"
+      [name]="'Languages'"
+      [tableName]="'settings-languages-table'"
+      [config]="languageTableConfig"
+      [hidePagination]="true"
+      (onRowClick)="selectLanguage($event)"
+    ></app-datatable>
+
+    @if (selectedLanguage) {
+      <div class="dictionary-panel">
+        <div class="dictionary-header">
+          <div>
+            <h3 class="dictionary-title">{{ selectedLanguage.name }} Language Dictionary</h3>
+            <p class="dictionary-subtitle">Click edit or delete on a word, or add a new translation for this language.</p>
+          </div>
+
+          <button class="btn secondary" (click)="openWordModal()">Add Word</button>
+        </div>
+
+        <app-datatable
+          [url]="wordsUrl"
+          [name]="'Language Words'"
+          [tableName]="'settings-language-words-table'"
+          [config]="wordTableConfig"
+          [hidePagination]="true"
+        ></app-datatable>
+      </div>
+    }
+  </div>
+
+  <app-modal
+    [visible]="languageFields.length > 0"
+    [title]="'Language Form'"
+    [widthClass]="'w-[640px]'"
+    (onClose)="closeModals()"
+  >
+    <app-dynamic-form-builder
+      [fields]="languageFields"
+      [action]="''"
+      [method]="'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [submitLabel]="'Save'"
+      (formSubmitted)="submitLanguage($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="wordFields.length > 0"
+    [title]="editingWordId ? 'Edit Word' : 'Add Word'"
+    [widthClass]="'w-[640px]'"
+    (onClose)="closeModals()"
+  >
+    <app-dynamic-form-builder
+      [fields]="wordFields"
+      [action]="''"
+      [method]="editingWordId ? 'PUT' : 'POST'"
+      [className]="'grid grid-cols-1 gap-4'"
+      [submitLabel]="'Save'"
+      (formSubmitted)="submitWord($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+</div>

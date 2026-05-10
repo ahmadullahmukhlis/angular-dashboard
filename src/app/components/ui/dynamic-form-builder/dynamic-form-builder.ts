@@ -51,6 +51,7 @@ import { MultipleRecord } from '../multiple-record/multiple-record';
     MultipleRecord,
   ],
   templateUrl: './dynamic-form-builder.html',
+  styleUrl: './dynamic-form-builder.css',
 })
 export class DynamicFormBuilder implements OnChanges {
   private fb = inject(FormBuilder);

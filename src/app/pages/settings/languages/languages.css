@@ -15,6 +15,7 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
 .title {
@@ -27,6 +28,12 @@
   margin-top: 4px;
   color: #64748b;
   font-size: 0.82rem;
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .btn {
@@ -44,25 +51,6 @@
   background: #1d4ed8;
 }
 
-.btn.danger {
-  background: #dc2626;
-}
-
-.btn.danger:hover {
-  background: #b91c1c;
-}
-
-.btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.header-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
 .btn.secondary {
   background: #0f172a;
 }
@@ -71,52 +59,27 @@
   background: #020617;
 }
 
-.drilldown-stack {
+.dictionary-panel {
   margin-top: 20px;
-  display: grid;
-  gap: 18px;
-}
-
-.drilldown-section {
   border: 1px solid #dbe5f0;
   border-radius: 14px;
   background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
   padding: 16px;
 }
 
-.drilldown-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+.dictionary-header {
   margin-bottom: 14px;
 }
 
-.drilldown-title {
+.dictionary-title {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
 }
 
-.drilldown-subtitle {
+.dictionary-subtitle {
   margin: 4px 0 0;
   color: #64748b;
   font-size: 0.8rem;
-}
-
-.drilldown-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.drilldown-table {
-  min-width: 0;
-}
-
-@media (max-width: 980px) {
-  .drilldown-grid {
-    grid-template-columns: 1fr;
-  }
 }

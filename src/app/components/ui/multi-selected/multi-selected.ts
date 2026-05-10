@@ -31,6 +31,7 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor, FormsModule } from '@angular/f
 })
 export class MultiSelected implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() url!: string;
+  @Input() optionsInput: any[] | null = null;
   @Input() optionLabel!: string;
   @Input() optionValue!: string;
   @Input() placeholder: string = 'Select';
@@ -57,11 +58,22 @@ export class MultiSelected implements OnInit, OnChanges, OnDestroy, ControlValue
 
   ngOnInit() {
     this.initialized = true;
+    if (this.hasStaticOptions()) {
+      this.options = [...(this.optionsInput ?? [])];
+      return;
+    }
     if (this.url && !this.disabled) this.scheduleLoad();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (!this.initialized) return;
+
+    if (changes['optionsInput'] && this.hasStaticOptions()) {
+      this.options = [...(this.optionsInput ?? [])];
+      this.loading = false;
+      this.lastLoadedUrl = undefined;
+      return;
+    }
 
     if (changes['url'] && !this.url) {
       this.options = [];
@@ -101,6 +113,12 @@ export class MultiSelected implements OnInit, OnChanges, OnDestroy, ControlValue
   }
 
   loadOptions() {
+    if (this.hasStaticOptions()) {
+      this.options = [...(this.optionsInput ?? [])];
+      this.loading = false;
+      return;
+    }
+
     if (!this.url || this.disabled) {
       this.options = [];
       this.loading = false;
@@ -160,8 +178,12 @@ export class MultiSelected implements OnInit, OnChanges, OnDestroy, ControlValue
   setDisabledState?(isDisabled: boolean): void {
     this.disabled = isDisabled;
 
-    if (!isDisabled && this.url && this.options.length === 0) {
+    if (!isDisabled && this.url && this.options.length === 0 && !this.hasStaticOptions()) {
       this.scheduleLoad();
     }
+  }
+
+  private hasStaticOptions(): boolean {
+    return Array.isArray(this.optionsInput);
   }
 }

@@ -1,0 +1,17 @@
+<div class="page">
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Backups</h2>
+        <p class="subtitle">Configuration list from the Vue settings sidebar.</p>
+      </div>
+    </div>
+
+    <app-datatable
+      [url]="'/configurations/backup'"
+      [name]="'Backups'"
+      [tableName]="'settings-backups-table'"
+      [config]="tableConfig"
+    ></app-datatable>
+  </div>
+</div>

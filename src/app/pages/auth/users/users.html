@@ -1,31 +1,67 @@
 <div class="page">
-  <div class="page-header">
-    <div>
-      <h2 class="title">Users</h2>
-      <p class="subtitle">Users for the current client context.</p>
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">List of users</h2>
+        <p class="subtitle">Create and manage users with the same flow as the Vue app.</p>
+      </div>
+      <button class="btn" (click)="openCreate()">Add New User</button>
     </div>
-    <button class="btn" (click)="openCreate()">New User</button>
-  </div>
 
-  <app-datatable
-    [url]="'/users'"
-    [name]="'users'"
-    [tableName]="'users-table'"
-    [config]="userTableConfig"
-  ></app-datatable>
+    <app-datatable
+      [url]="'/user-management/users'"
+      [name]="'Users'"
+      [tableName]="'users-table'"
+      [config]="userTableConfig"
+      [showDetails]="true"
+    ></app-datatable>
+  </div>
 
   <app-modal
     [visible]="showUserModal"
-    [title]="isEdit ? 'Edit User' : 'Create User'"
-    [widthClass]="'w-[900px]'"
+    [title]="isEdit ? 'User Form' : 'User Form'"
+    [widthClass]="'w-[760px]'"
     (onClose)="closeModal()"
   >
     <app-dynamic-form-builder
       [fields]="userFields"
-      [action]="actionUrl"
-      [method]="method"
-      [hiddenFields]="hiddenFields"
-      (submitCompleted)="onSubmit()"
+      [action]="''"
+      [method]="isEdit ? 'PUT' : 'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [submitLabel]="'Save'"
+      (formSubmitted)="submit($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="showAssignRolesModal"
+    [title]="'Assign Roles'"
+    [widthClass]="'w-[560px]'"
+    (onClose)="closeModal()"
+  >
+    <app-dynamic-form-builder
+      [fields]="assignRolesFields"
+      [action]="''"
+      [method]="'PUT'"
+      [className]="'grid grid-cols-1 gap-4'"
+      [submitLabel]="'Assign Roles'"
+      (formSubmitted)="submitAssignRoles($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="showUnassignRolesModal"
+    [title]="'Unassign Roles'"
+    [widthClass]="'w-[560px]'"
+    (onClose)="closeModal()"
+  >
+    <app-dynamic-form-builder
+      [fields]="unassignRolesFields"
+      [action]="''"
+      [method]="'PUT'"
+      [className]="'grid grid-cols-1 gap-4'"
+      [submitLabel]="'Unassign Roles'"
+      (formSubmitted)="submitUnassignRoles($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 </div>

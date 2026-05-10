@@ -24,29 +24,45 @@ export class ComponentService {
   load(url: string, state: any): Observable<any> {
     const queryParts: string[] = [];
 
-    // Always include pagination
-    queryParts.push(`page=${state.page ?? 1}`);
-    queryParts.push(`pageSize=${state.pageSize ?? 10}`);
+    const page = state.page ?? 1;
+    const pageSize = state.pageSize ?? 10;
+    const sortBy = state.sortBy;
+    const sortDir = state.sortDir;
+    const filters = state.filters && typeof state.filters === 'object' ? state.filters : {};
 
-    if (state.sortBy) queryParts.push(`sortBy=${state.sortBy}`);
-    if (state.sortDir) queryParts.push(`sortDir=${state.sortDir}`);
+    // Keep the existing query shape for current Angular consumers.
+    queryParts.push(`page=${page}`);
+    queryParts.push(`pageSize=${pageSize}`);
+    queryParts.push(`limit=${pageSize}`);
 
-    if (state.filters && typeof state.filters === 'object') {
-      Object.keys(state.filters).forEach((key) => {
-        const value = state.filters[key];
+    if (sortBy) {
+      queryParts.push(`sortBy=${encodeURIComponent(sortBy)}`);
+      queryParts.push(`order_by=${encodeURIComponent(sortBy)}`);
+    }
+    if (sortDir) {
+      queryParts.push(`sortDir=${encodeURIComponent(sortDir)}`);
+      queryParts.push(`direction=${encodeURIComponent(sortDir)}`);
+    }
+
+    if (Object.keys(filters).length > 0) {
+      Object.keys(filters).forEach((key) => {
+        const value = filters[key];
 
         // Ignore null / undefined / objects
         if (value === null || value === undefined || typeof value === 'object') {
           return;
         }
 
-        queryParts.push(`${key}=${value}`);
+        queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
       });
+
+      const searchValue = filters['search'];
+      if (searchValue !== null && searchValue !== undefined && searchValue !== '') {
+        queryParts.push(`filter=${encodeURIComponent(searchValue)}`);
+      }
     }
 
     const finalUrl = `${url}?${queryParts.join('&')}`;
-
-    console.log('Final URL:', finalUrl);
 
     return this.api.get(finalUrl);
   }

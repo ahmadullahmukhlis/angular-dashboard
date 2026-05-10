@@ -1,29 +1,66 @@
 <div class="page">
-  <div class="page-header">
-    <div>
-      <h2 class="title">Roles</h2>
-      <p class="subtitle">Assign permissions and group roles.</p>
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Roles list</h2>
+        <p class="subtitle">Manage roles and assign permissions.</p>
+      </div>
+      <button class="btn" (click)="openCreate()">Add New Role</button>
     </div>
-    <button class="btn" (click)="openCreate()">New Role</button>
-  </div>
 
-  <app-datatable
-    [url]="'/roles'"
-    [name]="'roles'"
-    [tableName]="'roles-table'"
-    [config]="tableConfig"
-  ></app-datatable>
+    <app-datatable
+      [url]="'/user-management/roles'"
+      [name]="'Roles'"
+      [tableName]="'roles-table'"
+      [config]="tableConfig"
+      (onRowClick)="selectRole($event)"
+    ></app-datatable>
+
+    @if (selectedRole) {
+      <div class="details-stack">
+        <section class="details-section">
+          <div class="details-header">
+            <div>
+              <h3 class="details-title">{{ selectedRole.name }}</h3>
+              <p class="details-subtitle">Assigned users and all permissions for this selected role.</p>
+            </div>
+          </div>
+
+          <div class="details-grid">
+            <div class="details-table">
+              <app-datatable
+                [rows]="assignedUsers"
+                [name]="'Assigned Users'"
+                [config]="assignedUsersTableConfig"
+                [hidePagination]="true"
+              ></app-datatable>
+            </div>
+
+            <div class="details-table">
+              <app-datatable
+                [rows]="assignedPermissions"
+                [name]="'Permissions'"
+                [config]="assignedPermissionsTableConfig"
+                [hidePagination]="true"
+              ></app-datatable>
+            </div>
+          </div>
+        </section>
+      </div>
+    }
+  </div>
 
   <app-modal
     [visible]="showModal"
-    [title]="isEdit ? 'Edit Role' : 'Create Role'"
-    [widthClass]="'w-[700px]'"
+    [title]="'Role Form'"
+    [widthClass]="'w-[520px]'"
     (onClose)="closeModal()"
   >
     <app-dynamic-form-builder
       [fields]="fields"
       [action]="''"
       [method]="isEdit ? 'PUT' : 'POST'"
+      [submitLabel]="'Save'"
       (formSubmitted)="submit($event)"
     ></app-dynamic-form-builder>
   </app-modal>

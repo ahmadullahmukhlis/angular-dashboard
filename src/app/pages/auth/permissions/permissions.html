@@ -1,30 +1,91 @@
 <div class="page">
-  <div class="page-header">
-    <div>
-      <h2 class="title">Permissions</h2>
-      <p class="subtitle">Define permission strings and group assignments.</p>
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Permissions</h2>
+        <p class="subtitle">Manage permissions in a table view like the other pages.</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn secondary" (click)="openGroupModal(0, null)">Add Permission Group</button>
+      </div>
     </div>
-    <button class="btn" (click)="openCreate()">New Permission</button>
+
+    <app-datatable
+      [url]="'/user-management/permission-groups'"
+      [name]="'Permission Groups'"
+      [tableName]="'permission-groups-table'"
+      [config]="tableConfig"
+      (onRowClick)="selectGroup($event, 0)"
+      
+    ></app-datatable>
+
+    @if (selectedGroupTrail.length > 0) {
+      <div class="drilldown-stack">
+        @for (group of selectedGroupTrail; track trackBySelectedGroup($index, group); let level = $index) {
+          <section class="drilldown-section">
+            <div class="drilldown-header">
+              <div>
+                <h3 class="drilldown-title">{{ group.name }}</h3>
+                <p class="drilldown-subtitle">Child groups and permissions for this selected group.</p>
+              </div>
+            </div>
+
+            <div class="drilldown-grid">
+              <div class="drilldown-table">
+                <app-datatable
+                  [rows]="group.groups ?? []"
+                  [name]="'Child Groups'"
+                  [config]="childGroupTableConfig"
+                  [hidePagination]="true"
+                  (onRowClick)="selectGroup($event, level + 1)"
+                ></app-datatable>
+              </div>
+
+              <div class="drilldown-table">
+                <app-datatable
+                  [rows]="group.permissions ?? []"
+                  [name]="'Permissions'"
+                  [config]="permissionTableConfig"
+                  [hidePagination]="true"
+                  (onRowClick)="copyPermission($event)"
+                ></app-datatable>
+              </div>
+            </div>
+          </section>
+        }
+      </div>
+    }
   </div>
 
-  <app-datatable
-    [url]="'/permissions'"
-    [name]="'permissions'"
-    [tableName]="'permissions-table'"
-    [config]="tableConfig"
-  ></app-datatable>
-
   <app-modal
-    [visible]="showModal"
-    [title]="isEdit ? 'Edit Permission' : 'Create Permission'"
-    [widthClass]="'w-[700px]'"
+    [visible]="permissionFields.length > 0"
+    [title]="'Permission Form'"
+    [widthClass]="'w-[640px]'"
     (onClose)="closeModal()"
   >
     <app-dynamic-form-builder
-      [fields]="fields"
+      [fields]="permissionFields"
       [action]="''"
-      [method]="isEdit ? 'PUT' : 'POST'"
-      (formSubmitted)="submit($event)"
+      [method]="'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [submitLabel]="'Save'"
+      (formSubmitted)="submitPermission($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="permissionGroupFields.length > 0"
+    [title]="activeGroupEditId ? 'Permission Group Form' : 'Permission Group Form'"
+    [widthClass]="'w-[640px]'"
+    (onClose)="closeModal()"
+  >
+    <app-dynamic-form-builder
+      [fields]="permissionGroupFields"
+      [action]="''"
+      [method]="activeGroupEditId ? 'PUT' : 'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [submitLabel]="'Save'"
+      (formSubmitted)="submitGroup($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 </div>

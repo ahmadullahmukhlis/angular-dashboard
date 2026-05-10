@@ -1,9 +1,9 @@
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <div [class]="className">
+<form [formGroup]="form" (ngSubmit)="submit()" class="dynamic-form">
+  <div [class]="className || 'grid grid-cols-1 gap-4'">
     @for (field of visibleFields(); track field.name) {
-      <div [class]="field.className">
+      <div [class]="(field.className || '') + ' dynamic-form__field'">
         @if (field.type !== 'repeater') {
-          <label class="block mb-1 font-medium">{{ field.label }}</label>
+          <label class="dynamic-form__label">{{ field.label }}</label>
         }
 
         @if (field.type === 'profile-image') {
@@ -18,7 +18,7 @@
             pInputText
             [formControlName]="field.name"
             [placeholder]="field.placeholder ?? field.label"
-            class="w-full"
+            class="dynamic-form__control w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
           />
         }
@@ -32,7 +32,8 @@
             [minFractionDigits]="field.minFractionDigits ?? 0"
             [maxFractionDigits]="field.maxFractionDigits ?? 0"
             [useGrouping]="field.useGrouping ?? false"
-            class="w-full"
+            styleClass="dynamic-form__control w-full"
+            inputStyleClass="dynamic-form__inner-input"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-inputNumber>
         }
@@ -41,8 +42,11 @@
         @if (field.type === 'password') {
           <p-password
             toggleMask
+            [feedback]="false"
             [formControlName]="field.name"
             [placeholder]="field.placeholder ?? field.label"
+            styleClass="dynamic-form__control w-full"
+            inputStyleClass="dynamic-form__inner-input w-full"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-password>
         }
@@ -53,7 +57,7 @@
             [formControlName]="field.name"
             [placeholder]="field.placeholder ?? field.label"
             (onBlur)="form.get(field.name)?.markAsTouched()"
-            class="w-full"
+            styleClass="dynamic-form__control w-full"
 
           ></p-datePicker>
         }
@@ -65,7 +69,7 @@
             rows="4"
             [formControlName]="field.name"
             [placeholder]="field.placeholder ?? field.label"
-            class="w-full"
+            class="dynamic-form__control w-full"
             (blur)="form.get(field.name)?.markAsTouched()"
           ></textarea>
         }
@@ -128,7 +132,7 @@
             [optionValue]="field.optionValue ?? 'id'"
             [placeholder]="field.placeholder ?? 'Select'"
             [filter]="field.searchable ?? true"
-            class="w-full"
+            class="dynamic-form__control w-full"
             appendTo="body"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-select>
@@ -155,6 +159,7 @@
           <app-multi-selected
             [formControlName]="field.name"
             [url]="getFieldUrl(field) ?? ''"
+            [optionsInput]="field.options ?? null"
             [disabled]="isFieldDisabled(field)"
             [optionLabel]="field.optionLabel ?? 'id'"
             [optionValue]="field.optionValue ?? 'id'"
@@ -202,7 +207,7 @@
 
         <!-- ERROR MESSAGES -->
         @if (isInvalid(field.name)) {
-          <div class="text-red-600 text-sm mt-1">
+          <div class="dynamic-form__error">
             @if (form.get(field.name)?.errors?.['required']) {
               <small>{{ field.label || field.name }} is required</small>
             }
@@ -240,13 +245,14 @@
 
   <!-- SUBMIT BUTTON -->
   @if (showSubmitButton) {
-    <div class="mt-4">
+    <div class="dynamic-form__actions">
       <button
         pButton
         type="submit"
         [label]="submitLabel"
         [loading]="loading"
         [disabled]="loading"
+        class="dynamic-form__submit"
       ></button>
     </div>
   }
