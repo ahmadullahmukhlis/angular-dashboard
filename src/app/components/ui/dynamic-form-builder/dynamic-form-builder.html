@@ -17,8 +17,10 @@
           <input
             pInputText
             [formControlName]="field.name"
+            [readonly]="field.readonly ?? false"
             [placeholder]="field.placeholder ?? field.label"
             class="dynamic-form__control w-full"
+            (input)="handleFieldChange(field, $any($event.target).value)"
             (blur)="form.get(field.name)?.markAsTouched()"
           />
         }
@@ -40,15 +42,27 @@
 
         <!-- PASSWORD -->
         @if (field.type === 'password') {
-          <p-password
-            toggleMask
-            [feedback]="false"
-            [formControlName]="field.name"
-            [placeholder]="field.placeholder ?? field.label"
-            styleClass="dynamic-form__control w-full"
-            inputStyleClass="dynamic-form__inner-input w-full"
-            (onBlur)="form.get(field.name)?.markAsTouched()"
-          ></p-password>
+          @if (field.readonly) {
+            <input
+              pInputText
+              type="password"
+              [formControlName]="field.name"
+              [readonly]="true"
+              [placeholder]="field.placeholder ?? field.label"
+              class="dynamic-form__control w-full"
+              (blur)="form.get(field.name)?.markAsTouched()"
+            />
+          } @else {
+            <p-password
+              toggleMask
+              [feedback]="false"
+              [formControlName]="field.name"
+              [placeholder]="field.placeholder ?? field.label"
+              styleClass="dynamic-form__control w-full"
+              inputStyleClass="dynamic-form__inner-input w-full"
+              (onBlur)="form.get(field.name)?.markAsTouched()"
+            ></p-password>
+          }
         }
 
         <!-- DATE -->
@@ -68,8 +82,10 @@
             pTextarea
             rows="4"
             [formControlName]="field.name"
+            [readonly]="field.readonly ?? false"
             [placeholder]="field.placeholder ?? field.label"
             class="dynamic-form__control w-full"
+            (input)="handleFieldChange(field, $any($event.target).value)"
             (blur)="form.get(field.name)?.markAsTouched()"
           ></textarea>
         }
@@ -134,6 +150,7 @@
             [filter]="field.searchable ?? true"
             class="dynamic-form__control w-full"
             appendTo="body"
+            (onChange)="handleFieldChange(field, $event.value)"
             (onBlur)="form.get(field.name)?.markAsTouched()"
           ></p-select>
         }

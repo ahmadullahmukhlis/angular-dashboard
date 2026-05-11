@@ -32,6 +32,7 @@ export const SIDEBAR_ROUTES: SidebarItem[] = [
     children: [
       { id: 50, label: 'Languages', icon: 'fa-language', route: '/settings/languages', isActive: false },
       { id: 51, label: 'Backups', icon: 'fa-database', route: '/settings/backups', isActive: false },
+      { id: 52, label: 'Identity', icon: 'fa-fingerprint', route: '/settings/identity', isActive: false },
     ],
   },
 ];

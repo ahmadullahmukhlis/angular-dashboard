@@ -8,6 +8,7 @@ import { DataTableConfig } from '../../../models/datatable.model';
 import { ApiService } from '../../../services/api/api.service';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
+import { RealmContextService } from '../../../services/realm-context.service';
 
 @Component({
   selector: 'app-roles',
@@ -21,6 +22,7 @@ export class Roles implements OnInit {
   private toastService = inject(ToastService);
   private componentService = inject(ComponentService);
   private cdr = inject(ChangeDetectorRef);
+  private realmContext = inject(RealmContextService);
 
   showModal = false;
   isEdit = false;
@@ -31,7 +33,11 @@ export class Roles implements OnInit {
   assignedPermissions: any[] = [];
 
   get roleAction(): string {
-    return this.isEdit && this.selectedId ? `/user-management/roles/${this.selectedId}` : '/user-management/roles';
+    return this.withRealm(`/user-management/roles${this.selectedId ? `/${this.selectedId}` : ''}`);
+  }
+
+  get rolesUrl(): string {
+    return this.withRealm('/user-management/roles');
   }
 
   fields: DynamicField[] = [
@@ -146,7 +152,7 @@ export class Roles implements OnInit {
     this.assignedUsers = [];
     this.assignedPermissions = [];
 
-    this.api.get(`/user-management/roles/${row.id}`).subscribe({
+    this.api.get(this.withRealm(`/user-management/roles/${row.id}`)).subscribe({
       next: (response: any) => {
         this.assignedPermissions = (response?.role?.permissions ?? []).map((item: any) => ({
           id: item?.permission?.id ?? item?.permission_id,
@@ -157,7 +163,7 @@ export class Roles implements OnInit {
       },
     });
 
-    this.api.get('/user-management/users?fetch_all=true').subscribe({
+    this.api.get(this.withRealm('/user-management/users', { fetch_all: 'true' })).subscribe({
       next: (users: any) => {
         const rows = Array.isArray(users?.data) ? users.data : Array.isArray(users) ? users : [];
         this.assignedUsers = rows.filter((user: any) =>
@@ -173,7 +179,7 @@ export class Roles implements OnInit {
     if (!this.selectedRole?.id || !permission?.id) return;
 
     this.toastService.confirmAction({ name: `Remove ${permission.name ?? 'permission'} from this role?` }, () => {
-      this.api.get(`/user-management/roles/${this.selectedRole.id}`).subscribe({
+      this.api.get(this.withRealm(`/user-management/roles/${this.selectedRole.id}`)).subscribe({
         next: (response: any) => {
           const role = response?.role;
           const remainingPermissions = (role?.role_permissions ?? [])
@@ -181,7 +187,7 @@ export class Roles implements OnInit {
             .filter((id: number) => id !== Number(permission.id));
 
           this.api
-            .put(`/user-management/roles/${this.selectedRole.id}`, {
+            .put(this.withRealm(`/user-management/roles/${this.selectedRole.id}`), {
               name: role?.name ?? this.selectedRole.name,
               role_permissions: remainingPermissions,
             })
@@ -201,14 +207,14 @@ export class Roles implements OnInit {
     if (!this.selectedRole?.id || !user?.id) return;
 
     this.toastService.confirmAction({ name: `Remove this role from ${user.email ?? 'this user'}?` }, () => {
-      this.api.get(`/user-management/users/${user.id}`).subscribe({
+      this.api.get(this.withRealm(`/user-management/users/${user.id}`)).subscribe({
         next: (fullUser: any) => {
           const remainingRoles = (fullUser?.roles ?? [])
             .filter((role: any) => Number(role?.id ?? role?.role_id) !== Number(this.selectedRole.id))
             .map((role: any) => ({ id: Number(role?.id ?? role?.role_id) }));
 
           this.api
-            .put(`/user-management/users/${user.id}`, {
+            .put(this.withRealm(`/user-management/users/${user.id}`), {
               first_name: fullUser.first_name,
               last_name: fullUser.last_name,
               email: fullUser.email,
@@ -246,7 +252,7 @@ export class Roles implements OnInit {
   delete(role: any) {
     if (!role?.id) return;
     this.toastService.confirmDelete({ name: role.name ?? 'role' }, () => {
-      this.api.delete(`/user-management/roles/${role.id}`).subscribe({
+      this.api.delete(this.withRealm(`/user-management/roles/${role.id}`)).subscribe({
         next: () => {
           this.toastService.success('Deleted', 'Role deleted successfully');
           this.componentService.revalidate('roles-table');
@@ -267,7 +273,7 @@ export class Roles implements OnInit {
   }
 
   private loadPermissionOptions() {
-    this.api.get('/user-management/permission-groups').subscribe({
+    this.api.get(this.withRealm('/user-management/permission-groups')).subscribe({
       next: (response: any) => {
         this.permissionOptions = this.flattenPermissions(response?.data ?? []);
         this.resetDefaults();
@@ -293,5 +299,13 @@ export class Roles implements OnInit {
       })) as { id: number; name: string }[]),
       ...this.flattenPermissions(group.groups ?? []),
     ]);
+  }
+
+  private withRealm(path: string, params: Record<string, string> = {}): string {
+    const search = new URLSearchParams({
+      realms: this.realmContext.selectedRealmSlug(),
+      ...params,
+    });
+    return `${path}?${search.toString()}`;
   }
 }

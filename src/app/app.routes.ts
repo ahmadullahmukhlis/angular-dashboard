@@ -40,6 +40,10 @@ export const routes: Routes = [
         path: 'settings/backups',
         loadComponent: () => import('./pages/settings/backups/backups').then(m => m.SettingsBackups)
       },
+      {
+        path: 'settings/identity',
+        loadComponent: () => import('./pages/settings/identity/identity').then(m => m.SettingsIdentity)
+      },
     ]
   },
 

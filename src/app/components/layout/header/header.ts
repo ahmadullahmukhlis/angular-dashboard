@@ -14,6 +14,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { ComponentService } from '../../../services/genral/component.service';
+import { RealmContextService } from '../../../services/realm-context.service';
 
 @Component({
   selector: 'app-header',
@@ -33,10 +34,13 @@ export class Header {
   private readonly router = inject(Router);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly componentService = inject(ComponentService);
+  private readonly realmContext = inject(RealmContextService);
 
   isNotificationsOpen = signal(false);
   isProfileMenuOpen = signal(false);
   isMobile = signal(false);
+  realms = this.realmContext.realms;
+  selectedRealmSlug = this.realmContext.selectedRealmSlug;
 
   notifications = signal([
     { id: 1, text: 'New user registered', time: '5 min ago', read: false, icon: 'fa-user-plus' },
@@ -65,6 +69,7 @@ export class Header {
       if (this.isBrowser) {
         this.sidebarService.updateViewport(window.innerWidth);
         this.isMobile.set(this.sidebarService.isMobile());
+        this.realmContext.loadRealms();
       }
     });
 
@@ -124,6 +129,12 @@ export class Header {
   }
 
   reloadData() {
+    this.componentService.revalidate('*');
+  }
+
+  onRealmChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value || 'default';
+    this.realmContext.setSelectedRealmSlug(value);
     this.componentService.revalidate('*');
   }
 }

@@ -26,6 +26,7 @@ export interface DynamicField {
 
   defaultValue?: any;
   disabled?: boolean;
+  readonly?: boolean;
   required?: boolean;
 
   className?: string;
@@ -66,5 +67,5 @@ export interface DynamicField {
   changeValue?: string;
   onSelect?: (row: any, form?: any) => void;
 
-  onChange?: (value: any) => void;
+  onChange?: (value: any, form?: any) => void;
 }

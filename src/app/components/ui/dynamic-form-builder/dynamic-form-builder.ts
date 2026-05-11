@@ -191,6 +191,10 @@ export class DynamicFormBuilder implements OnChanges {
     control?.updateValueAndValidity();
   }
 
+  handleFieldChange(field: DynamicField, value: any) {
+    field.onChange?.(value, this.form);
+  }
+
   /** ======================
    * FORM SUBMISSION
    * ====================== */

@@ -8,6 +8,7 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
+import { RealmContextService } from '../../../services/realm-context.service';
 
 @Component({
   selector: 'app-permissions',
@@ -20,6 +21,7 @@ export class Permissions {
   private api = inject(ApiService);
   private componentService = inject(ComponentService);
   private toastService = inject(ToastService);
+  private realmContext = inject(RealmContextService);
 
   selectedGroupTrail: any[] = [];
   activePermissionGroupId: number | null = null;
@@ -30,13 +32,19 @@ export class Permissions {
   permissionGroupFields: DynamicField[] = [];
 
   get permissionAction(): string {
-    return '/user-management/permission';
+    return this.withRealm('/user-management/permission');
   }
 
   get permissionGroupAction(): string {
-    return this.activeGroupEditId
-      ? `/user-management/permission-groups/${this.activeGroupEditId}`
-      : '/user-management/permission-groups';
+    return this.withRealm(
+      this.activeGroupEditId
+        ? `/user-management/permission-groups/${this.activeGroupEditId}`
+        : '/user-management/permission-groups',
+    );
+  }
+
+  get permissionGroupsUrl(): string {
+    return this.withRealm('/user-management/permission-groups');
   }
 
   tableConfig: DataTableConfig = {
@@ -225,7 +233,7 @@ export class Permissions {
   deletePermission(permission: any) {
     if (!permission?.id) return;
     this.toastService.confirmDelete({ name: permission.name ?? 'permission' }, () => {
-      this.api.delete(`/user-management/permission/${permission.id}`).subscribe({
+      this.api.delete(this.withRealm(`/user-management/permission/${permission.id}`)).subscribe({
         next: () => {
           this.toastService.success('Deleted', 'Permission deleted successfully');
           this.resetPermissionView();
@@ -237,7 +245,7 @@ export class Permissions {
   deleteGroup(group: any) {
     if (!group?.id) return;
     this.toastService.confirmDelete({ name: group.name ?? 'permission group' }, () => {
-      this.api.delete(`/user-management/permission-groups/${group.id}`).subscribe({
+      this.api.delete(this.withRealm(`/user-management/permission-groups/${group.id}`)).subscribe({
         next: () => {
           this.toastService.success('Deleted', 'Permission group deleted successfully');
           this.resetPermissionView();
@@ -278,5 +286,13 @@ export class Permissions {
   private resetPermissionView() {
     this.selectedGroupTrail = [];
     this.componentService.revalidate('permission-groups-table');
+  }
+
+  private withRealm(path: string, params: Record<string, string> = {}): string {
+    const search = new URLSearchParams({
+      realms: this.realmContext.selectedRealmSlug(),
+      ...params,
+    });
+    return `${path}?${search.toString()}`;
   }
 }

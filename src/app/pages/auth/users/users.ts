@@ -7,6 +7,7 @@ import { DataTableConfig } from '../../../models/datatable.model';
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
+import { RealmContextService } from '../../../services/realm-context.service';
 
 @Component({
   selector: 'app-auth-users',
@@ -19,6 +20,7 @@ export class AuthUsers {
   private api = inject(ApiService);
   private componentService = inject(ComponentService);
   private toastService = inject(ToastService);
+  private realmContext = inject(RealmContextService);
 
   showUserModal = false;
   showAssignRolesModal = false;
@@ -58,7 +60,7 @@ export class AuthUsers {
       type: 'multi-select',
       name: 'roles',
       label: 'Roles',
-      url: '/user-management/roles?fetch_all=true',
+      url: '',
       optionLabel: 'name',
       optionValue: 'id',
       className: 'md:col-span-2',
@@ -125,11 +127,19 @@ export class AuthUsers {
   };
 
   get userAction(): string {
-    return this.isEdit && this.selectedUserId ? `/user-management/users/${this.selectedUserId}` : '/user-management/users';
+    return this.withRealm(`/user-management/users${this.selectedUserId ? `/${this.selectedUserId}` : ''}`);
   }
 
   get assignRolesAction(): string {
-    return this.selectedUserId ? `/user-management/users/${this.selectedUserId}` : '';
+    return this.selectedUserId ? this.withRealm(`/user-management/users/${this.selectedUserId}`) : '';
+  }
+
+  get usersUrl(): string {
+    return this.withRealm('/user-management/users');
+  }
+
+  get rolesOptionsUrl(): string {
+    return this.withRealm('/user-management/roles', { fetch_all: 'true' });
   }
 
   openCreate() {
@@ -146,7 +156,7 @@ export class AuthUsers {
     this.resetDefaults();
     this.showUserModal = true;
 
-    this.api.get(`/user-management/users/${this.selectedUserId}`).subscribe({
+    this.api.get(this.withRealm(`/user-management/users/${this.selectedUserId}`)).subscribe({
       next: (user: any) => {
         this.userFields = this.userFields.map((f) => ({
           ...f,
@@ -167,6 +177,7 @@ export class AuthUsers {
   private resetDefaults() {
     this.userFields = this.userFields.map((f) => ({
       ...f,
+      url: f.name === 'roles' ? this.rolesOptionsUrl : f.url,
       defaultValue: f.name === 'is_active' ? true : f.name === 'roles' ? [] : null,
     }));
   }
@@ -196,7 +207,7 @@ export class AuthUsers {
         type: 'multi-select',
         name: 'roles',
         label: 'Roles',
-        url: '/user-management/roles?fetch_all=true',
+        url: this.rolesOptionsUrl,
         optionLabel: 'name',
         optionValue: 'id',
         searchable: true,
@@ -288,7 +299,7 @@ export class AuthUsers {
 
   delete(row: any) {
     if (!row?.id) return;
-    this.api.delete(`/user-management/users/${row.id}`).subscribe({
+    this.api.delete(this.withRealm(`/user-management/users/${row.id}`)).subscribe({
       next: () => {
         this.toastService.success('Deleted', 'User deleted successfully');
         this.componentService.revalidate('users-table');
@@ -299,9 +310,9 @@ export class AuthUsers {
   updateUserActiveStatus(row: any, isActive: boolean) {
     if (!row?.id) return;
 
-    this.api.get(`/user-management/users/${row.id}`).subscribe({
+    this.api.get(this.withRealm(`/user-management/users/${row.id}`)).subscribe({
       next: (user: any) => {
-        this.api.put(`/user-management/users/${row.id}`, {
+        this.api.put(this.withRealm(`/user-management/users/${row.id}`), {
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
@@ -332,5 +343,13 @@ export class AuthUsers {
       return !!user?.is_active;
     }
     return user?.[fieldName] ?? null;
+  }
+
+  private withRealm(path: string, params: Record<string, string> = {}): string {
+    const search = new URLSearchParams({
+      realms: this.realmContext.selectedRealmSlug(),
+      ...params,
+    });
+    return `${path}?${search.toString()}`;
   }
 }

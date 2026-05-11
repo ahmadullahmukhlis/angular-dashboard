@@ -62,7 +62,8 @@ export class ComponentService {
       }
     }
 
-    const finalUrl = `${url}?${queryParts.join('&')}`;
+    const separator = url.includes('?') ? '&' : '?';
+    const finalUrl = `${url}${separator}${queryParts.join('&')}`;
 
     return this.api.get(finalUrl);
   }

@@ -1,0 +1,164 @@
+<div class="page">
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Identity</h2>
+        <p class="subtitle">Manage realms, clients, service accounts, and service tokens from settings.</p>
+      </div>
+
+      <div class="header-actions">
+        <select class="realm-select" [value]="selectedRealmSlug" (change)="onRealmChange($event)">
+          @for (realm of realms; track realm.slug) {
+            <option [value]="realm.slug">{{ realm.name }}</option>
+          }
+        </select>
+        <button class="btn secondary" (click)="reloadRealms()">Reload Realms</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div>
+          <h3 class="dictionary-title">Realms</h3>
+          <p class="dictionary-subtitle">Create realms and choose which realm to manage.</p>
+        </div>
+        <button class="btn" (click)="openRealmModal()">Add Realm</button>
+      </div>
+
+      <app-datatable
+        [url]="realmsUrl"
+        [name]="'Realms'"
+        [tableName]="'settings-identity-realms-table'"
+        [config]="realmTableConfig"
+        [hidePagination]="true"
+        (onRowClick)="selectRealm($event)"
+      ></app-datatable>
+    </div>
+
+    <div class="dictionary-panel">
+      <div class="dictionary-header">
+        <div>
+          <h3 class="dictionary-title">Clients</h3>
+          <p class="dictionary-subtitle">Clients for realm: {{ selectedRealmSlug }}</p>
+        </div>
+        <button class="btn" (click)="openClientModal()">Add Client</button>
+      </div>
+
+      <app-datatable
+        [url]="clientsUrl"
+        [name]="'Clients'"
+        [tableName]="'settings-identity-clients-table'"
+        [config]="clientTableConfig"
+        [hidePagination]="true"
+      ></app-datatable>
+    </div>
+
+    <div class="dictionary-panel">
+      <div class="dictionary-header">
+        <div>
+          <h3 class="dictionary-title">Service Accounts</h3>
+          <p class="dictionary-subtitle">Service accounts for realm: {{ selectedRealmSlug }}</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn secondary" (click)="openTokenModal()">Generate Token</button>
+          <button class="btn" (click)="openServiceAccountModal()">Add Service Account</button>
+        </div>
+      </div>
+
+      <app-datatable
+        [url]="serviceAccountsUrl"
+        [name]="'Service Accounts'"
+        [tableName]="'settings-identity-service-accounts-table'"
+        [config]="serviceAccountTableConfig"
+        [hidePagination]="true"
+      ></app-datatable>
+    </div>
+  </div>
+
+  <app-modal
+    [visible]="realmFields.length > 0"
+    [title]="'Create Realm'"
+    [widthClass]="'w-[640px]'"
+    (onClose)="closeModals()"
+  >
+    <app-dynamic-form-builder
+      [fields]="realmFields"
+      [action]="realmAction"
+      [method]="'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformRealmPayload"
+      [submitLabel]="'Create Realm'"
+      (submitCompleted)="onRealmSaved($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="clientFields.length > 0"
+    [title]="'Create Client'"
+    [widthClass]="'w-[720px]'"
+    (onClose)="closeModals()"
+  >
+    <app-dynamic-form-builder
+      [fields]="clientFields"
+      [action]="clientAction"
+      [method]="'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformClientPayload"
+      [submitLabel]="'Create Client'"
+      (submitCompleted)="onClientSaved($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="serviceAccountFields.length > 0"
+    [title]="'Create Service Account'"
+    [widthClass]="'w-[760px]'"
+    (onClose)="closeModals()"
+  >
+    <app-dynamic-form-builder
+      [fields]="serviceAccountFields"
+      [action]="serviceAccountAction"
+      [method]="'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformServiceAccountPayload"
+      [submitLabel]="'Create Service Account'"
+      (submitCompleted)="onServiceAccountSaved($event)"
+    ></app-dynamic-form-builder>
+  </app-modal>
+
+  <app-modal
+    [visible]="tokenFields.length > 0"
+    [title]="'Generate Service Token'"
+    [widthClass]="'w-[680px]'"
+    (onClose)="closeModals()"
+  >
+    <app-dynamic-form-builder
+      [fields]="tokenFields"
+      [action]="tokenAction"
+      [method]="'POST'"
+      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformTokenPayload"
+      [submitLabel]="'Generate Token'"
+      (submitCompleted)="onTokenIssued($event)"
+    ></app-dynamic-form-builder>
+
+    @if (tokenResponse?.accessToken) {
+      <div class="token-card mt-4">
+        <div class="token-meta">
+          <span class="token-pill">{{ tokenResponse?.tokenType || 'Bearer' }}</span>
+          <span class="token-expiry">Expires in {{ tokenResponse?.expiresIn || 0 }}s</span>
+        </div>
+
+        <textarea
+          class="token-output"
+          readonly
+          [value]="tokenResponse?.accessToken || ''"
+        ></textarea>
+
+        <div class="token-actions">
+          <button class="btn secondary" (click)="copyToken()">Copy Token</button>
+        </div>
+      </div>
+    }
+  </app-modal>
+</div>
