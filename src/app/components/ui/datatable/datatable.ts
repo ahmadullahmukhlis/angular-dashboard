@@ -47,6 +47,7 @@ import { ToastService } from '../../../services/genral/tost.service';
   imports: [TableModule, FormsModule, Paginator, NgClass, Modal, Filter, Loading, Error],
 })
 export class Datatable implements OnInit, OnChanges {
+  private readonly compactBreakpoint = 768;
   // ✅ API URL
   @Input() url!: string;
   @Input() name!: string;
@@ -105,12 +106,14 @@ export class Datatable implements OnInit, OnChanges {
   private errorService = inject(AppErrorService);
   private sub!: Subscription;
   exportOpen: boolean = false;
+  isCompactView: boolean = false;
   rowActionMenuPosition: { [key: string]: { top: number; left: number } } = {};
   private rowActionCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ================= LIFECYCLE =================
 
   ngOnInit() {
+    this.updateResponsiveState();
     this.initializeTable();
 
     this.filterSubject.pipe(debounceTime(400), distinctUntilChanged()).subscribe((filters) => {
@@ -144,6 +147,11 @@ export class Datatable implements OnInit, OnChanges {
       this.loadData();
     }
     if (changes['rows'] && !this.url) this.syncLocalRows();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.updateResponsiveState();
   }
 
   showMoreFilters() {
@@ -566,6 +574,10 @@ export class Datatable implements OnInit, OnChanges {
     return classes;
   }
 
+  getVisibleRowActions(row: any) {
+    return (this.config.rowActions || []).filter((action) => !action.hidden?.(row));
+  }
+
   closeDetails() {
     this.selectedDetailRow = null;
     this.activeDetailTab = 'general';
@@ -915,5 +927,10 @@ export class Datatable implements OnInit, OnChanges {
   }
   ngOnDestroy() {
     if (this.sub) this.sub.unsubscribe();
+  }
+
+  private updateResponsiveState() {
+    if (typeof window === 'undefined') return;
+    this.isCompactView = window.innerWidth < this.compactBreakpoint;
   }
 }

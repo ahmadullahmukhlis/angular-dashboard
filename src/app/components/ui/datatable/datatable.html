@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2 xl:justify-end">
+      <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto xl:justify-end">
         @if (config.onAdd) {
           <button
             (click)="config.onAdd()"
@@ -61,23 +61,24 @@
       'px-3 py-2': tableSize === 'xs',
     }"
   >
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
    
       <!-- Title -->
-          <div class="relative flex items-center">
+          <div class="relative flex w-full items-center lg:max-w-md">
           <input
             type="text"
             placeholder="Search records..."
             (input)="handleFilter(searchKey, $any($event.target).value)"
-            class="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400 hover:border-gray-400"
+            class="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 placeholder-gray-400 hover:border-gray-400"
             [ngClass]="{
-              'pl-10 pr-4 py-2 w-80 text-base': tableSize === 'default',
-              'pl-9 pr-3 py-1.5 w-70 text-sm': tableSize === 'sm',
-              'pl-8 pr-2.5 py-1 w-60 text-xs': tableSize === 'xs',
+              'pl-10 pr-4 py-2 text-base lg:max-w-[20rem]': tableSize === 'default',
+              'pl-9 pr-3 py-1.5 text-sm lg:max-w-[18rem]': tableSize === 'sm',
+              'pl-8 pr-2.5 py-1 text-xs lg:max-w-[15rem]': tableSize === 'xs',
             }"
           />
+        </div>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2 sm:justify-end">
         @if (config.filters) {
           <button
             (click)="showMoreFilters()"
@@ -165,6 +166,7 @@
     </div>
   </div>
 
+  @if (!isCompactView) {
   <div class="overflow-x-auto bg-white">
     <table class="min-w-full border-collapse">
       <thead>
@@ -348,7 +350,7 @@
                         [style.left.px]="rowActionMenuPosition[getRowActionKey(row)]?.left"
                         (click)="$event.stopPropagation()"
                       >
-                        @for (action of config.rowActions; track action.label) {
+                        @for (action of getVisibleRowActions(row); track action.label) {
                           <button
                             (click)="
                               rowAction(row, action);
@@ -384,6 +386,140 @@
       </tbody>
     </table>
   </div>
+  } @else {
+  <div class="space-y-3 bg-slate-50 p-3 sm:p-4">
+    @if (loading && data.length === 0) {
+      <div class="rounded-2xl bg-white px-4 py-8 text-center shadow-sm">
+        <app-loading [size]="tableSize" message="Loading data..."></app-loading>
+      </div>
+    }
+
+    @if (error && !loading) {
+      <div class="rounded-2xl bg-white px-4 py-8 text-center shadow-sm">
+        <app-error
+          [title]="error.title"
+          [error]="error.message"
+          [details]="error.details"
+          [code]="error.code"
+          [retryable]="error.retryable"
+          [size]="'sm'"
+          (refresh)="refresh()"
+        ></app-error>
+      </div>
+    }
+
+    @if (!loading && !error && data.length === 0) {
+      <div class="rounded-2xl bg-white px-4 py-10 text-center shadow-sm">
+        <div class="mx-auto flex max-w-md flex-col items-center justify-center">
+          <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+            <svg class="h-7 w-7 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L10 12.414 5.293 7.707A1 1 0 015 7V4a1 1 0 011-1zm12 13H5a1 1 0 01-1-1v-2a1 1 0 01.293-.707L10 7.586l5.707 5.707A1 1 0 0116 13v2a1 1 0 01-1 1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-slate-900">No data available</h3>
+          <p class="mt-1 text-sm text-slate-500">Records will appear here once data is loaded from the system.</p>
+        </div>
+      </div>
+    }
+
+    @if (!loading && !error && data.length > 0) {
+      @for (row of data; track row?.id ?? row?.uuid ?? row?.code) {
+        <article
+          (click)="handleRowClick(row)"
+          class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition"
+          [ngClass]="{
+            '!border-amber-300 !bg-[#fff9db]': selectedDetailRow === row,
+            'ring-2 ring-blue-200': isRowSelected(row),
+          }"
+        >
+          <div class="mb-3 flex items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                Record
+              </div>
+              <div class="mt-1 text-sm font-semibold text-slate-900 truncate">
+                {{ getCellTitle(row, visibleColumns[0]) || 'Item' }}
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              @if (config.selectable && config.showCheckboxes) {
+                <input
+                  type="checkbox"
+                  [checked]="isRowSelected(row)"
+                  (change)="toggleRowSelection(row)"
+                  (click)="$event.stopPropagation()"
+                  class="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-200 focus:ring-offset-0"
+                />
+              }
+
+              @if (config.rowActions && getVisibleRowActions(row).length > 0) {
+                <div class="relative row-action-container">
+                  <button
+                    (click)="openRowActions(row, $event); $event.stopPropagation()"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+                  >
+                    <i class="fa fa-ellipsis"></i>
+                  </button>
+
+                  @if (isRowActionsOpen(row)) {
+                    <div
+                      class="fixed z-9999 min-w-40 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg"
+                      [style.top.px]="rowActionMenuPosition[getRowActionKey(row)]?.top"
+                      [style.left.px]="rowActionMenuPosition[getRowActionKey(row)]?.left"
+                      (click)="$event.stopPropagation()"
+                    >
+                      @for (action of getVisibleRowActions(row); track action.label) {
+                        <button
+                          (click)="
+                            rowAction(row, action);
+                            closeAllRowActions();
+                            $event.stopPropagation()
+                          "
+                          class="block w-full text-left hover:bg-gray-50 transition-colors flex items-center gap-2 px-3 py-2"
+                          [ngClass]="{
+                            'text-red-600 hover:text-red-700 hover:bg-red-50': action.color === 'danger',
+                            'text-blue-600 hover:text-blue-700 hover:bg-blue-50': action.color === 'primary',
+                            'text-gray-700 hover:text-gray-900': !action.color,
+                          }"
+                        >
+                          @if (action.icon) {
+                            <i class="fa {{ action.icon }} text-sm"></i>
+                          }
+                          <span class="font-medium">{{ action.label }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-2">
+            @for (column of visibleColumns; track column.key) {
+              <div class="grid grid-cols-[minmax(0,110px)_1fr] items-start gap-3 rounded-xl bg-slate-50 px-3 py-2">
+                <div class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  {{ column.label }}
+                </div>
+                <div
+                  [class]="getCellClasses(column)"
+                  class="min-w-0 text-sm leading-5 text-slate-800 break-words"
+                  [title]="getCellTitle(row, column)"
+                  [innerHTML]="getCellDisplayValue(row, column)"
+                ></div>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    }
+  </div>
+  }
 
   @if (!loading && !error && data.length > 0 && !hidePagination) {
     <div
