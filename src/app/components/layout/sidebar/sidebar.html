@@ -67,15 +67,22 @@
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto py-6 px-4">
+    <div
+      class="flex-1 px-4 py-6"
+      [class.sidebar-scroll-area]="!isCollapsed() || isMobile()"
+      [class.sidebar-scroll-area-collapsed]="isCollapsed() && !isMobile()"
+    >
       <nav class="space-y-2">
         @for (item of sidebarItems; track item.id) {
-          <div class="mb-1">
+          <div class="sidebar-item group relative mb-1">
             <a
               (click)="onItemClick($event, item)"
               [routerLink]="item.children?.length ? null : item.route"
               routerLinkActive="active-link"
               class="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 group"
+              [class.justify-center]="isCollapsed() && !isMobile()"
+              [class.collapsed-tooltip]="isCollapsed() && !isMobile() && !item.children?.length"
+              [attr.data-tooltip]="isCollapsed() && !isMobile() && !item.children?.length ? item.label : null"
               [class.bg-primary-50]="item.isActive"
             >
               <i
@@ -102,6 +109,45 @@
                 ></i>
               }
             </a>
+
+            @if (isCollapsed() && !isMobile() && item.children?.length) {
+              <div
+                class="sidebar-flyout absolute left-full top-0 z-50 w-64 pl-3"
+              >
+                <div class="rounded-2xl border border-gray-200 bg-white p-3 shadow-2xl">
+                  <div class="border-b border-gray-100 px-3 pb-2 text-sm font-semibold text-gray-800">
+                    {{ item.label }}
+                  </div>
+
+                  <div class="mt-2 space-y-1">
+                    @for (child of item.children; track child.id) {
+                      <a
+                        (click)="setActiveItem(child.id)"
+                        [routerLink]="child.route"
+                        routerLinkActive="active-link"
+                        class="flex items-center rounded-xl px-3 py-2.5 transition-colors hover:bg-gray-50 group"
+                        [class.bg-primary-50]="child.isActive"
+                      >
+                        <i
+                          class="fas {{ child.icon }} text-sm transition-colors"
+                          [class.text-primary-600]="child.isActive"
+                          [class.text-gray-400]="!child.isActive"
+                          [class.group-hover:text-primary-600]="!child.isActive"
+                        ></i>
+
+                        <span
+                          class="ml-3 text-sm font-medium"
+                          [class.text-primary-600]="child.isActive"
+                          [class.text-gray-600]="!child.isActive"
+                        >
+                          {{ child.label }}
+                        </span>
+                      </a>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
 
             <div
               class="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-4"

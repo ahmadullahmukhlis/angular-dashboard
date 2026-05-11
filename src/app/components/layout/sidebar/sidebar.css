@@ -3,6 +3,14 @@
   display: block;
 }
 
+.sidebar-scroll-area {
+  overflow-y: auto;
+}
+
+.sidebar-scroll-area-collapsed {
+  overflow: visible;
+}
+
 /* Smooth scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -53,6 +61,26 @@
 /* Hover effects */
 .group:hover .group-hover\:text-primary-600 {
   color: #3b82f6 !important;
+}
+
+.sidebar-flyout {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-8px);
+  pointer-events: none;
+  z-index: 80;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    visibility 0.18s ease;
+}
+
+.sidebar-item:hover .sidebar-flyout,
+.sidebar-item:focus-within .sidebar-flyout {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 /* Collapsed sidebar tooltip */
