@@ -285,8 +285,10 @@ export class Datatable implements OnInit, OnChanges {
     this.componentService.load(this.url, state).subscribe({
       next: (res: any) => {
         this.data = res.content || res.items || res.data || res.results || res || [];
-        this.totalRecords = res.totalElements || res.totalRecords || res.total || this.data.length;
-        this.totalPages = res.totalPages || 0;
+        this.currentPage = res.current_page || this.currentPage || 1;
+        this.pageSize = res.per_page || this.pageSize || 10;
+        this.totalRecords = res.total || res.totalElements || res.totalRecords || this.data.length;
+        this.totalPages = res.last_page || res.totalPages || 0;
         this.syncActiveRowReference();
         this.loading = false;
         this.error = null;
