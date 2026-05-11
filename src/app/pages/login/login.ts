@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { ClientContextService } from '../../services/client-context.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class Login implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private authService: AuthService,
+    private clientContext: ClientContextService,
     private router: Router,
   ) {
     this.loginForm = this.fb.group({
@@ -46,13 +48,24 @@ export class Login implements OnInit {
     const loginUrl = import.meta.env.NG_APP_LOGIN_URL;
     const payload = { email, password };
 
-    this.http.post<any>(loginUrl + '/login', payload).subscribe({
-      next: (res) => {
+    this.http.post<any>(loginUrl + '/login', payload, { observe: 'response' }).subscribe({
+      next: (response: HttpResponse<any>) => {
         this.isLoading = false;
         this.loginForm.enable(); // ✅ re-enable form
+        const res = response.body;
         const accessToken = res?.accessToken ?? res?.data?.accessToken;
         const refreshToken = res?.refreshToken ?? res?.data?.refreshToken;
- 
+        const clientId =
+          res?.clientId ??
+          res?.data?.clientId ??
+          response.headers.get('X-Client-Id') ??
+          response.headers.get('x-client-id');
+        const clientAssertion =
+          res?.clientAssertion ??
+          res?.data?.clientAssertion ??
+          response.headers.get('X-Client-Assertion') ??
+          response.headers.get('x-client-assertion');
+
         if (!accessToken) {
           this.errorMessage = 'Invalid server response';
           alert('Login failed: No access token received');
@@ -60,6 +73,9 @@ export class Login implements OnInit {
         }
 
         this.authService.setTokens(accessToken, refreshToken);
+        if (clientId && clientAssertion) {
+          this.clientContext.setContext(clientId, clientAssertion);
+        }
         this.router.navigate(['/dashboard']);
       },
 

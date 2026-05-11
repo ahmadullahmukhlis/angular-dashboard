@@ -206,7 +206,7 @@
 </div>
 <button (click)="openModal()" class="bg-purple-500">open modal</button>
 
-<app-modal [visible]="isOpent" title="show test modal" (onClose)="closeModal()" widthClass="w-50%">
+<!-- <app-modal [visible]="isOpent" title="show test modal" (onClose)="closeModal()" widthClass="w-50%">
   <app-dynamic-form-builder
     [className]="'grid grid-cols-2 gap-4'"
     [fields]="fields"
@@ -218,8 +218,8 @@
     (submitCompleted)="onSubmitCompleted($event)"
     (valuesChanged)="onValuesChanged($event)"
   ></app-dynamic-form-builder>
-</app-modal>
-<app-datatable
+</app-modal> -->
+<!-- <app-datatable
   [url]="'/users'"
   [config]="tableConfig"
   tableName="users-table"
@@ -232,8 +232,8 @@
   (tableEvent)="handleTableEvent($event)"
   [name]="'Users Table'"
 >
-</app-datatable>
-
+</app-datatable> -->
+<!-- 
 <app-server-data url="/users" id="users-table">
   <ng-template let-data>
     @for (user of data; track $index) {
@@ -249,4 +249,4 @@
       reload Data
     </button>
   </ng-template>
-</app-server-data>
+</app-server-data> -->
