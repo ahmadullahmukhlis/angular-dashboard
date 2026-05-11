@@ -73,17 +73,19 @@
       [class.sidebar-scroll-area-collapsed]="isCollapsed() && !isMobile()"
     >
       <nav class="space-y-2">
-        @for (item of sidebarItems; track item.id) {
+        @for (item of sidebarItems(); track item.id) {
           <div class="sidebar-item group relative mb-1">
             <a
               (click)="onItemClick($event, item)"
               [routerLink]="item.children?.length ? null : item.route"
               routerLinkActive="active-link"
+              [routerLinkActiveOptions]="{ exact: !item.children?.length }"
               class="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 group"
               [class.justify-center]="isCollapsed() && !isMobile()"
               [class.collapsed-tooltip]="isCollapsed() && !isMobile() && !item.children?.length"
               [attr.data-tooltip]="isCollapsed() && !isMobile() && !item.children?.length ? item.label : null"
               [class.bg-primary-50]="item.isActive"
+              [class.text-primary-600]="item.isActive"
             >
               <i
                 class="fas {{ item.icon }} text-lg transition-colors"
@@ -104,8 +106,10 @@
 
               @if ((!isCollapsed() || isMobile()) && item.children) {
                 <i
-                  class="fas fa-chevron-down ml-auto text-xs transition-transform duration-300 text-gray-400"
+                  class="fas fa-chevron-down ml-auto text-xs transition-transform duration-300"
                   [class.rotate-180]="item.isExpanded"
+                  [class.text-primary-600]="item.isActive"
+                  [class.text-gray-400]="!item.isActive"
                 ></i>
               }
             </a>
@@ -125,6 +129,7 @@
                         (click)="setActiveItem(child.id)"
                         [routerLink]="child.route"
                         routerLinkActive="active-link"
+                        [routerLinkActiveOptions]="{ exact: true }"
                         class="flex items-center rounded-xl px-3 py-2.5 transition-colors hover:bg-gray-50 group"
                         [class.bg-primary-50]="child.isActive"
                       >
@@ -159,6 +164,7 @@
                   (click)="setActiveItem(child.id)"
                   [routerLink]="child.route"
                   routerLinkActive="active-link"
+                  [routerLinkActiveOptions]="{ exact: true }"
                   class="flex items-center px-4 py-2.5 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 group"
                   [class.bg-primary-50]="child.isActive"
                 >

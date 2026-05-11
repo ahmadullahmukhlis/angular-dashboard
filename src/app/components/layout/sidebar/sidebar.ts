@@ -38,10 +38,9 @@ export class Sidebar implements OnInit {
   readonly isCollapsed = this.sidebarService.sidebarCollapsedSignal;
   readonly isMobile = this.sidebarService.isMobileSignal;
   readonly isMobileDrawerOpen = this.sidebarService.mobileDrawerOpenSignal;
-  sidebarItems: SidebarItem[] = [];
+  readonly sidebarItems = this.sidebarService.sidebarItemsSignal;
 
   ngOnInit(): void {
-    this.sidebarItems = this.sidebarService.getSidebarItems();
     if (this.isBrowser) {
       this.sidebarService.updateViewport(window.innerWidth);
     }
