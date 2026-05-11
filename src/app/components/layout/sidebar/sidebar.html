@@ -1,18 +1,27 @@
-<!-- Sidebar Container -->
-<div class="h-screen fixed left-0 top-0 z-50 flex">
-  <!-- Main Sidebar -->
+@if (isMobile() && isMobileDrawerOpen()) {
+  <button
+    type="button"
+    class="fixed inset-0 z-40 bg-black/40 md:hidden"
+    (click)="closeMobileDrawer()"
+    aria-label="Close navigation"
+  ></button>
+}
+
+<div
+  class="fixed left-0 top-0 z-50 flex h-screen transition-transform duration-300 ease-in-out"
+  [class.translate-x-0]="!isMobile() || isMobileDrawerOpen()"
+  [class.-translate-x-full]="isMobile() && !isMobileDrawerOpen()"
+>
   <div
     class="h-full flex flex-col bg-white border-r border-gray-200 shadow-md transition-[width] duration-300 ease-in-out"
-    [class.w-72]="!isCollapsed"
-    [class.w-20]="isCollapsed"
+    [class.w-72]="!isCollapsed() || isMobile()"
+    [class.w-20]="isCollapsed() && !isMobile()"
   >
-    <!-- Sidebar Header -->
     <div class="flex items-center justify-between h-20 px-6 border-b border-gray-200">
-      <!-- Logo -->
       <div
         class="flex items-center space-x-3 overflow-hidden transition-all duration-300"
-        [class.w-0]="isCollapsed"
-        [class.opacity-0]="isCollapsed"
+        [class.w-0]="isCollapsed() && !isMobile()"
+        [class.opacity-0]="isCollapsed() && !isMobile()"
       >
         <div class="flex-shrink-0">
           <img
@@ -28,8 +37,7 @@
         </div>
       </div>
 
-      <!-- Collapsed Logo -->
-      @if (isCollapsed) {
+      @if (isCollapsed() && !isMobile()) {
         <div class="flex items-center justify-center w-full">
           <img
             src="/logo/logo.png"
@@ -39,28 +47,33 @@
         </div>
       }
 
-      <!-- Toggle Button -->
       <button
+        type="button"
         (click)="toggleSidebar()"
-        class="absolute right-0 top-8 translate-x-1/2 w-8 h-8 bg-white border border-gray-300 rounded-full shadow flex items-center justify-center hover:bg-gray-50 z-10"
+        class="absolute z-10 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white shadow hover:bg-gray-50"
+        [class.right-0]="!isMobile()"
+        [class.top-8]="!isMobile()"
+        [class.translate-x-1/2]="!isMobile()"
+        [class.right-4]="isMobile()"
+        [class.top-6]="isMobile()"
+        aria-label="Toggle sidebar"
       >
         <i
           class="fas text-gray-600 transition-transform duration-300"
-          [class.fa-chevron-left]="!isCollapsed"
-          [class.fa-chevron-right]="isCollapsed"
+          [class.fa-chevron-left]="!isMobile() && !isCollapsed()"
+          [class.fa-chevron-right]="!isMobile() && isCollapsed()"
+          [class.fa-times]="isMobile()"
         ></i>
       </button>
     </div>
 
-    <!-- Sidebar Content -->
     <div class="flex-1 overflow-y-auto py-6 px-4">
       <nav class="space-y-2">
-        <!-- Parent Items -->
         @for (item of sidebarItems; track item.id) {
           <div class="mb-1">
             <a
-              (click)="toggleItemExpansion(item.id)"
-              [routerLink]="item.route"
+              (click)="onItemClick($event, item)"
+              [routerLink]="item.children?.length ? null : item.route"
               routerLinkActive="active-link"
               class="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-50 group"
               [class.bg-primary-50]="item.isActive"
@@ -72,7 +85,7 @@
                 [class.group-hover:text-primary-600]="!item.isActive"
               ></i>
 
-              @if (!isCollapsed) {
+              @if (!isCollapsed() || isMobile()) {
                 <span
                   class="ml-4 font-medium"
                   [class.text-primary-600]="item.isActive"
@@ -82,7 +95,7 @@
                 </span>
               }
 
-              @if (!isCollapsed && item.children) {
+              @if ((!isCollapsed() || isMobile()) && item.children) {
                 <i
                   class="fas fa-chevron-down ml-auto text-xs transition-transform duration-300 text-gray-400"
                   [class.rotate-180]="item.isExpanded"
@@ -90,10 +103,9 @@
               }
             </a>
 
-            <!-- Child Items -->
             <div
               class="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-4"
-              [hidden]="!item.children || !item.isExpanded || isCollapsed"
+              [hidden]="!item.children || !item.isExpanded || (isCollapsed() && !isMobile())"
               @childAnimation
             >
               @for (child of item.children; track child.id) {
@@ -124,8 +136,7 @@
           </div>
         }
 
-        <!-- Quick Actions -->
-        @if (!isCollapsed) {
+        @if (!isCollapsed() || isMobile()) {
           <div class="pt-6">
             <div class="text-xs font-semibold text-gray-400 uppercase px-4 mb-2">Quick Actions</div>
           </div>
@@ -134,20 +145,20 @@
         <div class="space-y-1">
           <a
             class="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
-            [class.justify-center]="isCollapsed"
+            [class.justify-center]="isCollapsed() && !isMobile()"
           >
             <i class="fas fa-plus-circle text-lg text-gray-500"></i>
-            @if (!isCollapsed) {
+            @if (!isCollapsed() || isMobile()) {
               <span class="ml-4 font-medium text-gray-700"> Create New </span>
             }
           </a>
 
           <a
             class="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-50"
-            [class.justify-center]="isCollapsed"
+            [class.justify-center]="isCollapsed() && !isMobile()"
           >
             <i class="fas fa-download text-lg text-gray-500"></i>
-            @if (!isCollapsed) {
+            @if (!isCollapsed() || isMobile()) {
               <span class="ml-4 font-medium text-gray-700"> Export Data </span>
             }
           </a>
@@ -155,23 +166,22 @@
       </nav>
     </div>
 
-    <!-- Footer -->
     <div class="border-t border-gray-200 p-4">
-      <div class="flex items-center" [class.justify-center]="isCollapsed">
+      <div class="flex items-center" [class.justify-center]="isCollapsed() && !isMobile()">
         <img
           src="/profile/profile.jpg"
           alt="AhmadUllah Mukhlis"
           class="w-10 h-10 rounded-full border-2 border-white shadow"
         />
 
-        @if (!isCollapsed) {
+        @if (!isCollapsed() || isMobile()) {
           <div class="ml-3 flex-1 min-w-0">
             <p class="text-sm font-semibold text-gray-800 truncate">AhmadUllah Mukhlis</p>
             <p class="text-xs text-gray-500 truncate">Administrator</p>
           </div>
         }
 
-        @if (!isCollapsed) {
+        @if (!isCollapsed() || isMobile()) {
           <button class="ml-2 p-1.5 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100">
             <i class="fas fa-cog"></i>
           </button>
@@ -179,12 +189,4 @@
       </div>
     </div>
   </div>
-
-  <!-- Mobile Overlay -->
-  @if (!isCollapsed) {
-    <div
-      class="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden"
-      (click)="toggleSidebar()"
-    ></div>
-  }
 </div>

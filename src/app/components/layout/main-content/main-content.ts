@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, HostListener, inject, PLATFORM_ID } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Sidebar } from '../sidebar/sidebar';
 import { Header } from '../header/header';
@@ -15,23 +15,30 @@ import { ToastComponent } from '../../ui/toast.component/toast.component';
   styleUrls: ['./main-content.css'],
 })
 export class MainContent {
-  isMobile = false;
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   constructor(private sidebarService: SidebarService) {
-    this.checkMobile();
+    if (this.isBrowser) {
+      this.updateViewport();
+    }
   }
 
   @HostListener('window:resize')
   onResize(): void {
-    this.checkMobile();
+    if (this.isBrowser) {
+      this.updateViewport();
+    }
   }
 
-  private checkMobile(): void {
-    this.isMobile = window.innerWidth < 768;
+  private updateViewport(): void {
+    this.sidebarService.updateViewport(window.innerWidth);
   }
 
-  // Getter for collapsed sidebar state (no arguments needed)
   get isCollapsed(): boolean {
     return this.sidebarService.isCollapsed();
+  }
+
+  get isMobile(): boolean {
+    return this.sidebarService.isMobile();
   }
 }

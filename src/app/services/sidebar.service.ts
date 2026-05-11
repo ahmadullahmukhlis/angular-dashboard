@@ -1,4 +1,5 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, PLATFORM_ID, effect, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { SidebarItem } from '../models/sidebar-item.model';
 import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
 
@@ -6,20 +7,23 @@ import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
   providedIn: 'root',
 })
 export class SidebarService {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private sidebarItems: SidebarItem[] = structuredClone(SIDEBAR_ROUTES);
-
   private readonly STORAGE_KEY = 'sidebar-collapsed';
-
-  // ✅ Initialize from localStorage
-  private _isCollapsed = signal<boolean>(localStorage.getItem(this.STORAGE_KEY) === 'true');
-
-  // Expose signal
+  private readonly mobileBreakpoint = 768;
+  private _isCollapsed = signal<boolean>(this.readCollapsedState());
+  private _isMobile = signal<boolean>(false);
+  private _isMobileDrawerOpen = signal<boolean>(false);
   sidebarCollapsedSignal = this._isCollapsed;
+  isMobileSignal = this._isMobile;
+  mobileDrawerOpenSignal = this._isMobileDrawerOpen;
 
   constructor() {
-    // ✅ Persist automatically whenever value changes
     effect(() => {
-      localStorage.setItem(this.STORAGE_KEY, this._isCollapsed().toString());
+      if (this.isBrowser) {
+        localStorage.setItem(this.STORAGE_KEY, this._isCollapsed().toString());
+      }
     });
   }
 
@@ -67,7 +71,7 @@ export class SidebarService {
   }
 
   toggleItemExpansion(itemId: number): void {
-    if (this._isCollapsed()) return; // prevent expanding when collapsed
+    if (this._isCollapsed() && !this._isMobile()) return; // only block expansion for collapsed desktop sidebar
 
     const item = this.findItemById(this.sidebarItems, itemId);
     if (item && item.children) {
@@ -95,7 +99,45 @@ export class SidebarService {
     return this._isCollapsed();
   }
 
+  isMobile(): boolean {
+    return this._isMobile();
+  }
+
+  isMobileDrawerOpen(): boolean {
+    return this._isMobileDrawerOpen();
+  }
+
+  updateViewport(width: number): void {
+    const isMobile = width < this.mobileBreakpoint;
+    this._isMobile.set(isMobile);
+
+    if (!isMobile) {
+      this._isMobileDrawerOpen.set(false);
+    }
+  }
+
+  toggleNavigation(): void {
+    if (this._isMobile()) {
+      this._isMobileDrawerOpen.update((isOpen) => !isOpen);
+      return;
+    }
+
+    this.toggleSidebar();
+  }
+
+  closeMobileDrawer(): void {
+    this._isMobileDrawerOpen.set(false);
+  }
+
   // ---------------- Private Helpers ----------------
+
+  private readCollapsedState(): boolean {
+    if (!this.isBrowser) {
+      return false;
+    }
+
+    return localStorage.getItem(this.STORAGE_KEY) === 'true';
+  }
 
   private deactivateAllItems(items: SidebarItem[]): void {
     items.forEach((item) => {

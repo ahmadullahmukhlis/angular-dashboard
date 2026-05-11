@@ -11,8 +11,8 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { SidebarService } from '../../../services/sidebar.service';
 import { Breadcrumb } from '../breadcrumb/breadcrumb';
 import { Router, NavigationEnd } from '@angular/router';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { filter, map } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
 import { ComponentService } from '../../../services/genral/component.service';
 
 @Component({
@@ -21,7 +21,6 @@ import { ComponentService } from '../../../services/genral/component.service';
   imports: [CommonModule, Breadcrumb],
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
-  // NEW: Consolidate global listeners here instead of using @HostListener
   host: {
     '(window:resize)': 'onResize()',
     '(document:click)': 'onDocumentClick($event)',
@@ -35,7 +34,6 @@ export class Header {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly componentService = inject(ComponentService);
 
-  // Use Signals for state management
   isNotificationsOpen = signal(false);
   isProfileMenuOpen = signal(false);
   isMobile = signal(false);
@@ -63,26 +61,29 @@ export class Header {
   isSidebarCollapsed = this.sidebarService.sidebarCollapsedSignal;
 
   constructor() {
-    // NEW: afterNextRender is the modern, browser-safe replacement for ngAfterViewInit
     afterNextRender(() => {
-      this.checkMobile();
+      if (this.isBrowser) {
+        this.sidebarService.updateViewport(window.innerWidth);
+        this.isMobile.set(this.sidebarService.isMobile());
+      }
     });
 
-    // Handle router events reactively
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => this.closeDropdowns());
+      .subscribe(() => {
+        this.closeDropdowns();
+        this.sidebarService.closeMobileDrawer();
+      });
   }
 
   onResize(): void {
-    if (this.isBrowser) this.checkMobile();
-  }
-
-  private checkMobile(): void {
-    this.isMobile.set(window.innerWidth < 768);
+    if (this.isBrowser) {
+      this.sidebarService.updateViewport(window.innerWidth);
+      this.isMobile.set(this.sidebarService.isMobile());
+    }
   }
 
   toggleNotifications(event?: MouseEvent): void {
@@ -104,7 +105,7 @@ export class Header {
   }
 
   toggleSidebar(): void {
-    this.sidebarService.toggleSidebar();
+    this.sidebarService.toggleNavigation();
   }
 
   private closeDropdowns(): void {

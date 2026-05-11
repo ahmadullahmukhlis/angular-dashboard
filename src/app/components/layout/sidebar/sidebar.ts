@@ -2,12 +2,14 @@ import {
   Component,
   OnInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
+  HostListener,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SidebarService } from '../../../services/sidebar.service';
 import { SidebarItem } from '../../../models/sidebar-item.model';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -31,34 +33,54 @@ import { RouterModule } from '@angular/router';
   ],
 })
 export class Sidebar implements OnInit {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly sidebarService = inject(SidebarService);
+  readonly isCollapsed = this.sidebarService.sidebarCollapsedSignal;
+  readonly isMobile = this.sidebarService.isMobileSignal;
+  readonly isMobileDrawerOpen = this.sidebarService.mobileDrawerOpenSignal;
   sidebarItems: SidebarItem[] = [];
-  isCollapsed = false;
-
-  constructor(
-    private sidebarService: SidebarService,
-    private cdr: ChangeDetectorRef
-  ) {}
 
   ngOnInit(): void {
     this.sidebarItems = this.sidebarService.getSidebarItems();
-    this.isCollapsed = this.sidebarService.isCollapsed();
-    this.cdr.markForCheck();
+    if (this.isBrowser) {
+      this.sidebarService.updateViewport(window.innerWidth);
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (this.isBrowser) {
+      this.sidebarService.updateViewport(window.innerWidth);
+    }
   }
 
   toggleItemExpansion(itemId: number): void {
     this.sidebarService.toggleItemExpansion(itemId);
-    this.cdr.markForCheck();
+  }
+
+  onItemClick(event: MouseEvent, item: SidebarItem): void {
+    if (item.children?.length) {
+      event.preventDefault();
+      this.toggleItemExpansion(item.id);
+      return;
+    }
+
+    this.setActiveItem(item.id);
   }
 
   setActiveItem(itemId: number): void {
     this.sidebarService.setActiveItem(itemId);
-    this.cdr.markForCheck();
+    if (this.isMobile()) {
+      this.sidebarService.closeMobileDrawer();
+    }
   }
 
   toggleSidebar(): void {
-    this.sidebarService.toggleSidebar();
-    this.isCollapsed = this.sidebarService.isCollapsed();
-    this.cdr.markForCheck();
+    this.sidebarService.toggleNavigation();
+  }
+
+  closeMobileDrawer(): void {
+    this.sidebarService.closeMobileDrawer();
   }
 
   trackById(index: number, item: SidebarItem): number {
