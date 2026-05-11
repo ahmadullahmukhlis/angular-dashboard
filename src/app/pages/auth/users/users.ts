@@ -27,6 +27,8 @@ export class AuthUsers {
   selectedUserId: number | null = null;
   assignRolesFields: DynamicField[] = [];
   unassignRolesFields: DynamicField[] = [];
+  assignRolesHiddenFields: Array<{ name: string; value: any }> = [];
+  unassignRolesHiddenFields: Array<{ name: string; value: any }> = [];
 
   userFields: DynamicField[] = [
     { type: 'text', name: 'first_name', label: 'First Name', required: true, className: 'md:col-span-1' },
@@ -86,18 +88,8 @@ export class AuthUsers {
       { key: 'is_active', label: 'Active', type: 'boolean' },
     ],
     rowActions: [
-      {
-        label: 'Edit',
-        icon: 'fa-edit',
-        action: (row) => this.openEdit(row),
-        color: 'primary',
-      },
-      {
-        label: 'Assign Roles',
-        icon: 'fa-user-tag',
-        action: (row) => this.openAssignRoles(row),
-        color: 'warning',
-      },
+      { label: 'Edit', icon: 'fa-edit', action: (row) => this.openEdit(row), color: 'primary' },
+      { label: 'Assign Roles', icon: 'fa-user-tag', action: (row) => this.openAssignRoles(row), color: 'warning' },
       {
         label: 'Inactive',
         icon: 'fa-user-slash',
@@ -132,6 +124,14 @@ export class AuthUsers {
     ],
   };
 
+  get userAction(): string {
+    return this.isEdit && this.selectedUserId ? `/user-management/users/${this.selectedUserId}` : '/user-management/users';
+  }
+
+  get assignRolesAction(): string {
+    return this.selectedUserId ? `/user-management/users/${this.selectedUserId}` : '';
+  }
+
   openCreate() {
     this.isEdit = false;
     this.selectedUserId = null;
@@ -160,6 +160,8 @@ export class AuthUsers {
     this.showUserModal = false;
     this.showAssignRolesModal = false;
     this.showUnassignRolesModal = false;
+    this.assignRolesHiddenFields = [];
+    this.unassignRolesHiddenFields = [];
   }
 
   private resetDefaults() {
@@ -169,31 +171,20 @@ export class AuthUsers {
     }));
   }
 
-  submit = (payload: any) => {
-    const finalPayload = {
-      first_name: payload.first_name,
-      last_name: payload.last_name,
-      email: payload.email,
-      password: payload.password || null,
-      confirm_password: payload.confirm_password || null,
-      roles: Array.isArray(payload.roles)
-        ? payload.roles.map((id: any) => ({ id: Number(id) }))
-        : [],
-      is_active: !!payload.is_active,
-    };
+  transformUserPayload = (payload: any) => ({
+    first_name: payload.first_name,
+    last_name: payload.last_name,
+    email: payload.email,
+    password: payload.password || null,
+    confirm_password: payload.confirm_password || null,
+    roles: Array.isArray(payload.roles) ? payload.roles.map((id: any) => ({ id: Number(id) })) : [],
+    is_active: !!payload.is_active,
+  });
 
-    const request$ =
-      this.isEdit && this.selectedUserId
-        ? this.api.put(`/user-management/users/${this.selectedUserId}`, finalPayload)
-        : this.api.post('/user-management/users', finalPayload);
-
-    request$.subscribe({
-      next: () => {
-        this.showUserModal = false;
-        this.toastService.success('Success', this.isEdit ? 'User updated successfully' : 'User created successfully');
-        this.componentService.revalidate('users-table');
-      },
-    });
+  onUserSaved = (response: any) => {
+    this.showUserModal = false;
+    this.toastService.success('Success', response?.message ?? (this.isEdit ? 'User updated successfully' : 'User created successfully'));
+    this.componentService.revalidate('users-table');
   };
 
   openAssignRoles(row: any) {
@@ -212,39 +203,38 @@ export class AuthUsers {
         defaultValue: Array.isArray(row?.roles) ? row.roles.map((role: any) => role?.id ?? role?.role_id) : [],
       },
     ];
+    this.assignRolesHiddenFields = [
+      { name: 'first_name', value: row.first_name },
+      { name: 'last_name', value: row.last_name },
+      { name: 'email', value: row.email },
+      { name: 'password', value: null },
+      { name: 'confirm_password', value: null },
+      { name: 'is_active', value: !!row.is_active },
+    ];
     this.showAssignRolesModal = true;
   }
 
-  submitAssignRoles = (payload: any) => {
-    if (!this.selectedUserId) return;
+  transformAssignRolesPayload = (payload: any) => ({
+    first_name: payload.first_name,
+    last_name: payload.last_name,
+    email: payload.email,
+    password: null,
+    confirm_password: null,
+    roles: Array.isArray(payload.roles) ? payload.roles.map((id: any) => ({ id: Number(id) })) : [],
+    is_active: !!payload.is_active,
+  });
 
-    this.api.get(`/user-management/users/${this.selectedUserId}`).subscribe({
-      next: (user: any) => {
-        const finalPayload = {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          password: null,
-          confirm_password: null,
-          roles: Array.isArray(payload.roles) ? payload.roles.map((id: any) => ({ id: Number(id) })) : [],
-          is_active: !!user.is_active,
-        };
-
-        this.api.put(`/user-management/users/${this.selectedUserId}`, finalPayload).subscribe({
-          next: () => {
-            this.showAssignRolesModal = false;
-            this.toastService.success('Success', 'User roles assigned successfully');
-            this.componentService.revalidate('users-table');
-          },
-        });
-      },
-    });
+  onRolesAssigned = (response: any) => {
+    this.showAssignRolesModal = false;
+    this.toastService.success('Success', response?.message ?? 'User roles assigned successfully');
+    this.componentService.revalidate('users-table');
   };
 
   openUnassignRoles(row: any) {
     this.selectedUserId = row?.id ?? null;
     if (!this.selectedUserId) return;
 
+    const existingRoles = Array.isArray(row?.roles) ? row.roles.map((role: any) => Number(role?.id ?? role?.role_id)) : [];
     this.unassignRolesFields = [
       {
         type: 'multi-select',
@@ -262,39 +252,38 @@ export class AuthUsers {
         defaultValue: [],
       },
     ];
+    this.unassignRolesHiddenFields = [
+      { name: 'first_name', value: row.first_name },
+      { name: 'last_name', value: row.last_name },
+      { name: 'email', value: row.email },
+      { name: 'password', value: null },
+      { name: 'confirm_password', value: null },
+      { name: 'is_active', value: !!row.is_active },
+      { name: '__existing_roles', value: existingRoles },
+    ];
     this.showUnassignRolesModal = true;
   }
 
-  submitUnassignRoles = (payload: any) => {
-    if (!this.selectedUserId) return;
+  transformUnassignRolesPayload = (payload: any) => {
+    const selectedRoleIds = Array.isArray(payload.roles) ? payload.roles.map((id: any) => Number(id)) : [];
+    const existingRoles = Array.isArray(payload.__existing_roles) ? payload.__existing_roles : [];
+    return {
+      first_name: payload.first_name,
+      last_name: payload.last_name,
+      email: payload.email,
+      password: null,
+      confirm_password: null,
+      roles: existingRoles
+        .filter((id: number) => !selectedRoleIds.includes(Number(id)))
+        .map((id: number) => ({ id: Number(id) })),
+      is_active: !!payload.is_active,
+    };
+  };
 
-    this.api.get(`/user-management/users/${this.selectedUserId}`).subscribe({
-      next: (user: any) => {
-        const selectedRoleIds = Array.isArray(payload.roles) ? payload.roles.map((id: any) => Number(id)) : [];
-        const remainingRoles =
-          selectedRoleIds.length === 0
-            ? []
-            : (user?.roles ?? [])
-                .filter((role: any) => !selectedRoleIds.includes(Number(role?.id ?? role?.role_id)))
-                .map((role: any) => ({ id: Number(role?.id ?? role?.role_id) }));
-
-        this.api.put(`/user-management/users/${this.selectedUserId}`, {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          email: user.email,
-          password: null,
-          confirm_password: null,
-          roles: remainingRoles,
-          is_active: !!user.is_active,
-        }).subscribe({
-          next: () => {
-            this.showUnassignRolesModal = false;
-            this.toastService.success('Success', 'User roles unassigned successfully');
-            this.componentService.revalidate('users-table');
-          },
-        });
-      },
-    });
+  onRolesUnassigned = (response: any) => {
+    this.showUnassignRolesModal = false;
+    this.toastService.success('Success', response?.message ?? 'User roles unassigned successfully');
+    this.componentService.revalidate('users-table');
   };
 
   delete(row: any) {

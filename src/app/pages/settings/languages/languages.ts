@@ -77,6 +77,16 @@ export class SettingsLanguages {
     return `/configurations/language/words?language_id=${this.selectedLanguage.id}`;
   }
 
+  get languageAction(): string {
+    return '/configurations/languages';
+  }
+
+  get wordAction(): string {
+    return this.editingWordId
+      ? `/configurations/language/words/${this.editingWordId}`
+      : '/configurations/language/words';
+  }
+
   openLanguageModal() {
     this.languageFields = [
       {
@@ -143,50 +153,34 @@ export class SettingsLanguages {
     this.selectedLanguage = language;
   }
 
-  submitLanguage = (payload: any) => {
-    const finalPayload = {
-      name: payload.name,
-      abbr: payload.abbr,
-      direction: payload.direction ?? 'ltr',
-      status: Boolean(payload.status),
-    };
+  transformLanguagePayload = (payload: any) => ({
+    name: payload.name,
+    abbr: payload.abbr,
+    direction: payload.direction ?? 'ltr',
+    status: Boolean(payload.status),
+  });
 
-    this.api.post('/configurations/languages', finalPayload).subscribe({
-      next: (response: any) => {
-        this.closeModals();
-        this.toastService.success('Success', response?.message ?? 'Language created successfully');
-        this.componentService.revalidate('settings-languages-table');
-      },
-    });
+  transformWordPayload = (payload: any) => ({
+    id: this.editingWordId ?? 0,
+    word: payload.word,
+    translation: payload.translation,
+    language_id: this.selectedLanguage.id,
+  });
+
+  onLanguageSaved = (response: any) => {
+    this.closeModals();
+    this.toastService.success('Success', response?.message ?? 'Language created successfully');
+    this.componentService.revalidate('settings-languages-table');
   };
 
-  submitWord = (payload: any) => {
-    if (!this.selectedLanguage?.id) {
-      return;
-    }
-
-    const finalPayload = {
-      id: this.editingWordId ?? 0,
-      word: payload.word,
-      translation: payload.translation,
-      language_id: this.selectedLanguage.id,
-    };
-
-    const request$ = this.editingWordId
-      ? this.api.put(`/configurations/language/words/${this.editingWordId}`, finalPayload)
-      : this.api.post('/configurations/language/words', finalPayload);
-
-    request$.subscribe({
-      next: (response: any) => {
-        this.closeModals();
-        this.toastService.success(
-          'Success',
-          response?.message ??
-            (this.editingWordId ? 'Language dictionary updated successfully' : 'Language dictionary added successfully'),
-        );
-        this.componentService.revalidate('settings-language-words-table');
-      },
-    });
+  onWordSaved = (response: any) => {
+    this.closeModals();
+    this.toastService.success(
+      'Success',
+      response?.message ??
+        (this.editingWordId ? 'Language dictionary updated successfully' : 'Language dictionary added successfully'),
+    );
+    this.componentService.revalidate('settings-language-words-table');
   };
 
   deleteLanguage(language: any) {

@@ -64,6 +64,7 @@ export class DynamicFormBuilder implements OnChanges {
   @Input() action!: string;
   @Input() method: 'POST' | 'PUT' = 'POST';
   @Input() beforeSubmit?: (v: any) => boolean | void;
+  @Input() payloadTransform?: (payload: any) => any;
   @Input() needConfirmation = false;
   @Input() hiddenFields?: { name: string; value: any }[];
   @Input() className: string = '';
@@ -295,6 +296,10 @@ export class DynamicFormBuilder implements OnChanges {
       // Use plain JSON
       finalPayload = { ...payload };
       this.hiddenFields?.forEach((h) => (finalPayload[h.name] = h.value));
+    }
+
+    if (this.payloadTransform) {
+      finalPayload = this.payloadTransform(finalPayload);
     }
 
     // --- Emit or send to API ---

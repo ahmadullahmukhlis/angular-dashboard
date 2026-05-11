@@ -30,6 +30,10 @@ export class Roles implements OnInit {
   assignedUsers: any[] = [];
   assignedPermissions: any[] = [];
 
+  get roleAction(): string {
+    return this.isEdit && this.selectedId ? `/user-management/roles/${this.selectedId}` : '/user-management/roles';
+  }
+
   fields: DynamicField[] = [
     { type: 'text', name: 'name', label: 'Role Name', required: true },
     {
@@ -225,33 +229,18 @@ export class Roles implements OnInit {
     });
   }
 
-  submit = (payload: any) => {
-    const finalPayload = {
-      name: payload.name,
-      role_permissions: Array.isArray(payload.role_permissions)
-        ? payload.role_permissions.map((value: any) => Number(value))
-        : [],
-    };
+  transformRolePayload = (payload: any) => ({
+    name: payload.name,
+    role_permissions: Array.isArray(payload.role_permissions)
+      ? payload.role_permissions.map((value: any) => Number(value))
+      : [],
+  });
 
-    if (this.isEdit && this.selectedId) {
-      this.api.put(`/user-management/roles/${this.selectedId}`, finalPayload).subscribe({
-        next: () => {
-          this.showModal = false;
-          this.toastService.success('Success', 'Role updated successfully');
-          this.componentService.revalidate('roles-table');
-          this.clearSelectedRole();
-        },
-      });
-      return;
-    }
-    this.api.post('/user-management/roles', finalPayload).subscribe({
-      next: () => {
-        this.showModal = false;
-        this.toastService.success('Success', 'Role created successfully');
-        this.componentService.revalidate('roles-table');
-        this.clearSelectedRole();
-      },
-    });
+  onRoleSaved = (response: any) => {
+    this.showModal = false;
+    this.toastService.success('Success', response?.message ?? (this.isEdit ? 'Role updated successfully' : 'Role created successfully'));
+    this.componentService.revalidate('roles-table');
+    this.clearSelectedRole();
   };
 
   delete(role: any) {

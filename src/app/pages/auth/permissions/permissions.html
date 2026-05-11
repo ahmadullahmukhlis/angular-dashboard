@@ -65,11 +65,12 @@
   >
     <app-dynamic-form-builder
       [fields]="permissionFields"
-      [action]="''"
+      [action]="permissionAction"
       [method]="'POST'"
       [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformPermissionPayload"
       [submitLabel]="'Save'"
-      (formSubmitted)="submitPermission($event)"
+      (submitCompleted)="onPermissionSaved($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 
@@ -81,11 +82,12 @@
   >
     <app-dynamic-form-builder
       [fields]="permissionGroupFields"
-      [action]="''"
+      [action]="permissionGroupAction"
       [method]="activeGroupEditId ? 'PUT' : 'POST'"
       [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformGroupPayload"
       [submitLabel]="'Save'"
-      (formSubmitted)="submitGroup($event)"
+      (submitCompleted)="onGroupSaved($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 </div>

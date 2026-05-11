@@ -29,6 +29,16 @@ export class Permissions {
   permissionFields: DynamicField[] = [];
   permissionGroupFields: DynamicField[] = [];
 
+  get permissionAction(): string {
+    return '/user-management/permission';
+  }
+
+  get permissionGroupAction(): string {
+    return this.activeGroupEditId
+      ? `/user-management/permission-groups/${this.activeGroupEditId}`
+      : '/user-management/permission-groups';
+  }
+
   tableConfig: DataTableConfig = {
     searchKey: 'search',
     columns: [
@@ -164,12 +174,7 @@ export class Permissions {
         label: 'Permission Group Name',
         required: true,
         defaultValue: group?.name ?? null,
-      },
-      {
-        type: 'text',
-        name: 'icon',
-        label: 'Icon',
-        defaultValue: group?.icon ?? null,
+        className:'col-span-2'
       },
     ];
   }
@@ -191,42 +196,30 @@ export class Permissions {
     return group.id;
   }
 
-  submitPermission = (payload: any) => {
-    const finalPayload = {
-      name: payload.name,
-      permission_group_id: Number(this.activePermissionGroupId ?? 0),
-    };
+  transformPermissionPayload = (payload: any) => ({
+    name: payload.name,
+    permission_group_id: Number(this.activePermissionGroupId ?? 0),
+  });
 
-    this.api.post('/user-management/permission', finalPayload).subscribe({
-      next: () => {
-        this.closeModal();
-        this.toastService.success('Success', 'Permission created successfully');
-        this.resetPermissionView();
-      },
-    });
+  transformGroupPayload = (payload: any) => ({
+    name: payload.name,
+    permission_group_id: Number(this.activeGroupParentId ?? 0),
+  });
+
+  onPermissionSaved = (response: any) => {
+    this.closeModal();
+    this.toastService.success('Success', response?.message ?? 'Permission created successfully');
+    this.resetPermissionView();
   };
 
-  submitGroup = (payload: any) => {
-    const finalPayload = {
-      name: payload.name,
-      icon: payload.icon || null,
-      permission_group_id: Number(this.activeGroupParentId ?? 0),
-    };
-
-    const request$ = this.activeGroupEditId
-      ? this.api.put(`/user-management/permission-groups/${this.activeGroupEditId}`, finalPayload)
-      : this.api.post('/user-management/permission-groups', finalPayload);
-
-    request$.subscribe({
-      next: () => {
-        this.closeModal();
-        this.toastService.success(
-          'Success',
-          this.activeGroupEditId ? 'Permission group updated successfully' : 'Permission group created successfully',
-        );
-        this.resetPermissionView();
-      },
-    });
+  onGroupSaved = (response: any) => {
+    this.closeModal();
+    this.toastService.success(
+      'Success',
+      response?.message ??
+        (this.activeGroupEditId ? 'Permission group updated successfully' : 'Permission group created successfully'),
+    );
+    this.resetPermissionView();
   };
 
   deletePermission(permission: any) {

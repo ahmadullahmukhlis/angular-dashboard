@@ -25,11 +25,12 @@
   >
     <app-dynamic-form-builder
       [fields]="userFields"
-      [action]="''"
+      [action]="userAction"
       [method]="isEdit ? 'PUT' : 'POST'"
       [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+      [payloadTransform]="transformUserPayload"
       [submitLabel]="'Save'"
-      (formSubmitted)="submit($event)"
+      (submitCompleted)="onUserSaved($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 
@@ -41,11 +42,13 @@
   >
     <app-dynamic-form-builder
       [fields]="assignRolesFields"
-      [action]="''"
+      [action]="assignRolesAction"
       [method]="'PUT'"
       [className]="'grid grid-cols-1 gap-4'"
+      [hiddenFields]="assignRolesHiddenFields"
+      [payloadTransform]="transformAssignRolesPayload"
       [submitLabel]="'Assign Roles'"
-      (formSubmitted)="submitAssignRoles($event)"
+      (submitCompleted)="onRolesAssigned($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 
@@ -57,11 +60,13 @@
   >
     <app-dynamic-form-builder
       [fields]="unassignRolesFields"
-      [action]="''"
+      [action]="assignRolesAction"
       [method]="'PUT'"
       [className]="'grid grid-cols-1 gap-4'"
+      [hiddenFields]="unassignRolesHiddenFields"
+      [payloadTransform]="transformUnassignRolesPayload"
       [submitLabel]="'Unassign Roles'"
-      (formSubmitted)="submitUnassignRoles($event)"
+      (submitCompleted)="onRolesUnassigned($event)"
     ></app-dynamic-form-builder>
   </app-modal>
 </div>
