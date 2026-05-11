@@ -16,6 +16,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly api = inject(ApiService);
   private readonly clientContext = inject(ClientContextService);
+  private isRedirectingToLogin = false;
 
   // Signal to track the current token state reactively
   private readonly _accessToken = signal<string | null>(localStorage.getItem('accessToken'));
@@ -37,6 +38,7 @@ export class AuthService {
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     this._accessToken.set(accessToken); // Update signal
+    this.isRedirectingToLogin = false;
   }
 
   getAccessToken(): string | null {
@@ -147,6 +149,22 @@ export class AuthService {
     }
 
     this.clearTokens();
-    this.router.navigate(['/login']);
+    this.redirectToLogin();
+  }
+
+  handleUnauthorized(): void {
+    this.clearTokens();
+    this.redirectToLogin();
+  }
+
+  private redirectToLogin(): void {
+    if (this.isRedirectingToLogin) {
+      return;
+    }
+
+    this.isRedirectingToLogin = true;
+    void this.router.navigate(['/login']).finally(() => {
+      this.isRedirectingToLogin = false;
+    });
   }
 }
