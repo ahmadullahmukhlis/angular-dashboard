@@ -3,8 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { jwtDecode } from 'jwt-decode';
 import { Observable, of } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { ApiService } from './api/api.service';
+import { tap, catchError, finalize, map, shareReplay } from 'rxjs/operators';
 import { ClientContextService } from './client-context.service';
 
 @Injectable({
@@ -14,9 +13,9 @@ export class AuthService {
   // Use inject() for modern DI in field initializers
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
-  private readonly api = inject(ApiService);
   private readonly clientContext = inject(ClientContextService);
   private isRedirectingToLogin = false;
+  private refreshRequest$: Observable<string | null> | null = null;
 
   // Signal to track the current token state reactively
   private readonly _accessToken = signal<string | null>(localStorage.getItem('accessToken'));
@@ -34,9 +33,11 @@ export class AuthService {
      TOKEN STORAGE
   ============================ */
 
-  setTokens(accessToken: string, refreshToken: string) {
+  setTokens(accessToken: string, refreshToken?: string | null) {
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
     this._accessToken.set(accessToken); // Update signal
     this.isRedirectingToLogin = false;
   }
@@ -83,7 +84,11 @@ export class AuthService {
      REFRESH TOKEN
   ============================ */
 
-  refreshToken(): Observable<any> {
+  refreshToken(): Observable<string | null> {
+    if (this.refreshRequest$) {
+      return this.refreshRequest$;
+    }
+
     const refreshToken = this.getRefreshToken();
     const clientId = this.clientContext.getClientId();
     const clientAssertion = this.clientContext.getClientAssertion();
@@ -94,8 +99,8 @@ export class AuthService {
     }
 
     const params = { refreshToken };
-    return this.http
-      .post<any>(`${import.meta.env.NG_APP_API_URL}/refresh`, null, {
+    this.refreshRequest$ = this.http
+      .post<any>(`${import.meta.env.NG_APP_LOGIN_URL}/refresh`, null, {
         params,
         headers: {
           'X-Client-Id': clientId ?? '',
@@ -103,18 +108,26 @@ export class AuthService {
         },
       })
       .pipe(
-        tap((res: any) => {
+        map((res: any) => {
           const data = res?.data ?? res;
-          if (data?.accessToken && data?.refreshToken) {
-            this.setTokens(data.accessToken, data.refreshToken);
+          if (data?.accessToken) {
+            this.setTokens(data.accessToken, data?.refreshToken ?? refreshToken);
+            return data.accessToken as string;
           }
+          return null;
         }),
         catchError((error) => {
           console.error('Refresh token failed:', error);
           this.logout();
           return of(null);
         }),
+        finalize(() => {
+          this.refreshRequest$ = null;
+        }),
+        shareReplay(1),
       );
+
+    return this.refreshRequest$;
   }
 
   /* ============================
@@ -128,7 +141,7 @@ export class AuthService {
 
     if (refreshToken && clientId && clientAssertion) {
       this.http
-        .post<any>(`${import.meta.env.NG_APP_API_URL}/logout`, null, {
+        .post<any>(`${import.meta.env.NG_APP_LOGIN_URL}/logout`, null, {
           params: { refreshToken },
           headers: {
             'X-Client-Id': clientId,

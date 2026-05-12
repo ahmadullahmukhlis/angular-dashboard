@@ -1,8 +1,10 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse, HttpContextToken } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
+import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
+
+const REFRESH_RETRIED = new HttpContextToken<boolean>(() => false);
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -22,17 +24,56 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
     );
   }
 
-  let authReq = req;
-  if (token) {
-    authReq = req.clone({
+  const attachToken = (request: typeof req, accessToken: string) =>
+    request.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
+
+  if (token && authService.isTokenExpired(token) && !isAuthRequest) {
+    return authService.refreshToken().pipe(
+      switchMap((newToken) => {
+        if (!newToken) {
+          authService.handleUnauthorized();
+          return throwError(
+            () =>
+              new HttpErrorResponse({
+                status: 401,
+                statusText: 'Unauthorized',
+                url: req.url,
+              }),
+          );
+        }
+        return next(attachToken(req, newToken));
+      }),
+    );
   }
+
+  const authReq = token ? attachToken(req, token) : req;
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && !isAuthRequest && !req.context.get(REFRESH_RETRIED)) {
+        return authService.refreshToken().pipe(
+          switchMap((newToken) => {
+            if (!newToken) {
+              authService.handleUnauthorized();
+              return throwError(() => error);
+            }
+
+            return next(
+              attachToken(
+                req.clone({
+                  context: req.context.set(REFRESH_RETRIED, true),
+                }),
+                newToken,
+              ),
+            );
+          }),
+        );
+      }
+
       if (error.status === 401 && !isAuthRequest) {
         authService.handleUnauthorized();
       } else if ((error.status === 401 || error.status === 403) && isAuthRequest) {

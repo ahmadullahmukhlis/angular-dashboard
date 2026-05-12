@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
 import { ComponentService } from '../../../services/genral/component.service';
 import { RealmContextService } from '../../../services/realm-context.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -35,6 +36,7 @@ export class Header {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly componentService = inject(ComponentService);
   private readonly realmContext = inject(RealmContextService);
+  private readonly authService = inject(AuthService);
 
   isNotificationsOpen = signal(false);
   isProfileMenuOpen = signal(false);
@@ -136,5 +138,12 @@ export class Header {
     const value = (event.target as HTMLSelectElement).value || 'default';
     this.realmContext.setSelectedRealmSlug(value);
     this.componentService.revalidate('*');
+  }
+
+  logout(event?: MouseEvent): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.closeDropdowns();
+    this.authService.logout();
   }
 }
