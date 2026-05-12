@@ -76,9 +76,8 @@ export class SettingsIdentity {
   realmFields: DynamicField[] = [];
   clientFields: DynamicField[] = [];
   serviceAccountFields: DynamicField[] = [];
-  tokenFields: DynamicField[] = [];
-
-  tokenResponse: { accessToken: string; tokenType: string; expiresIn: number } | null = null;
+  showServiceAccountModal = false;
+  isServiceAccountFormLoading = false;
 
   realmTableConfig: DataTableConfig = {
     columns: [
@@ -124,6 +123,27 @@ export class SettingsIdentity {
     searchKey: 'search',
     rowActions: [
       {
+        label: 'Download Credentials',
+        icon: 'fa-download',
+        color: 'success',
+        action: (row) => this.downloadServiceAccountCredentials(row),
+        hidden: (row) => !row?.is_active,
+      },
+      {
+        label: 'Inactive',
+        icon: 'fa-ban',
+        color: 'danger',
+        action: (row) => this.updateServiceAccountStatus(row, false),
+        hidden: (row) => !row?.is_active,
+      },
+      {
+        label: 'Activate',
+        icon: 'fa-check',
+        color: 'success',
+        action: (row) => this.updateServiceAccountStatus(row, true),
+        hidden: (row) => !!row?.is_active,
+      },
+      {
         label: 'Copy Principal',
         icon: 'fa-key',
         color: 'warning',
@@ -142,7 +162,6 @@ export class SettingsIdentity {
     this.realmContext.loadRealms();
     effect(() => {
       this.realmContext.selectedRealmSlug();
-      this.tokenResponse = null;
       this.loadClientsForRealm();
       this.loadServiceAccountsForRealm();
       this.loadPermissionsForRealm();
@@ -181,10 +200,6 @@ export class SettingsIdentity {
 
   get serviceAccountAction(): string {
     return '/identity/service-accounts';
-  }
-
-  get tokenAction(): string {
-    return '/service-auth/token';
   }
 
   onRealmChange(event: Event): void {
@@ -261,20 +276,18 @@ export class SettingsIdentity {
   }
 
   openServiceAccountModal(): void {
-    this.tokenResponse = null;
+    this.showServiceAccountModal = true;
+    this.isServiceAccountFormLoading = true;
+    this.serviceAccountFields = [];
     this.buildServiceAccountFields(this.selectedRealmSlug, this.generateSecret());
-  }
-
-  openTokenModal(): void {
-    this.tokenResponse = null;
-    this.buildTokenFields(this.selectedRealmSlug);
   }
 
   closeModals(): void {
     this.realmFields = [];
     this.clientFields = [];
     this.serviceAccountFields = [];
-    this.tokenFields = [];
+    this.showServiceAccountModal = false;
+    this.isServiceAccountFormLoading = false;
   }
 
   transformClientPayload = (payload: any) => ({
@@ -293,13 +306,6 @@ export class SettingsIdentity {
     secret: payload.secret,
     permissions: Array.isArray(payload.permissions) ? payload.permissions : [],
     allowed_audiences: Array.isArray(payload.allowed_audiences) ? payload.allowed_audiences : [],
-  });
-
-  transformTokenPayload = (payload: any) => ({
-    realm_slug: payload.realm_slug || this.selectedRealmSlug,
-    principal: payload.principal,
-    secret: payload.secret,
-    audience: payload.audience,
   });
 
   onRealmSaved = (response: any) => {
@@ -325,20 +331,6 @@ export class SettingsIdentity {
     this.componentService.revalidate('settings-identity-service-accounts-table');
     this.loadServiceAccountsForRealm();
   };
-
-  onTokenIssued = (response: any) => {
-    this.tokenResponse = {
-      accessToken: response?.accessToken ?? '',
-      tokenType: response?.tokenType ?? 'Bearer',
-      expiresIn: Number(response?.expiresIn ?? 0),
-    };
-    this.toastService.success('Success', 'Service token generated successfully');
-  };
-
-  copyToken(): void {
-    if (!this.tokenResponse?.accessToken) return;
-    this.copyValue(this.tokenResponse.accessToken, 'Access token copied');
-  }
 
   private loadClientsForRealm(): void {
     this.api.get<ClientItem[]>(this.clientsUrl).subscribe({
@@ -407,6 +399,7 @@ export class SettingsIdentity {
       ),
     }).subscribe({
       next: ({ clients, permissions }) => {
+        this.isServiceAccountFormLoading = false;
         const clientOptions = (Array.isArray(clients) ? clients : []).map((client) => ({
           label: client.client_id,
           value: client.client_id,
@@ -458,66 +451,78 @@ export class SettingsIdentity {
         ];
       },
       error: () => {
+        this.isServiceAccountFormLoading = false;
         this.serviceAccountFields = [];
         this.toastService.error('Error', 'Failed to load realm data for service account form');
       },
     });
   }
 
-  private buildTokenFields(realmSlug: string, principal?: string): void {
-    forkJoin({
-      clients: this.api.get<ClientItem[]>(`/identity/realms/${encodeURIComponent(realmSlug)}/clients`),
-      serviceAccounts: this.api.get<ServiceAccountItem[]>(
-        `/identity/realms/${encodeURIComponent(realmSlug)}/service-accounts`,
-      ),
-    }).subscribe({
-      next: ({ clients, serviceAccounts }) => {
-        const clientRows = Array.isArray(clients) ? clients : [];
-        const accountRows = Array.isArray(serviceAccounts) ? serviceAccounts : [];
-        const principalOptions = accountRows.map((account) => ({
-          label: `${account.name} (${account.principal})`,
-          value: account.principal,
-        }));
-        const selectedAccount =
-          accountRows.find((account) => account.principal === principal) ?? accountRows[0] ?? null;
-        const audienceOptions =
-          selectedAccount?.allowed_audiences?.map((audience) => ({ label: audience, value: audience })) ??
-          clientRows.map((client) => ({ label: client.client_id, value: client.client_id }));
+  private downloadServiceAccountCredentials(row: ServiceAccountItem): void {
+    const realmSlug = row?.realm_slug || this.selectedRealmSlug;
+    const serviceAccountId = Number(row?.id || 0);
 
-        this.tokenFields = [
-          this.createModalRealmField(realmSlug, (value) => this.buildTokenFields(value || 'default')),
-          {
-            type: 'select',
-            name: 'principal',
-            label: 'Principal',
-            required: true,
-            options: principalOptions,
-            optionLabel: 'label',
-            optionValue: 'value',
-            searchable: true,
-            defaultValue: selectedAccount?.principal ?? null,
-            onChange: (value) => this.buildTokenFields(realmSlug, value),
-          },
-          { type: 'password', name: 'secret', label: 'Secret', required: true },
-          {
-            type: 'select',
-            name: 'audience',
-            label: 'Audience',
-            required: true,
-            options: audienceOptions,
-            optionLabel: 'label',
-            optionValue: 'value',
-            searchable: true,
-            defaultValue: audienceOptions[0]?.value ?? null,
-            className: 'md:col-span-2',
-          },
-        ];
+    if (!serviceAccountId) {
+      this.toastService.error('Error', 'This service account is missing id');
+      return;
+    }
+
+    const endpoint = `/identity/realms/${encodeURIComponent(realmSlug)}/service-accounts/${serviceAccountId}/token`;
+    this.api.get(endpoint).subscribe({
+      next: (response) => {
+        this.downloadJsonFile(
+          response,
+          `${this.slugify(realmSlug)}-service-account-${serviceAccountId}-credentials.json`,
+        );
+        this.toastService.success('Success', 'Service account credentials downloaded');
       },
       error: () => {
-        this.tokenFields = [];
-        this.toastService.error('Error', 'Failed to load realm data for token form');
+        this.toastService.error('Error', 'Failed to download service account credentials');
       },
     });
+  }
+
+  private updateServiceAccountStatus(row: ServiceAccountItem, isActive: boolean): void {
+    const realmSlug = row?.realm_slug || this.selectedRealmSlug;
+    const serviceAccountId = Number(row?.id || 0);
+
+    if (!serviceAccountId) {
+      this.toastService.error('Error', 'This service account is missing id');
+      return;
+    }
+
+    this.api
+      .put(`/identity/realms/${encodeURIComponent(realmSlug)}/service-accounts/${serviceAccountId}/status`, {
+        is_active: isActive,
+      })
+      .subscribe({
+        next: (response: any) => {
+          this.toastService.success(
+            'Success',
+            response?.message ??
+              (isActive ? 'Service account activated successfully' : 'Service account inactivated successfully'),
+          );
+          this.componentService.revalidate('settings-identity-service-accounts-table');
+          this.loadServiceAccountsForRealm();
+        },
+        error: () => {
+          this.toastService.error(
+            'Error',
+            isActive ? 'Failed to activate service account' : 'Failed to inactivate service account',
+          );
+        },
+      });
+  }
+
+  private downloadJsonFile(data: unknown, filename: string): void {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   }
 
   private parseCsv(value: string | null | undefined): string[] {

@@ -59,10 +59,7 @@
           <h3 class="dictionary-title">Service Accounts</h3>
           <p class="dictionary-subtitle">Service accounts for realm: {{ selectedRealmSlug }}</p>
         </div>
-        <div class="header-actions">
-          <button class="btn secondary" (click)="openTokenModal()">Generate Token</button>
-          <button class="btn" (click)="openServiceAccountModal()">Add Service Account</button>
-        </div>
+        <button class="btn" (click)="openServiceAccountModal()">Add Service Account</button>
       </div>
 
       <app-datatable
@@ -110,55 +107,23 @@
   </app-modal>
 
   <app-modal
-    [visible]="serviceAccountFields.length > 0"
+    [visible]="showServiceAccountModal"
     [title]="'Create Service Account'"
     [widthClass]="'w-[760px]'"
     (onClose)="closeModals()"
   >
-    <app-dynamic-form-builder
-      [fields]="serviceAccountFields"
-      [action]="serviceAccountAction"
-      [method]="'POST'"
-      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
-      [payloadTransform]="transformServiceAccountPayload"
-      [submitLabel]="'Create Service Account'"
-      (submitCompleted)="onServiceAccountSaved($event)"
-    ></app-dynamic-form-builder>
-  </app-modal>
-
-  <app-modal
-    [visible]="tokenFields.length > 0"
-    [title]="'Generate Service Token'"
-    [widthClass]="'w-[680px]'"
-    (onClose)="closeModals()"
-  >
-    <app-dynamic-form-builder
-      [fields]="tokenFields"
-      [action]="tokenAction"
-      [method]="'POST'"
-      [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
-      [payloadTransform]="transformTokenPayload"
-      [submitLabel]="'Generate Token'"
-      (submitCompleted)="onTokenIssued($event)"
-    ></app-dynamic-form-builder>
-
-    @if (tokenResponse?.accessToken) {
-      <div class="token-card mt-4">
-        <div class="token-meta">
-          <span class="token-pill">{{ tokenResponse?.tokenType || 'Bearer' }}</span>
-          <span class="token-expiry">Expires in {{ tokenResponse?.expiresIn || 0 }}s</span>
-        </div>
-
-        <textarea
-          class="token-output"
-          readonly
-          [value]="tokenResponse?.accessToken || ''"
-        ></textarea>
-
-        <div class="token-actions">
-          <button class="btn secondary" (click)="copyToken()">Copy Token</button>
-        </div>
-      </div>
+    @if (isServiceAccountFormLoading) {
+      <div class="py-8 text-center text-sm text-gray-500">Loading service account form...</div>
+    } @else if (serviceAccountFields.length > 0) {
+      <app-dynamic-form-builder
+        [fields]="serviceAccountFields"
+        [action]="serviceAccountAction"
+        [method]="'POST'"
+        [className]="'grid grid-cols-1 md:grid-cols-2 gap-4'"
+        [payloadTransform]="transformServiceAccountPayload"
+        [submitLabel]="'Create Service Account'"
+        (submitCompleted)="onServiceAccountSaved($event)"
+      ></app-dynamic-form-builder>
     }
   </app-modal>
 </div>
