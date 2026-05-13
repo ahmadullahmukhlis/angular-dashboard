@@ -467,7 +467,7 @@ export class SettingsIdentity {
       return;
     }
 
-    const endpoint = `/identity/realms/${encodeURIComponent(realmSlug)}/service-accounts/${serviceAccountId}/token`;
+    const endpoint = `/identity/realms/${encodeURIComponent(realmSlug)}/service-accounts/${serviceAccountId}/credentials`;
     this.api.get(endpoint).subscribe({
       next: (response) => {
         this.downloadJsonFile(
