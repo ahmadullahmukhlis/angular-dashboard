@@ -1,0 +1,47 @@
+<div class="page">
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Activity Logs</h2>
+        <p class="subtitle">Inspect user activity, restore logs, and review per-user history.</p>
+      </div>
+    </div>
+
+    <app-datatable
+      [url]="'/user-management/activity-log'"
+      [name]="'Activity Logs'"
+      [tableName]="'settings-activity-logs-table'"
+      [config]="activityTableConfig"
+      (onRowClick)="selectActivity($event)"
+    ></app-datatable>
+
+    @if (selectedActivity && selectedUserLogs.length > 0) {
+      <div class="details-stack">
+        <section class="details-section">
+          <div class="details-header">
+            <div>
+              <h3 class="details-title">User Activity Logs</h3>
+              <p class="details-subtitle">Related logs for the selected user activity record.</p>
+            </div>
+          </div>
+
+          <app-datatable
+            [rows]="selectedUserLogs"
+            [name]="'User Activity Logs'"
+            [config]="relatedLogsTableConfig"
+            [hidePagination]="true"
+          ></app-datatable>
+        </section>
+      </div>
+    }
+  </div>
+
+  <app-modal
+    [visible]="detailModalVisible"
+    [title]="'Activity Log Details'"
+    [widthClass]="'w-[760px]'"
+    (onClose)="closeDetailModal()"
+  >
+    <pre class="activity-log-json">{{ detailPayload | json }}</pre>
+  </app-modal>
+</div>

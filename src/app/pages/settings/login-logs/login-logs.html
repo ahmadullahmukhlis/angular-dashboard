@@ -1,0 +1,17 @@
+<div class="page">
+  <div class="page-panel">
+    <div class="page-header">
+      <div>
+        <h2 class="title">Login Logs</h2>
+        <p class="subtitle">Review user login activity and authentication results.</p>
+      </div>
+    </div>
+
+    <app-datatable
+      [url]="'/user-management/login-logs'"
+      [name]="'Login Logs'"
+      [tableName]="'settings-login-logs-table'"
+      [config]="tableConfig"
+    ></app-datatable>
+  </div>
+</div>

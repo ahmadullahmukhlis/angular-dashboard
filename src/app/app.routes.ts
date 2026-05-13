@@ -44,6 +44,14 @@ export const routes: Routes = [
         path: 'settings/identity',
         loadComponent: () => import('./pages/settings/identity/identity').then(m => m.SettingsIdentity)
       },
+      {
+        path: 'settings/login-logs',
+        loadComponent: () => import('./pages/settings/login-logs/login-logs').then(m => m.SettingsLoginLogs)
+      },
+      {
+        path: 'settings/activity-logs',
+        loadComponent: () => import('./pages/settings/activity-logs/activity-logs').then(m => m.SettingsActivityLogs)
+      },
     ]
   },
 

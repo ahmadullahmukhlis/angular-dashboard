@@ -33,6 +33,8 @@ export const SIDEBAR_ROUTES: SidebarItem[] = [
       { id: 50, label: 'Languages', icon: 'fa-language', route: '/settings/languages', isActive: false },
       { id: 51, label: 'Backups', icon: 'fa-database', route: '/settings/backups', isActive: false },
       { id: 52, label: 'Identity', icon: 'fa-fingerprint', route: '/settings/identity', isActive: false },
+      { id: 53, label: 'Login Logs', icon: 'fa-right-to-bracket', route: '/settings/login-logs', isActive: false },
+      { id: 54, label: 'Activity Logs', icon: 'fa-clock-rotate-left', route: '/settings/activity-logs', isActive: false },
     ],
   },
 ];

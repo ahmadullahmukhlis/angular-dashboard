@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.details-stack {
+  margin-top: 1.5rem;
+}
+
+.details-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1rem;
+}
+
+.details-header {
+  margin-bottom: 1rem;
+}
+
+.details-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.details-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.activity-log-json {
+  max-height: 28rem;
+  overflow: auto;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
