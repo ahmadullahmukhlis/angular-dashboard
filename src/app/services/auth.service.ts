@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Observable, of } from 'rxjs';
 import { tap, catchError, finalize, map, shareReplay } from 'rxjs/operators';
 import { ClientContextService } from './client-context.service';
+import { AppStateService, SessionUser } from '../state/user.state';
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,7 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly clientContext = inject(ClientContextService);
+  private readonly appState = inject(AppStateService);
   private isRedirectingToLogin = false;
   private refreshRequest$: Observable<string | null> | null = null;
 
@@ -55,6 +57,11 @@ export class AuthService {
     localStorage.removeItem('refreshToken');
     this._accessToken.set(null);
     this.clientContext.clearContext();
+    this.appState.clearUser();
+  }
+
+  setUserSession(user: SessionUser | null, authMeta?: { tokenType?: string | null; expiresIn?: number | null; refreshExpiresIn?: number | null } | null) {
+    this.appState.setSession(user, authMeta ?? null);
   }
 
   /* ============================

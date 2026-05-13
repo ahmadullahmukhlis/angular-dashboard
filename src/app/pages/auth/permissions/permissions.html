@@ -6,7 +6,9 @@
         <p class="subtitle">Manage permissions in a table view like the other pages.</p>
       </div>
       <div class="header-actions">
-        <button class="btn secondary" (click)="openGroupModal(0, null)">Add Permission Group</button>
+        <app-permission-gate [permission]="'permission-groups-create'">
+          <button class="btn secondary" (click)="openGroupModal(0, null)">Add Permission Group</button>
+        </app-permission-gate>
       </div>
     </div>
 

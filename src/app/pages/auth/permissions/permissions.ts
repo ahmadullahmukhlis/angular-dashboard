@@ -9,11 +9,13 @@ import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
 import { RealmContextService } from '../../../services/realm-context.service';
+import { PermissionService } from '../../../services/permission.service';
+import { PermissionGate } from '../../../components/ui/permission-gate/permission-gate';
 
 @Component({
   selector: 'app-permissions',
   standalone: true,
-  imports: [CommonModule, Datatable, DynamicFormBuilder, Modal],
+  imports: [CommonModule, Datatable, DynamicFormBuilder, Modal, PermissionGate],
   templateUrl: './permissions.html',
   styleUrl: './permissions.css',
 })
@@ -22,6 +24,7 @@ export class Permissions {
   private componentService = inject(ComponentService);
   private toastService = inject(ToastService);
   private realmContext = inject(RealmContextService);
+  readonly permissionService = inject(PermissionService);
 
   selectedGroupTrail: any[] = [];
   activePermissionGroupId: number | null = null;
@@ -70,24 +73,28 @@ export class Permissions {
         icon: 'fa-folder-plus',
         action: (row) => this.openGroupModal(row.id, null),
         color: 'primary',
+        hidden: () => !this.permissionService.hasPermission('permission-groups-create'),
       },
       {
         label: 'Add Permission',
         icon: 'fa-plus',
         action: (row) => this.openPermissionModal(row),
         color: 'success',
+        hidden: () => !this.permissionService.hasPermission('permissions-create'),
       },
       {
         label: 'Edit',
         icon: 'fa-edit',
         action: (row) => this.openGroupModal(row.parentId ?? 0, row),
         color: 'warning',
+        hidden: () => !this.permissionService.hasPermission('permission-groups-edit'),
       },
       {
         label: 'Delete',
         icon: 'fa-trash',
         action: (row) => this.deleteGroup(row),
         color: 'danger',
+        hidden: () => !this.permissionService.hasPermission('permission-groups-delete'),
       },
     ],
   };
@@ -114,24 +121,28 @@ export class Permissions {
         icon: 'fa-folder-plus',
         action: (row) => this.openGroupModal(row.id, null),
         color: 'primary',
+        hidden: () => !this.permissionService.hasPermission('permission-groups-create'),
       },
       {
         label: 'Add Permission',
         icon: 'fa-plus',
         action: (row) => this.openPermissionModal(row),
         color: 'success',
+        hidden: () => !this.permissionService.hasPermission('permissions-create'),
       },
       {
         label: 'Edit',
         icon: 'fa-edit',
         action: (row) => this.openGroupModal(row.parentId ?? 0, row),
         color: 'warning',
+        hidden: () => !this.permissionService.hasPermission('permission-groups-edit'),
       },
       {
         label: 'Delete',
         icon: 'fa-trash',
         action: (row) => this.deleteGroup(row),
         color: 'danger',
+        hidden: () => !this.permissionService.hasPermission('permission-groups-delete'),
       },
     ],
   };
@@ -154,6 +165,7 @@ export class Permissions {
         icon: 'fa-trash',
         action: (row) => this.deletePermission(row),
         color: 'danger',
+        hidden: () => !this.permissionService.hasPermission('permissions-delete'),
       },
     ],
   };

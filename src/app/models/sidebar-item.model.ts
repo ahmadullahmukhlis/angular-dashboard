@@ -6,6 +6,7 @@ export interface SidebarItem {
   isActive: boolean;
   isExpanded?: boolean;
   children?: SidebarItem[];
+  permissions?: string[];
   badge?: {
     text: string;
     color: string;

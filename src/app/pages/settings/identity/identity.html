@@ -22,7 +22,9 @@
           <h3 class="dictionary-title">Realms</h3>
           <p class="dictionary-subtitle">Create realms and choose which realm to manage.</p>
         </div>
-        <button class="btn" (click)="openRealmModal()">Add Realm</button>
+        <app-permission-gate [permission]="'identity-realms-create'">
+          <button class="btn" (click)="openRealmModal()">Add Realm</button>
+        </app-permission-gate>
       </div>
 
       <app-datatable
@@ -41,7 +43,9 @@
           <h3 class="dictionary-title">Clients</h3>
           <p class="dictionary-subtitle">Clients for realm: {{ selectedRealmSlug }}</p>
         </div>
-        <button class="btn" (click)="openClientModal()">Add Client</button>
+        <app-permission-gate [permission]="'identity-clients-create'">
+          <button class="btn" (click)="openClientModal()">Add Client</button>
+        </app-permission-gate>
       </div>
 
       <app-datatable
@@ -59,7 +63,9 @@
           <h3 class="dictionary-title">Service Accounts</h3>
           <p class="dictionary-subtitle">Service accounts for realm: {{ selectedRealmSlug }}</p>
         </div>
-        <button class="btn" (click)="openServiceAccountModal()">Add Service Account</button>
+        <app-permission-gate [permission]="'identity-service-accounts-create'">
+          <button class="btn" (click)="openServiceAccountModal()">Add Service Account</button>
+        </app-permission-gate>
       </div>
 
       <app-datatable

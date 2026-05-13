@@ -5,11 +5,13 @@ import { DataTableConfig } from '../../../models/datatable.model';
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
+import { PermissionGate } from '../../../components/ui/permission-gate/permission-gate';
+import { PermissionService } from '../../../services/permission.service';
 
 @Component({
   selector: 'app-settings-backups',
   standalone: true,
-  imports: [CommonModule, Datatable],
+  imports: [CommonModule, Datatable, PermissionGate],
   templateUrl: './backups.html',
   styleUrl: './backups.css',
 })
@@ -17,6 +19,7 @@ export class SettingsBackups {
   private api = inject(ApiService);
   private toastService = inject(ToastService);
   private componentService = inject(ComponentService);
+  readonly permissionService = inject(PermissionService);
 
   tableConfig: DataTableConfig = {
     columns: [

@@ -16,6 +16,7 @@ import { filter } from 'rxjs/operators';
 import { ComponentService } from '../../../services/genral/component.service';
 import { RealmContextService } from '../../../services/realm-context.service';
 import { AuthService } from '../../../services/auth.service';
+import { AppStateService } from '../../../state/user.state';
 
 @Component({
   selector: 'app-header',
@@ -37,12 +38,25 @@ export class Header {
   private readonly componentService = inject(ComponentService);
   private readonly realmContext = inject(RealmContextService);
   private readonly authService = inject(AuthService);
+  private readonly appState = inject(AppStateService);
 
   isNotificationsOpen = signal(false);
   isProfileMenuOpen = signal(false);
   isMobile = signal(false);
   realms = this.realmContext.realms;
   selectedRealmSlug = this.realmContext.selectedRealmSlug;
+  currentUser = this.appState.userSignal;
+  displayName = computed(() => {
+    const user = this.currentUser();
+    const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim();
+    return fullName || user?.username || user?.email || 'User';
+  });
+  displayEmail = computed(() => this.currentUser()?.email || 'No email');
+  displayRole = computed(() => {
+    const roles = this.currentUser()?.roles ?? [];
+    return roles.length ? roles.join(', ') : 'No role';
+  });
+  profileImageUrl = computed(() => this.currentUser()?.image_url || this.currentUser()?.image || '/profile/profile.jpg');
 
   notifications = signal([
     { id: 1, text: 'New user registered', time: '5 min ago', read: false, icon: 'fa-user-plus' },

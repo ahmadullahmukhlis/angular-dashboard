@@ -4,6 +4,7 @@ import { SidebarItem } from '../models/sidebar-item.model';
 import { SIDEBAR_ROUTES } from '../shared/SIdeBarRoutes';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
+import { PermissionService } from './permission.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ export class SidebarService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly router = inject(Router);
+  private readonly permissionService = inject(PermissionService);
   private sidebarItems: SidebarItem[] = structuredClone(SIDEBAR_ROUTES);
   private readonly STORAGE_KEY = 'sidebar-collapsed';
   private readonly mobileBreakpoint = 768;
@@ -29,6 +31,12 @@ export class SidebarService {
       if (this.isBrowser) {
         localStorage.setItem(this.STORAGE_KEY, this._isCollapsed().toString());
       }
+    });
+
+    effect(() => {
+      this.permissionService.permissionSignature();
+      this.sidebarItems = this.filterItemsByPermission(structuredClone(SIDEBAR_ROUTES));
+      this.syncActiveStateWithRoute(this.router.url);
     });
 
     this.syncActiveStateWithRoute(this.router.url);
@@ -238,5 +246,15 @@ export class SidebarService {
 
   private publishSidebarItems(): void {
     this._sidebarItems.set([...this.sidebarItems]);
+  }
+
+  private filterItemsByPermission(items: SidebarItem[]): SidebarItem[] {
+    return items
+      .filter((item) => this.permissionService.hasAnyPermission(item.permissions))
+      .map((item) => ({
+        ...item,
+        children: item.children?.length ? this.filterItemsByPermission(item.children) : item.children,
+      }))
+      .filter((item) => !item.children || item.children.length > 0 || !item.permissions?.length || this.permissionService.hasAnyPermission(item.permissions));
   }
 }

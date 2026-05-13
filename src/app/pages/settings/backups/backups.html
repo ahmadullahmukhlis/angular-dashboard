@@ -6,7 +6,9 @@
         <p class="subtitle">Configuration list from the Vue settings sidebar.</p>
       </div>
 
-      <button class="btn" (click)="runBackup()">Make Backup</button>
+      <app-permission-gate [permission]="'backup-run-backup'">
+        <button class="btn" (click)="runBackup()">Make Backup</button>
+      </app-permission-gate>
     </div>
 
     <app-datatable

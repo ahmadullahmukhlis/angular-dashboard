@@ -6,6 +6,7 @@ import { DataTableConfig } from '../../../models/datatable.model';
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
+import { PermissionService } from '../../../services/permission.service';
 
 @Component({
   selector: 'app-settings-activity-logs',
@@ -18,6 +19,7 @@ export class SettingsActivityLogs {
   private readonly api = inject(ApiService);
   private readonly toastService = inject(ToastService);
   private readonly componentService = inject(ComponentService);
+  readonly permissionService = inject(PermissionService);
 
   selectedActivity: any | null = null;
   selectedUserLogs: any[] = [];
@@ -41,6 +43,7 @@ export class SettingsActivityLogs {
         icon: 'fa-eye',
         color: 'primary',
         action: (row) => this.viewDetails(row),
+        hidden: () => !this.permissionService.hasPermission('activity-log-view-details'),
       },
       {
         label: 'User Logs',
@@ -54,6 +57,7 @@ export class SettingsActivityLogs {
         icon: 'fa-rotate-left',
         color: 'success',
         action: (row) => this.restoreLog(row),
+        hidden: () => !this.permissionService.hasPermission('activity-log-recover-delete-record'),
       },
     ],
   };
@@ -73,12 +77,14 @@ export class SettingsActivityLogs {
         icon: 'fa-eye',
         color: 'primary',
         action: (row) => this.viewDetails(row),
+        hidden: () => !this.permissionService.hasPermission('activity-log-view-details'),
       },
       {
         label: 'Restore Log',
         icon: 'fa-rotate-left',
         color: 'success',
         action: (row) => this.restoreLog(row),
+        hidden: () => !this.permissionService.hasPermission('activity-log-recover-delete-record'),
       },
     ],
   };

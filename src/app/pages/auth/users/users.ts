@@ -8,11 +8,13 @@ import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
 import { RealmContextService } from '../../../services/realm-context.service';
+import { PermissionService } from '../../../services/permission.service';
+import { PermissionGate } from '../../../components/ui/permission-gate/permission-gate';
 
 @Component({
   selector: 'app-auth-users',
   standalone: true,
-  imports: [DynamicFormBuilder, Datatable, Modal],
+  imports: [DynamicFormBuilder, Datatable, Modal, PermissionGate],
   templateUrl: './users.html',
   styleUrl: './users.css',
 })
@@ -21,6 +23,7 @@ export class AuthUsers {
   private componentService = inject(ComponentService);
   private toastService = inject(ToastService);
   private realmContext = inject(RealmContextService);
+  readonly permissionService = inject(PermissionService);
 
   showUserModal = false;
   showAssignRolesModal = false;
@@ -90,28 +93,43 @@ export class AuthUsers {
       { key: 'is_active', label: 'Active', type: 'boolean' },
     ],
     rowActions: [
-      { label: 'Edit', icon: 'fa-edit', action: (row) => this.openEdit(row), color: 'primary' },
-      { label: 'Assign Roles', icon: 'fa-user-tag', action: (row) => this.openAssignRoles(row), color: 'warning' },
+      {
+        label: 'Edit',
+        icon: 'fa-edit',
+        action: (row) => this.openEdit(row),
+        color: 'primary',
+        hidden: () => !this.permissionService.hasPermission('users-edit'),
+      },
+      {
+        label: 'Assign Roles',
+        icon: 'fa-user-tag',
+        action: (row) => this.openAssignRoles(row),
+        color: 'warning',
+        hidden: () => !this.permissionService.hasPermission('users-edit'),
+      },
       {
         label: 'Inactive',
         icon: 'fa-user-slash',
         action: (row) => this.updateUserActiveStatus(row, false),
         color: 'danger',
-        hidden: (row) => !row?.is_active,
+        hidden: (row) => !row?.is_active || !this.permissionService.hasPermission('users-edit'),
       },
       {
         label: 'Activate',
         icon: 'fa-user-check',
         action: (row) => this.updateUserActiveStatus(row, true),
         color: 'success',
-        hidden: (row) => !!row?.is_active,
+        hidden: (row) => !!row?.is_active || !this.permissionService.hasPermission('users-edit'),
       },
       {
         label: 'Unassign Roles',
         icon: 'fa-user-minus',
         action: (row) => this.openUnassignRoles(row),
         color: 'danger',
-        hidden: (row) => !Array.isArray(row?.roles) || row.roles.length === 0,
+        hidden: (row) =>
+          !Array.isArray(row?.roles) ||
+          row.roles.length === 0 ||
+          !this.permissionService.hasPermission('users-edit'),
       },
       {
         label: 'Delete',
@@ -122,9 +140,22 @@ export class AuthUsers {
           title: 'Delete User',
           message: 'This will permanently delete the user.',
         },
+        hidden: () => !this.permissionService.hasPermission('users-delete'),
       },
     ],
   };
+
+  canCreateUsers(): boolean {
+    return this.permissionService.hasPermission('users-create');
+  }
+
+  canEditUsers(): boolean {
+    return this.permissionService.hasPermission('users-edit');
+  }
+
+  canDeleteUsers(): boolean {
+    return this.permissionService.hasPermission('users-delete');
+  }
 
   get userAction(): string {
     return this.withRealm(`/user-management/users${this.selectedUserId ? `/${this.selectedUserId}` : ''}`);

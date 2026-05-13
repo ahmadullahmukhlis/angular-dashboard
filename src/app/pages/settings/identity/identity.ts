@@ -10,6 +10,8 @@ import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
 import { RealmContextService } from '../../../services/realm-context.service';
 import { forkJoin } from 'rxjs';
+import { PermissionService } from '../../../services/permission.service';
+import { PermissionGate } from '../../../components/ui/permission-gate/permission-gate';
 
 interface RealmItem {
   id: number;
@@ -59,7 +61,7 @@ interface ServiceAccountItem {
 @Component({
   selector: 'app-settings-identity',
   standalone: true,
-  imports: [CommonModule, Datatable, DynamicFormBuilder, Modal],
+  imports: [CommonModule, Datatable, DynamicFormBuilder, Modal, PermissionGate],
   templateUrl: './identity.html',
   styleUrl: './identity.css',
 })
@@ -68,6 +70,7 @@ export class SettingsIdentity {
   private readonly componentService = inject(ComponentService);
   private readonly toastService = inject(ToastService);
   private readonly realmContext = inject(RealmContextService);
+  readonly permissionService = inject(PermissionService);
 
   clientsForRealm: ClientItem[] = [];
   serviceAccountsForRealm: ServiceAccountItem[] = [];
@@ -127,21 +130,21 @@ export class SettingsIdentity {
         icon: 'fa-download',
         color: 'success',
         action: (row) => this.downloadServiceAccountCredentials(row),
-        hidden: (row) => !row?.is_active,
+        hidden: (row) => !row?.is_active || !this.permissionService.hasPermission('identity-service-accounts-view-credentials'),
       },
       {
         label: 'Inactive',
         icon: 'fa-ban',
         color: 'danger',
         action: (row) => this.updateServiceAccountStatus(row, false),
-        hidden: (row) => !row?.is_active,
+        hidden: (row) => !row?.is_active || !this.permissionService.hasPermission('identity-service-accounts-edit'),
       },
       {
         label: 'Activate',
         icon: 'fa-check',
         color: 'success',
         action: (row) => this.updateServiceAccountStatus(row, true),
-        hidden: (row) => !!row?.is_active,
+        hidden: (row) => !!row?.is_active || !this.permissionService.hasPermission('identity-service-accounts-edit'),
       },
       {
         label: 'Copy Principal',

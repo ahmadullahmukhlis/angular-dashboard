@@ -5,7 +5,9 @@
         <h2 class="title">List of users</h2>
         <p class="subtitle">Create and manage users with the same flow as the Vue app.</p>
       </div>
-      <button class="btn" (click)="openCreate()">Add New User</button>
+      <app-permission-gate [permission]="'users-create'">
+        <button class="btn" (click)="openCreate()">Add New User</button>
+      </app-permission-gate>
     </div>
 
     <app-datatable

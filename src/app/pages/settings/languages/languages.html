@@ -7,7 +7,9 @@
       </div>
 
       <div class="header-actions">
-        <button class="btn" (click)="openLanguageModal()">Add Language</button>
+        <app-permission-gate [permission]="'languages-create'">
+          <button class="btn" (click)="openLanguageModal()">Add Language</button>
+        </app-permission-gate>
       </div>
     </div>
 
@@ -28,7 +30,9 @@
             <p class="dictionary-subtitle">Click edit or delete on a word, or add a new translation for this language.</p>
           </div>
 
-          <button class="btn secondary" (click)="openWordModal()">Add Word</button>
+          <app-permission-gate [permission]="'language-dictionary-add-word'">
+            <button class="btn secondary" (click)="openWordModal()">Add Word</button>
+          </app-permission-gate>
         </div>
 
         <app-datatable

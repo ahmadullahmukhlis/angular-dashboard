@@ -5,7 +5,9 @@
         <h2 class="title">Roles list</h2>
         <p class="subtitle">Manage roles and assign permissions.</p>
       </div>
-      <button class="btn" (click)="openCreate()">Add New Role</button>
+      <app-permission-gate [permission]="'roles-create'">
+        <button class="btn" (click)="openCreate()">Add New Role</button>
+      </app-permission-gate>
     </div>
 
     <app-datatable
@@ -16,7 +18,7 @@
       (onRowClick)="selectRole($event)"
     ></app-datatable>
 
-    @if (selectedRole) {
+    @if (selectedRole && permissionService.hasPermission('roles-view-details')) {
       <div class="details-stack">
         <section class="details-section">
           <div class="details-header">

@@ -9,11 +9,13 @@ import { ApiService } from '../../../services/api/api.service';
 import { ToastService } from '../../../services/genral/tost.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { RealmContextService } from '../../../services/realm-context.service';
+import { PermissionService } from '../../../services/permission.service';
+import { PermissionGate } from '../../../components/ui/permission-gate/permission-gate';
 
 @Component({
   selector: 'app-roles',
   standalone: true,
-  imports: [CommonModule, DynamicFormBuilder, Datatable, Modal],
+  imports: [CommonModule, DynamicFormBuilder, Datatable, Modal, PermissionGate],
   templateUrl: './roles.html',
   styleUrl: './roles.css',
 })
@@ -23,6 +25,7 @@ export class Roles implements OnInit {
   private componentService = inject(ComponentService);
   private cdr = inject(ChangeDetectorRef);
   private realmContext = inject(RealmContextService);
+  readonly permissionService = inject(PermissionService);
 
   showModal = false;
   isEdit = false;
@@ -71,12 +74,14 @@ export class Roles implements OnInit {
         icon: 'fa-edit',
         action: (row) => this.openEdit(row),
         color: 'primary',
+        hidden: () => !this.permissionService.hasPermission('roles-edit'),
       },
       {
         label: 'Delete',
         icon: 'fa-trash',
         action: (row) => this.delete(row),
         color: 'danger',
+        hidden: () => !this.permissionService.hasPermission('roles-delete'),
       },
     ],
   };
@@ -118,6 +123,10 @@ export class Roles implements OnInit {
 
   ngOnInit(): void {
     this.loadPermissionOptions();
+  }
+
+  canCreateRoles(): boolean {
+    return this.permissionService.hasPermission('roles-create');
   }
 
   openCreate() {

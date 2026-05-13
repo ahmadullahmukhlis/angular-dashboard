@@ -8,11 +8,13 @@ import { DynamicField } from '../../../models/fomrBuilderModel';
 import { ApiService } from '../../../services/api/api.service';
 import { ComponentService } from '../../../services/genral/component.service';
 import { ToastService } from '../../../services/genral/tost.service';
+import { PermissionGate } from '../../../components/ui/permission-gate/permission-gate';
+import { PermissionService } from '../../../services/permission.service';
 
 @Component({
   selector: 'app-settings-languages',
   standalone: true,
-  imports: [CommonModule, Datatable, DynamicFormBuilder, Modal],
+  imports: [CommonModule, Datatable, DynamicFormBuilder, Modal, PermissionGate],
   templateUrl: './languages.html',
   styleUrl: './languages.css',
 })
@@ -20,6 +22,7 @@ export class SettingsLanguages {
   private api = inject(ApiService);
   private toastService = inject(ToastService);
   private componentService = inject(ComponentService);
+  readonly permissionService = inject(PermissionService);
 
   selectedLanguage: any | null = null;
   languageFields: DynamicField[] = [];
@@ -41,6 +44,7 @@ export class SettingsLanguages {
         icon: 'fa-trash',
         color: 'danger',
         action: (row) => this.deleteLanguage(row),
+        hidden: () => !this.permissionService.hasPermission('languages-delete'),
       },
     ],
   };
@@ -59,12 +63,14 @@ export class SettingsLanguages {
         icon: 'fa-edit',
         color: 'warning',
         action: (row) => this.openWordModal(row),
+        hidden: () => !this.permissionService.hasPermission('language-dictionary-add-word'),
       },
       {
         label: 'Delete',
         icon: 'fa-trash',
         color: 'danger',
         action: (row) => this.deleteWord(row),
+        hidden: () => !this.permissionService.hasPermission('language-dictionary-delete-word'),
       },
     ],
   };

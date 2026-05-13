@@ -65,6 +65,17 @@ export class Login implements OnInit {
           res?.data?.clientAssertion ??
           response.headers.get('X-Client-Assertion') ??
           response.headers.get('x-client-assertion');
+        const user = res?.user ?? res?.data?.user ?? null;
+        const resolvedUser = user
+          ? {
+              ...user,
+              roles: Array.isArray(user?.roles) && user.roles.length > 0 ? user.roles : (res?.roles ?? res?.data?.roles ?? []),
+              permissions:
+                Array.isArray(user?.permissions) && user.permissions.length > 0
+                  ? user.permissions
+                  : (res?.permissions ?? res?.data?.permissions ?? []),
+            }
+          : null;
 
         if (!accessToken) {
           this.errorMessage = 'Invalid server response';
@@ -73,6 +84,11 @@ export class Login implements OnInit {
         }
 
         this.authService.setTokens(accessToken, refreshToken);
+        this.authService.setUserSession(resolvedUser, {
+          tokenType: res?.tokenType ?? res?.data?.tokenType ?? null,
+          expiresIn: res?.expiresIn ?? res?.data?.expiresIn ?? null,
+          refreshExpiresIn: res?.refreshExpiresIn ?? res?.data?.refreshExpiresIn ?? null,
+        });
         if (clientId && clientAssertion) {
           this.clientContext.setContext(clientId, clientAssertion);
         }
@@ -108,5 +124,4 @@ export class Login implements OnInit {
   get passwordControl() {
     return this.loginForm.get('password');
   }
-
 }
