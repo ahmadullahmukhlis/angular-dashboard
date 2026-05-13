@@ -160,4 +160,11 @@ export class Header {
     this.closeDropdowns();
     this.authService.logout();
   }
+
+  navigateToProfile(event?: MouseEvent): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.closeDropdowns();
+    void this.router.navigate(['/profile']);
+  }
 }

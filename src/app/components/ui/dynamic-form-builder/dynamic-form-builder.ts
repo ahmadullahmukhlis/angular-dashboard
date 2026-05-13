@@ -62,6 +62,7 @@ export class DynamicFormBuilder implements OnChanges {
 
   @Input({ required: true }) fields: DynamicField[] = [];
   @Input() action!: string;
+  @Input() url?: string;
   @Input() method: 'POST' | 'PUT' = 'POST';
   @Input() beforeSubmit?: (v: any) => boolean | void;
   @Input() payloadTransform?: (payload: any) => any;
@@ -316,7 +317,9 @@ export class DynamicFormBuilder implements OnChanges {
       return;
     }
 
-    this.componentService.request(this.method, this.action, finalPayload).subscribe({
+    const submitUrl = this.url || this.action;
+
+    this.componentService.request(this.method, submitUrl, finalPayload).subscribe({
       next: (e: any) => {
         if (hasFileWithValue && e.type === HttpEventType.UploadProgress && e.total) {
           this.progress = true;
@@ -333,7 +336,7 @@ export class DynamicFormBuilder implements OnChanges {
       },
       error: (err: any) => {
         console.error('Form submission error:', err);
-        const normalized = this.errorService.normalize(err, this.action || 'form submission');
+        const normalized = this.errorService.normalize(err, submitUrl || 'form submission');
         this.toastService.error(normalized.message, normalized.title);
         this.resetLoading();
       },

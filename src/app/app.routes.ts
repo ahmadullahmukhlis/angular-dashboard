@@ -19,7 +19,7 @@ export const routes: Routes = [
       },
       { 
         path: 'profile', 
-        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) 
+        loadComponent: () => import('./pages/profile/profile').then(m => m.ProfilePage) 
       },
       {
         path: 'auth/users',
