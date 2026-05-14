@@ -21,19 +21,29 @@ export class SettingsActivityLogs {
   private readonly componentService = inject(ComponentService);
   readonly permissionService = inject(PermissionService);
 
-  selectedActivity: any | null = null;
-  selectedUserLogs: any[] = [];
   detailModalVisible = false;
   detailPayload: any | null = null;
 
   activityTableConfig: DataTableConfig = {
     columns: [
       { key: 'id', label: 'ID' },
-      { key: 'user_name', label: 'User' },
-      { key: 'email', label: 'Email' },
-      { key: 'action', label: 'Action' },
+      {
+        key: 'causer',
+        label: 'User',
+        renderer: (_value, row) => row?.causer?.full_name ?? this.resolveCauserName(row) ?? 'System',
+      },
+      {
+        key: 'causer_email',
+        label: 'Email',
+        renderer: (_value, row) => row?.causer?.email ?? '-',
+      },
+      { key: 'subject_type', label: 'Subject Type' },
       { key: 'description', label: 'Description' },
-      { key: 'model_type', label: 'Model' },
+      {
+        key: 'changes',
+        label: 'Changes',
+        renderer: (_value, row) => this.summarizeChanges(row),
+      },
       { key: 'created_at', label: 'Created At', type: 'date' },
     ],
     searchKey: 'search',
@@ -50,7 +60,7 @@ export class SettingsActivityLogs {
         icon: 'fa-list',
         color: 'warning',
         action: (row) => this.loadUserLogs(row),
-        hidden: (row) => !this.resolvePublicUserId(row),
+        hidden: () => true,
       },
       {
         label: 'Restore Log',
@@ -61,42 +71,6 @@ export class SettingsActivityLogs {
       },
     ],
   };
-
-  relatedLogsTableConfig: DataTableConfig = {
-    columns: [
-      { key: 'id', label: 'ID' },
-      { key: 'action', label: 'Action' },
-      { key: 'description', label: 'Description' },
-      { key: 'model_type', label: 'Model' },
-      { key: 'created_at', label: 'Created At', type: 'date' },
-    ],
-    searchKey: 'search',
-    rowActions: [
-      {
-        label: 'View Details',
-        icon: 'fa-eye',
-        color: 'primary',
-        action: (row) => this.viewDetails(row),
-        hidden: () => !this.permissionService.hasPermission('activity-log-view-details'),
-      },
-      {
-        label: 'Restore Log',
-        icon: 'fa-rotate-left',
-        color: 'success',
-        action: (row) => this.restoreLog(row),
-        hidden: () => !this.permissionService.hasPermission('activity-log-recover-delete-record'),
-      },
-    ],
-  };
-
-  selectActivity(row: any): void {
-    this.selectedActivity = row;
-    if (this.resolvePublicUserId(row)) {
-      this.loadUserLogs(row);
-    } else {
-      this.selectedUserLogs = [];
-    }
-  }
 
   viewDetails(row: any): void {
     if (!row?.id) return;
@@ -116,13 +90,9 @@ export class SettingsActivityLogs {
     const publicUserId = this.resolvePublicUserId(row);
     if (!publicUserId) return;
 
-    this.selectedActivity = row;
     this.api.get(`/user-management/activity-log/user-log/${encodeURIComponent(publicUserId)}`).subscribe({
-      next: (response: any) => {
-        this.selectedUserLogs = this.extractRows(response);
-      },
+      next: () => {},
       error: () => {
-        this.selectedUserLogs = [];
         this.toastService.error('Error', 'Failed to load user activity logs');
       },
     });
@@ -136,9 +106,6 @@ export class SettingsActivityLogs {
         next: (response: any) => {
           this.toastService.success('Success', response?.message ?? 'Activity log restored successfully');
           this.componentService.revalidate('settings-activity-logs-table');
-          if (this.selectedActivity) {
-            this.loadUserLogs(this.selectedActivity);
-          }
         },
         error: () => {
           this.toastService.error('Error', 'Failed to restore activity log');
@@ -154,6 +121,9 @@ export class SettingsActivityLogs {
 
   private resolvePublicUserId(row: any): string | null {
     return (
+      row?.causer?.id ??
+      row?.properties?.attributes?.public_id ??
+      row?.properties?.old?.public_id ??
       row?.publicUserId ??
       row?.public_user_id ??
       row?.user_public_id ??
@@ -164,11 +134,38 @@ export class SettingsActivityLogs {
     );
   }
 
-  private extractRows(response: any): any[] {
-    if (Array.isArray(response)) return response;
-    if (Array.isArray(response?.data)) return response.data;
-    if (Array.isArray(response?.items)) return response.items;
-    if (Array.isArray(response?.content)) return response.content;
-    return [];
+  private resolveCauserName(row: any): string | null {
+    const firstName = row?.causer?.first_name ?? row?.causer?.firstName;
+    const lastName = row?.causer?.last_name ?? row?.causer?.lastName;
+    const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+    return fullName || null;
   }
+
+  private summarizeChanges(row: any): string {
+    const changes = row?.properties?.changes;
+    if (!changes || typeof changes !== 'object') {
+      const hasOld = !!row?.properties?.old;
+      const hasAttributes = !!row?.properties?.attributes;
+      if (hasOld && hasAttributes) return 'Updated';
+      if (hasAttributes) return 'Created';
+      if (hasOld) return 'Deleted';
+      return '-';
+    }
+
+    const parts: string[] = [];
+
+    Object.entries(changes).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        parts.push(`${key}: ${value.length}`);
+        return;
+      }
+
+      if (value !== null && value !== undefined && value !== '') {
+        parts.push(`${key}`);
+      }
+    });
+
+    return parts.length ? parts.join(', ') : 'Updated';
+  }
+
 }
